@@ -1,5 +1,6 @@
 *test*
 config/config.yaml
+*.log
 
 # 执行文件
 MediaWarp*

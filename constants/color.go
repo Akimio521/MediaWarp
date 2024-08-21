@@ -1,0 +1,29 @@
+package constants
+
+const (
+	COLOR_BACK   uint8 = iota // 黑色
+	COLOR_RED                 // 红色
+	COLOR_GREEN               // 绿色
+	COLOR_YELLOW              // 黄色
+	COLOR_BLUE                // 蓝色
+	COLOR_PURPLE              // 紫色
+	COLOR_CYAN                // 青色
+	COLOR_GRAY                // 灰色
+)
+
+const (
+	COLOR_STATUS_CODE200 = COLOR_GREEN
+	COLOR_STATUS_CODE300 = COLOR_GRAY
+	COLOR_STATUS_CODE400 = COLOR_YELLOW
+	COLOR_STATUS_CODE500 = COLOR_RED
+)
+
+const (
+	COLOR_METHOD_GET     = COLOR_BLUE
+	COLOR_METHOD_POST    = COLOR_CYAN
+	COLOR_METHOD_PUT     = COLOR_YELLOW
+	COLOR_METHOD_PATCH   = COLOR_GREEN
+	COLOR_METHOD_DELETE  = COLOR_RED
+	COLOR_METHOD_HEAD    = COLOR_PURPLE
+	COLOR_METHOD_OPTIONS = COLOR_GRAY
+)

@@ -11,12 +11,11 @@ import (
 
 // 拦截basehtmlplayer.js实现Web跨域播放Strm
 func ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
-	fmt.Println("匹配路由：/web/modules/htmlvideoplayer/basehtmlplayer.js\t请求方法：", ctx.Request.Method)
 	version := ctx.Query("v")
-	fmt.Println("请求basehtmlplayer.js版本：", version)
-	resp, err := http.Get(cfg.Origin + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
+	logger.ServerLogger.Info("请求basehtmlplayer.js版本：", version)
+	resp, err := http.Get(config.Origin + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
 	if err != nil {
-		fmt.Println("请求失败，使用回源策略，错误信息：", err)
+		logger.ServerLogger.Warning("请求失败，使用回源策略，错误信息：", err)
 		DefaultHandler(ctx)
 		return
 	}
@@ -24,7 +23,7 @@ func ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("读取响应体失败，使用回源策略，错误信息：", err)
+		logger.ServerLogger.Warning("读取响应体失败，使用回源策略，错误信息：", err)
 		DefaultHandler(ctx)
 		return
 	}

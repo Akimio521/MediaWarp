@@ -10,8 +10,8 @@ import (
 
 func InitRouter() *gin.Engine {
 	ginR := gin.New()
-	// ginR.Use(middleware.LogRawRequest())
 	ginR.Use(middleware.QueryCaseInsensitive())
+	ginR.Use(middleware.LogMiddleware())
 
 	// UserLibraryService
 	registerRoutes(ginR, "/Users/:userId/Items", controllers.DefaultHandler, http.MethodGet)
@@ -30,8 +30,8 @@ func InitRouter() *gin.Engine {
 	return ginR
 }
 
+// 注册路由
 func registerRoutes(router *gin.Engine, path string, handler gin.HandlerFunc, method string) {
-	// 注册路由
 	embyPath := "/emby" + path
 	switch method {
 	case http.MethodGet:

@@ -1,7 +1,8 @@
-package config
+package core
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 
@@ -15,6 +16,38 @@ type configManager struct {
 	}
 	Origin string
 	ApiKey string
+}
+
+// 读取并解析配置文件
+func (c *configManager) LoadConfig() {
+	vip := viper.New()
+	vip.SetConfigFile(c.ConfigPath())
+	vip.SetConfigType("yaml")
+
+	if err := vip.ReadInConfig(); err != nil {
+		panic(err)
+	}
+
+	err := vip.Unmarshal(c)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// 创建文件夹
+func (c *configManager) CreateDir() {
+	if err := os.MkdirAll(c.ConfigDir(), os.ModePerm); err != nil {
+		panic(err)
+	}
+	if err := os.MkdirAll(c.LogDir(), os.ModePerm); err != nil {
+		panic(err)
+	}
+}
+
+// 初始化configManager
+func (c *configManager) Init() {
+	c.LoadConfig()
+	c.CreateDir()
 }
 
 // 获取版本号
@@ -43,20 +76,14 @@ func (c *configManager) LogDir() string {
 	return filepath.Join(c.RootDir(), "logs")
 }
 
-// 读取并解析配置文件
-func (c *configManager) LoadConfig() {
-	vip := viper.New()
-	vip.SetConfigFile(c.ConfigPath())
-	vip.SetConfigType("yaml")
+// 获取访问日志文件路径
+func (c *configManager) AccessLogPath() string {
+	return filepath.Join(c.LogDir(), "access.log")
+}
 
-	if err := vip.ReadInConfig(); err != nil {
-		panic(err)
-	}
-
-	err := vip.Unmarshal(c)
-	if err != nil {
-		panic(err)
-	}
+// 获取服务日志文件路径
+func (c *configManager) ServiceLogPath() string {
+	return filepath.Join(c.LogDir(), "service.log")
 }
 
 // MediaWarp监听地址
@@ -67,10 +94,10 @@ func (c *configManager) ListenAddr() string {
 // -----------------外部引用部分----------------- //
 var config configManager
 
-func init() {
-	config.LoadConfig()
-}
-
 func GetConfig() *configManager {
 	return &config
+}
+
+func init() {
+	config.Init()
 }
