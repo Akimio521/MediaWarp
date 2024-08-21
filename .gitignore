@@ -1,0 +1,5 @@
+*test*
+*.example
+
+# 执行文件
+MediaWarp*
