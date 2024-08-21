@@ -39,6 +39,7 @@ MediaWarp 是**前置于EmbyServer的API服务器**，修改了原版EmbyServer�
 - [ ] 多服务器转码推流
 
 # 更新日志
+- 2024-8-21：v0.0.1，实现MediaWarp基本功能
 
 # Star History
 <a href="https://github.com/Akimio521/MediaWarp/stargazers">
