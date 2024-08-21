@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var cfg *config.ConfigManager = config.GetConfig()
+var cfg = config.GetConfig()
 
 // 默认路由（直接转发请求到后端）
 func DefaultHandler(ctx *gin.Context) {

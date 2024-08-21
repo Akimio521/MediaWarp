@@ -11,9 +11,11 @@ import (
 	"syscall"
 )
 
+var cfg = config.GetConfig()
+
 func main() {
-	fmt.Println("MediaWarp启动中...")
-	cfg := config.GetConfig()
+	fmt.Printf("MediaWarp(%s)启动中...", cfg.Version())
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 

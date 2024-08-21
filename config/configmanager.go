@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type ConfigManager struct {
+type configManager struct {
 	Server struct {
 		Host string
 		Port int
@@ -17,29 +17,34 @@ type ConfigManager struct {
 	ApiKey string
 }
 
+// 获取版本号
+func (c *configManager) Version() string {
+	return APP_VERSION
+}
+
 // 获取项目根目录
-func (c *ConfigManager) RootDir() string {
+func (c *configManager) RootDir() string {
 	_, fullFilename, _, _ := runtime.Caller(0)
 	return filepath.Dir(filepath.Dir(fullFilename))
 }
 
 // 获取配置文件目录
-func (c *ConfigManager) ConfigDir() string {
+func (c *configManager) ConfigDir() string {
 	return filepath.Join(c.RootDir(), "config")
 }
 
 // 获取配置文件路径
-func (c *ConfigManager) ConfigPath() string {
+func (c *configManager) ConfigPath() string {
 	return filepath.Join(c.ConfigDir(), "config.yaml")
 }
 
 // 获取日志目录
-func (c *ConfigManager) LogDir() string {
+func (c *configManager) LogDir() string {
 	return filepath.Join(c.RootDir(), "logs")
 }
 
 // 读取并解析配置文件
-func (c *ConfigManager) LoadConfig() {
+func (c *configManager) LoadConfig() {
 	vip := viper.New()
 	vip.SetConfigFile(c.ConfigPath())
 	vip.SetConfigType("yaml")
@@ -55,17 +60,17 @@ func (c *ConfigManager) LoadConfig() {
 }
 
 // MediaWarp监听地址
-func (c *ConfigManager) ListenAddr() string {
+func (c *configManager) ListenAddr() string {
 	return fmt.Sprintf("%s:%d", c.Server.Host, c.Server.Port)
 }
 
 // -----------------外部引用部分----------------- //
-var config ConfigManager
+var config configManager
 
 func init() {
 	config.LoadConfig()
 }
 
-func GetConfig() *ConfigManager {
+func GetConfig() *configManager {
 	return &config
 }
