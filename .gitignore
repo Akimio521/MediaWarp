@@ -1,5 +1,5 @@
 *test*
-*.example
+config/config.yamll
 
 # 执行文件
 MediaWarp*

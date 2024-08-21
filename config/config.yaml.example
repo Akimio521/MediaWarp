@@ -1,0 +1,5 @@
+Server:                                 # MideWarp配置
+  Host:                                 # MideWarp监听IP（留空代表监听所有网卡，默认留空即可）
+  Port: 9000                            # MideWarp监听端口
+Origin: http://127.0.0.1:8096           # 上游Emby服务器地址
+ApiKey: 2eaxxxxxxxxxa8                  # 上游Emby服务器API
