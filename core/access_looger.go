@@ -20,10 +20,9 @@ func (s *accessLoggerSetting) Format(entry *logrus.Entry) ([]byte, error) {
 		b = entry.Buffer
 	}
 
-	fmt.Fprintf(
+	fmt.Fprint(
 		b,
-		"%s\n",
-		entry.Message,
+		entry.Message+"\n",
 	)
 	return b.Bytes(), nil
 }

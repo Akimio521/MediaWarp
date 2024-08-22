@@ -42,10 +42,10 @@ func (s *serviceLoggerSetting) Format(entry *logrus.Entry) ([]byte, error) {
 	// 返回格式化后的日志信息
 	fmt.Fprintf(
 		b,
-		"\033[3%dm【%s】\033[0m %s |%s\n",
-		colorCode,
-		strings.ToUpper(entry.Level.String()),
+		"%-10s %-20s | %-15s|%s"+"\n",
+		fmt.Sprintf("\033[3%dm【%s】\033[0m", colorCode, strings.ToUpper(entry.Level.String())),
 		formatTime,
+		strings.Split(entry.Caller.Function, ".")[1],
 		entry.Message,
 	)
 	return b.Bytes(), nil

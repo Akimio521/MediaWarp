@@ -14,6 +14,7 @@ func (l *loggerManager) Init() {
 	l.ServerLogger.SetFormatter(sLS)
 	l.AccessLogger.AddHook(aLS)
 	l.ServerLogger.AddHook(sLS)
+	l.ServerLogger.SetReportCaller(true) // 设置报告调用方
 }
 
 // -----------------外部引用部分----------------- //

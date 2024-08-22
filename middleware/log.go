@@ -30,12 +30,12 @@ func LogMiddleware() gin.HandlerFunc {
 		statusColor, methodColor := getColor(statusCode, method)
 
 		logger.AccessLogger.Infof(
-			`【AcessLog】%s |%s| %s | %s |%s "%s"`,
-			startTime.Format("2006-01-02 15:04:05"),
+			`【AcessLog】 %s|%s| %s |%s|%s "%s"`,
+			fmt.Sprintf("%-20s", startTime.Format("2006-1-2 15:04:05")),
 			fmt.Sprintf("\033[4%dm %d \033[0m", statusColor, statusCode),
-			wasteTime,
+			fmt.Sprintf("%-10s", wasteTime),
+			fmt.Sprintf("\033[4%dm %-7s\033[0m", methodColor, method),
 			clientIP,
-			fmt.Sprintf("\033[4%dm %s \033[0m", methodColor, method),
 			path,
 		)
 	}
