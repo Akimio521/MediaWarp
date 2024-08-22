@@ -9,13 +9,26 @@ import (
 	"github.com/spf13/viper"
 )
 
+type serverConfig struct {
+	Host string
+	Port int
+}
+
+type loggerConfig struct {
+	Enable        bool
+	AccessLogger  baseLoggerConfig
+	ServiceLogger baseLoggerConfig
+}
+
+type baseLoggerConfig struct {
+	Enable bool
+}
+
 type configManager struct {
-	Server struct {
-		Host string
-		Port int
-	}
-	Origin string
-	ApiKey string
+	Server        serverConfig
+	LoggerSetting loggerConfig
+	Origin        string
+	ApiKey        string
 }
 
 // 读取并解析配置文件
