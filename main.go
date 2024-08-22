@@ -1,7 +1,9 @@
 package main
 
 import (
+	"MediaWarp/constants"
 	"MediaWarp/core"
+	"MediaWarp/pkg"
 	"MediaWarp/router"
 	"flag"
 	"fmt"
@@ -16,11 +18,19 @@ var isDebug bool
 
 func init() {
 	flag.BoolVar(&isDebug, "debug", false, "是否启用调试模式")
+	fmt.Print(
+		constants.LOGO,
+		pkg.Center(
+			fmt.Sprintf(" MediaWarp %s 启动中... ", config.Version()),
+			75,
+			"=",
+		),
+	)
 }
 
 func main() {
 	flag.Parse()
-	fmt.Printf("MediaWarp(%s)启动中...\n", config.Version())
+
 	if isDebug {
 		logger.ServerLogger.SetLevel(logrus.DebugLevel)
 		logger.ServerLogger.Warning("已启用调试模式")
