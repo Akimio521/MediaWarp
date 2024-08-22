@@ -3,7 +3,6 @@ package controllers
 import (
 	"MediaWarp/schemas/emby"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -51,7 +50,6 @@ func ItemsHandler(ctx *gin.Context) {
 	err = json.Unmarshal(body, &userItemsDetailResponse)
 	if err != nil {
 		logger.ServerLogger.Warning("解析Json错误：", err)
-		fmt.Printf("%s", body)
 		return
 	}
 
@@ -68,7 +66,6 @@ func ItemsHandler(ctx *gin.Context) {
 	jsonData, err := json.Marshal(userItemsDetailResponse)
 	if err != nil {
 		logger.ServerLogger.Warning("序列化播放信息失败：", err)
-		ctx.JSON(500, gin.H{"error": "序列化播放信息失败"})
 		return
 	}
 

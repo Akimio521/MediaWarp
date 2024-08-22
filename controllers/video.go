@@ -3,7 +3,6 @@ package controllers
 import (
 	"MediaWarp/schemas/emby"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -25,7 +24,6 @@ func VideosHandler(ctx *gin.Context) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logger.ServerLogger.Warning("读取响应体失败：", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "读取响应体失败"})
 		return
 	}
 
@@ -33,7 +31,6 @@ func VideosHandler(ctx *gin.Context) {
 	err = json.Unmarshal(body, &playbackInfoResponse)
 	if err != nil {
 		logger.ServerLogger.Warning("解析Json错误：", err)
-		fmt.Printf("%s", body)
 		return
 	}
 	for _, mediasource := range playbackInfoResponse.MediaSources {

@@ -3,7 +3,6 @@ package controllers
 import (
 	"MediaWarp/schemas/emby"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -43,7 +42,6 @@ func PlaybackInfoHandler(ctx *gin.Context) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logger.ServerLogger.Warning("读取响应体失败：", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "读取响应体失败"})
 		return
 	}
 
@@ -51,7 +49,6 @@ func PlaybackInfoHandler(ctx *gin.Context) {
 	err = json.Unmarshal(body, &playbackInfoResponse)
 	if err != nil {
 		logger.ServerLogger.Warning("解析Json错误：", err)
-		fmt.Printf("%s", body)
 		return
 	}
 
@@ -68,7 +65,6 @@ func PlaybackInfoHandler(ctx *gin.Context) {
 	jsonData, err := json.Marshal(playbackInfoResponse)
 	if err != nil {
 		logger.ServerLogger.Warning("序列化播放信息失败：", err)
-		ctx.JSON(500, gin.H{"error": "序列化播放信息失败"})
 		return
 	}
 
