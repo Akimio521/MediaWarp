@@ -17,6 +17,7 @@ func InitRouter() *gin.Engine {
 	registerRoutes(ginR, "/Users/:userId/Items", controllers.DefaultHandler, http.MethodGet)
 	registerRoutes(ginR, "/Users/:userId/Items/Resume", controllers.DefaultHandler, http.MethodGet)
 	registerRoutes(ginR, "/Users/:userId/Items/Latest", controllers.DefaultHandler, http.MethodGet)
+	registerRoutes(ginR, "/Users/:userId/Items/Views", controllers.DefaultHandler, http.MethodGet)
 	registerRoutes(ginR, "/Users/:userId/Items/:itemId", controllers.ItemsHandler, http.MethodGet)
 	// ItemsService
 	registerRoutes(ginR, "/Items/:itemId/PlaybackInfo", controllers.PlaybackInfoHandler, http.MethodGet)
