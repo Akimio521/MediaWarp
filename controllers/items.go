@@ -24,12 +24,17 @@ func ItemsHandler(ctx *gin.Context) {
 		return
 	}
 
-	for index, mediasource := range userItemsDetailResponse.MediaSources {
-		if *mediasource.Protocol == emby.HTTP {
-			userItemsDetailResponse.MediaSources[index].SupportsDirectPlay = &constants.BOOL_TRUE
-			userItemsDetailResponse.MediaSources[index].SupportsDirectStream = &constants.BOOL_TRUE
-			userItemsDetailResponse.MediaSources[index].SupportsTranscoding = &constants.BOOL_FALSE
+	if *userItemsDetailResponse.MediaType == string(emby.Video) {
+		logger.ServerLogger.Debug("查找视频类型Item，ItemID：", *userItemsDetailResponse.ID)
+		for index, mediasource := range userItemsDetailResponse.MediaSources {
+			if *mediasource.Protocol == emby.HTTP {
+				userItemsDetailResponse.MediaSources[index].SupportsDirectPlay = &constants.BOOL_TRUE
+				userItemsDetailResponse.MediaSources[index].SupportsDirectStream = &constants.BOOL_TRUE
+				userItemsDetailResponse.MediaSources[index].SupportsTranscoding = &constants.BOOL_FALSE
+			}
 		}
+	} else {
+		logger.ServerLogger.Debug("查找非视频类型Item，ItemID：", *userItemsDetailResponse.ID)
 	}
 
 	ctx.JSON(http.StatusOK, userItemsDetailResponse)
