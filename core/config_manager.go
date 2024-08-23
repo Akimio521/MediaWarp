@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/spf13/viper"
 )
@@ -70,8 +69,11 @@ func (c *configManager) Version() string {
 
 // 获取项目根目录
 func (c *configManager) RootDir() string {
-	_, fullFilename, _, _ := runtime.Caller(0)
-	return filepath.Dir(filepath.Dir(fullFilename))
+	executablePath, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	return filepath.Dir(executablePath)
 }
 
 // 获取配置文件目录
