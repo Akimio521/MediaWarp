@@ -28,6 +28,7 @@ type configManager struct {
 	LoggerSetting loggerConfig
 	Origin        string
 	ApiKey        string
+	Static        bool
 }
 
 // 读取并解析配置文件
@@ -99,6 +100,11 @@ func (c *configManager) AccessLogPath() string {
 // 获取服务日志文件路径
 func (c *configManager) ServiceLogPath() string {
 	return filepath.Join(c.LogDir(), "service.log")
+}
+
+// 获取静态资源文件目录
+func (c *configManager) StaticDir() string {
+	return filepath.Join(c.RootDir(), "static")
 }
 
 // MediaWarp监听地址

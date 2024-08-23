@@ -1,6 +1,9 @@
 *test*
 config/config.yaml
 *.log
+/static/*
+!/static/.gitkeep
 
 # 执行文件
+bin/*
 MediaWarp*

@@ -2,6 +2,7 @@ package router
 
 import (
 	"MediaWarp/controllers"
+	"MediaWarp/core"
 	"MediaWarp/middleware"
 	"net/http"
 
@@ -9,6 +10,7 @@ import (
 )
 
 func InitRouter() *gin.Engine {
+	var config = core.GetConfig()
 	ginR := gin.New()
 	ginR.Use(middleware.QueryCaseInsensitive())
 	ginR.Use(middleware.LogMiddleware())
@@ -26,6 +28,10 @@ func InitRouter() *gin.Engine {
 	registerRoutes(ginR, "/Videos/:itemId/:name", controllers.VideosHandler, http.MethodGet)
 
 	ginR.GET("/web/modules/htmlvideoplayer/basehtmlplayer.js", controllers.ModifyBaseHtmlPlayerHandler)
+	if config.Static { // 静态资源
+		ginR.GET("/web/index.html", controllers.ModifyIndexHandler)
+		ginR.Static("/MediaWarp/Static", config.StaticDir())
+	}
 	ginR.NoRoute(controllers.DefaultHandler)
 
 	return ginR

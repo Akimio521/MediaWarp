@@ -9,3 +9,4 @@ LoggerSetting:                          # 日志设定
     Enable: True                        # 是否启用服务日志文件记录
 Origin: http://127.0.0.1:8096           # 上游Emby服务器地址
 ApiKey: 2eaxxxxxxxxxa8                  # 上游Emby服务器API KEY
+Static: False                           # 是否开启静态资源路由（访问URI /MediaWarp/Static将返回static下的资源，static/AddtionalHEAD.html将会被添加到）
