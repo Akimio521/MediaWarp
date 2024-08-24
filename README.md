@@ -27,13 +27,22 @@ MediaWarp 是**前置于EmbyServer的API服务器**，修改了原版EmbyServer�
 </div>
 
 # 功能
-- [x] 对于协议为Http的Strm文件可以实现302直链播放，流量不经过EmbyServer
+1. 对于协议为Http的Strm文件可以实现302直链播放，流量不经过EmbyServer
   - **推荐配合[AutoFilm](https://github.com/Akimio521/AutoFilm)使用**
   - 已通过测试客户端（Web、iOS Emby、Infuse、Conflux）
+2. 自定义Web前端样式（html、css、js）
+  - 效果演示：
+    ![首页](https://raw.githubusercontent.com/Akimio521/MediaWarp/main/img/index.jpg)
+    ![电影](https://raw.githubusercontent.com/Akimio521/MediaWarp/main/img/movie.jpg)
+    ![电视剧](https://raw.githubusercontent.com/Akimio521/MediaWarp/main/img/series.jpg)
+
+  - 感谢以下作者提供相关脚本、前端样式：
+    - [Nolovenodie/emby-crx](https://github.com/Nolovenodie/emby-crx)
+    - [newday-life/emby-front-end-mod](https://github.com/newday-life/emby-front-end-mod)
 
 # TODO LIST
 - [ ] 屏蔽特定客户端访问
-- [ ] 提供多种Web前端样式
+- [x] 提供多种Web前端样式
 - [ ] 利用Mysql/PostgreSQL/Redis优化Infuse媒体库模式下扫库体验
 - [ ] 多服务器负载均衡
 - [ ] 多服务器转码推流
