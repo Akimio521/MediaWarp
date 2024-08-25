@@ -37,15 +37,16 @@ func VideosHandler(ctx *gin.Context) {
 		if *mediasource.ID == mediaSourceID {
 
 			if strings.ToUpper(*mediasource.Container) == "STRM" { // 判断是否为Strm文件
-				if *mediasource.Protocol == schemas_emby.HTTP {
-					httpStrmRedirect(ctx, &mediasource)
-					return
+				if *mediasource.Protocol == schemas_emby.HTTP && config.HttpStrm.Enable { // 判断是否为http协议Strm
+					if httpStrmRedirect(ctx, &mediasource, &item) {
+						return
+					}
 				}
 				if config.AlistStrm.Enable { // 判断是否启用AlistStrm
 					if alistStrmRedirect(ctx, &mediasource, &item) {
 						return
 					}
-					logger.ServerLogger.Warning("未匹配AlistStrm路径：", *item.Path)
+					logger.ServerLogger.Info("未匹配AlistStrm路径：", *item.Path)
 				}
 
 			}
@@ -57,10 +58,19 @@ func VideosHandler(ctx *gin.Context) {
 }
 
 // Strm文件内部为标准http协议时，302重定向播放
-func httpStrmRedirect(ctx *gin.Context, mediasource *schemas_emby.MediaSourceInfo) {
+func httpStrmRedirect(ctx *gin.Context, mediasource *schemas_emby.MediaSourceInfo, item *schemas_emby.BaseItemDto) (mathed bool) {
+	mathed = false
 	logger := core.GetLogger()
-	logger.ServerLogger.Info("Http协议Strm重定向：", *mediasource.Path)
-	ctx.Redirect(http.StatusFound, *mediasource.Path)
+	for _, prefix := range config.HttpStrm.PrefixList {
+		if strings.HasPrefix(*mediasource.Path, prefix) {
+			logger.ServerLogger.Info("匹配HttpStrm路径：", *item.Path)
+			logger.ServerLogger.Info("Http协议Strm重定向：", *mediasource.Path)
+			ctx.Redirect(http.StatusFound, *mediasource.Path)
+			return true
+		}
+	}
+	logger.ServerLogger.Info("未匹配AlistStrm路径：", *item.Path)
+	return false
 }
 
 // 判断是否注册为AlistStrm，实现302重定向播放

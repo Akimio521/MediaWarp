@@ -14,14 +14,14 @@ type serverConfig struct {
 	Port int
 }
 
-type loggerConfig struct {
-	Enable        bool
-	AccessLogger  baseLoggerConfig
-	ServiceLogger baseLoggerConfig
+type baseConfig struct {
+	Enable bool
 }
 
-type baseLoggerConfig struct {
-	Enable bool
+type loggerConfig struct {
+	Enable        bool
+	AccessLogger  baseConfig
+	ServiceLogger baseConfig
 }
 
 type clientFilterConfig struct {
@@ -39,6 +39,11 @@ type baseAlistStrmConfig struct {
 	AlistServer api.AlistServer
 }
 
+type httpStrmConfig struct {
+	Enable     bool
+	PrefixList []string
+}
+
 type configManager struct {
 	Server        serverConfig
 	LoggerSetting loggerConfig
@@ -46,6 +51,7 @@ type configManager struct {
 	ApiKey        string
 	Static        bool
 	ClientFilter  clientFilterConfig
+	HttpStrm      httpStrmConfig
 	AlistStrm     alistStrmConfig
 }
 
