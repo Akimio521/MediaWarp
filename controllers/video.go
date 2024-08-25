@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"MediaWarp/api"
-	"MediaWarp/schemas/emby"
+	"MediaWarp/schemas/schemas_emby"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,7 +33,7 @@ func VideosHandler(ctx *gin.Context) {
 	item := ItemResponse.Items[0]
 	for _, mediasource := range item.MediaSources {
 		if *mediasource.ID == mediaSourceID {
-			if *mediasource.Protocol == emby.HTTP {
+			if *mediasource.Protocol == schemas_emby.HTTP {
 				logger.ServerLogger.Info("302重定向：", *mediasource.Path)
 				ctx.Redirect(http.StatusFound, *mediasource.Path)
 			} else {

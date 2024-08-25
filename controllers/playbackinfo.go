@@ -3,7 +3,7 @@ package controllers
 import (
 	"MediaWarp/constants"
 	"MediaWarp/pkg"
-	"MediaWarp/schemas/emby"
+	"MediaWarp/schemas/schemas_emby"
 	"encoding/json"
 	"net/http"
 
@@ -18,7 +18,7 @@ func PlaybackInfoHandler(ctx *gin.Context) {
 		return
 	}
 
-	var playbackInfoResponse emby.PlaybackInfoResponse
+	var playbackInfoResponse schemas_emby.PlaybackInfoResponse
 	err = json.Unmarshal(body, &playbackInfoResponse)
 	if err != nil {
 		logger.ServerLogger.Warning("解析Json错误：", err)
@@ -26,7 +26,7 @@ func PlaybackInfoHandler(ctx *gin.Context) {
 	}
 
 	for index, mediasource := range playbackInfoResponse.MediaSources {
-		if *mediasource.Protocol == emby.HTTP {
+		if *mediasource.Protocol == schemas_emby.HTTP {
 			playbackInfoResponse.MediaSources[index].SupportsDirectPlay = &constants.BOOL_TRUE
 			playbackInfoResponse.MediaSources[index].SupportsDirectStream = &constants.BOOL_TRUE
 			playbackInfoResponse.MediaSources[index].SupportsTranscoding = &constants.BOOL_FALSE

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"MediaWarp/schemas/emby"
+	"MediaWarp/schemas/schemas_emby"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -16,7 +16,7 @@ type EmbyServer struct {
 
 // ItemsService
 // /Items
-func (embyServer *EmbyServer) ItemsServiceQueryItem(ids string, limit int, fields string) (ItemResponse *emby.ItemResponse, err error) {
+func (embyServer *EmbyServer) ItemsServiceQueryItem(ids string, limit int, fields string) (ItemResponse *schemas_emby.ItemResponse, err error) {
 	params := url.Values{}
 	params.Add("Ids", ids)
 	params.Add("Limit", strconv.Itoa(limit))
