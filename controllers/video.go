@@ -46,9 +46,7 @@ func VideosHandler(ctx *gin.Context) {
 					if alistStrmRedirect(ctx, &mediasource, &item) {
 						return
 					}
-					logger.ServerLogger.Info("未匹配AlistStrm路径：", *item.Path)
 				}
-
 			}
 			logger.ServerLogger.Info("本地视频：", *mediasource.Path)
 			DefaultHandler(ctx)
@@ -63,7 +61,7 @@ func httpStrmRedirect(ctx *gin.Context, mediasource *schemas_emby.MediaSourceInf
 	logger := core.GetLogger()
 	for _, prefix := range config.HttpStrm.PrefixList {
 		if strings.HasPrefix(*mediasource.Path, prefix) {
-			logger.ServerLogger.Info("匹配HttpStrm路径：", *item.Path)
+			logger.ServerLogger.Debug("匹配HttpStrm路径：", *item.Path)
 			logger.ServerLogger.Info("Http协议Strm重定向：", *mediasource.Path)
 			ctx.Redirect(http.StatusFound, *mediasource.Path)
 			return true
@@ -85,7 +83,7 @@ func alistStrmRedirect(ctx *gin.Context, mediasource *schemas_emby.MediaSourceIn
 		if strings.HasPrefix(*item.Path, alistStrmConfig.Prefix) {
 			alistPath = *mediasource.Path
 			alistServer = alistStrmConfig.AlistServer
-			logger.ServerLogger.Info("匹配AlistStrm路径：", *item.Path)
+			logger.ServerLogger.Debug("匹配AlistStrm路径：", *item.Path)
 			break
 		}
 	}
@@ -104,5 +102,6 @@ func alistStrmRedirect(ctx *gin.Context, mediasource *schemas_emby.MediaSourceIn
 		ctx.Redirect(http.StatusFound, fsGet.RawURL)
 		return true
 	}
+	logger.ServerLogger.Info("未匹配AlistStrm路径：", *item.Path)
 	return
 }
