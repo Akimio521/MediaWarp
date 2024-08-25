@@ -1,6 +1,7 @@
 package core
 
 import (
+	"MediaWarp/api"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -28,6 +29,15 @@ type clientFilterConfig struct {
 	Mode       string
 	ClientList []string
 }
+type alistStrmConfig struct {
+	Enable bool
+	List   []baseAlistStrmConfig
+}
+
+type baseAlistStrmConfig struct {
+	Prefix      string
+	AlistServer api.AlistServer
+}
 
 type configManager struct {
 	Server        serverConfig
@@ -36,6 +46,7 @@ type configManager struct {
 	ApiKey        string
 	Static        bool
 	ClientFilter  clientFilterConfig
+	AlistStrm     alistStrmConfig
 }
 
 // 读取并解析配置文件
