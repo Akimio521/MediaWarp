@@ -23,12 +23,19 @@ type baseLoggerConfig struct {
 	Enable bool
 }
 
+type clientFilterConfig struct {
+	Enable     bool
+	Mode       string
+	ClientList []string
+}
+
 type configManager struct {
 	Server        serverConfig
 	LoggerSetting loggerConfig
 	Origin        string
 	ApiKey        string
 	Static        bool
+	ClientFilter  clientFilterConfig
 }
 
 // 读取并解析配置文件

@@ -1,12 +1,21 @@
-Server:                                 # MideWarp配置
-  Host:                                 # MideWarp监听IP（留空代表监听所有网卡，默认留空即可）
-  Port: 9000                            # MideWarp监听端口
-LoggerSetting:                          # 日志设定
-  Enable: True                          # 是否启用日志文件记录
-  AccessLogger:                         # 访问日志设定
-    Enable: True                        # 是否启用访问日志文件记录
-  ServiceLogger:                        # 服务日志设定
-    Enable: True                        # 是否启用服务日志文件记录
-Origin: http://127.0.0.1:8096           # 上游Emby服务器地址
-ApiKey: 2eaxxxxxxxxxa8                  # 上游Emby服务器API KEY
-Static: False                           # 是否开启静态资源路由（访问URI /MediaWarp/Static将返回static下的资源，static/AddtionalHEAD.html将会被添加到）
+Server:                                     # MideWarp配置
+  Host:                                     # MideWarp监听IP（留空代表监听所有网卡，默认留空即可）
+  Port: 9000                                # MideWarp监听端口
+
+LoggerSetting:                              # 日志设定
+  Enable: True                              # 是否启用日志文件记录
+  AccessLogger:                             # 访问日志设定
+    Enable: True                            # 是否启用访问日志文件记录
+  ServiceLogger:                            # 服务日志设定
+    Enable: True                            # 是否启用服务日志文件记录
+
+Origin: http://127.0.0.1:8096               # 上游Emby服务器地址
+ApiKey: 2eaxxxxxxxxxa8                      # 上游Emby服务器API KEY
+Static: False                               # 是否开启静态资源路由（访问URI /MediaWarp/Static将返回static下的资源，static/AddtionalHEAD.html将会被添加到index.html的head中）
+
+ClientFilter:                               # 客户端过滤器
+  Enable: False                             # 是否启用客户端过滤器
+  Mode: BlackList # WhileList / BlackList   # 黑白名单模式
+  ClientList:                               # 名单列表
+    - Fileball
+    - Infuse

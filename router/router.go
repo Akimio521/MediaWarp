@@ -14,6 +14,7 @@ func InitRouter() *gin.Engine {
 	ginR := gin.New()
 	ginR.Use(middleware.QueryCaseInsensitive())
 	ginR.Use(middleware.LogMiddleware())
+	ginR.Use(middleware.ClientFilter())
 
 	// VideoService
 	registerRoutes(ginR, "/Videos/:itemId/:name", controllers.VideosHandler, http.MethodGet)
