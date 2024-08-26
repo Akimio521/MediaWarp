@@ -20,26 +20,30 @@ func ClientFilter() gin.HandlerFunc {
 
 		userAgent := ctx.Request.UserAgent()
 		var allowed bool
-		if config.ClientFilter.Mode == "WhileList" { // 白名单模式
+		if userAgent == "" { // 开启了客户端过滤器后禁止所有未提供User-Agent的链接
 			allowed = false
-			for _, ua := range config.ClientFilter.ClientList {
-				if strings.Contains(userAgent, ua) {
-					allowed = true
-					break
-				}
-			}
-		} else if config.ClientFilter.Mode == "BlackList" { // 黑名单模式
-			allowed = true
-			for _, ua := range config.ClientFilter.ClientList {
-				if strings.Contains(userAgent, ua) {
-					allowed = false
-					break
-				}
-			}
 		} else {
-			logger.ServerLogger.Error("未知的客户端过滤器模式，已关闭客户端过滤器")
-			config.ClientFilter.Enable = false
-			allowed = true
+			if config.ClientFilter.Mode == "WhileList" { // 白名单模式
+				allowed = false
+				for _, ua := range config.ClientFilter.ClientList {
+					if strings.Contains(userAgent, ua) {
+						allowed = true
+						break
+					}
+				}
+			} else if config.ClientFilter.Mode == "BlackList" { // 黑名单模式
+				allowed = true
+				for _, ua := range config.ClientFilter.ClientList {
+					if strings.Contains(userAgent, ua) {
+						allowed = false
+						break
+					}
+				}
+			} else {
+				logger.ServerLogger.Error("未知的客户端过滤器模式，已关闭客户端过滤器")
+				config.ClientFilter.Enable = false
+				allowed = true
+			}
 		}
 
 		if !allowed {
