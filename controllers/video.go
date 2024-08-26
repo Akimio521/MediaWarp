@@ -60,7 +60,7 @@ func httpStrmRedirect(ctx *gin.Context, mediasource *schemas_emby.MediaSourceInf
 	logger := core.GetLogger()
 	for _, prefix := range config.HttpStrm.PrefixList {
 		if strings.HasPrefix(*item.Path, prefix) {
-			logger.ServerLogger.Debug("匹配HttpStrm路径：", *item.Path)
+			logger.ServerLogger.Debug(*item.Path, "匹配HttpStrm路径：", prefix, "成功")
 			logger.ServerLogger.Info("Http协议Strm重定向：", *mediasource.Path)
 			ctx.Redirect(http.StatusFound, *mediasource.Path)
 			return true
@@ -82,7 +82,7 @@ func alistStrmRedirect(ctx *gin.Context, mediasource *schemas_emby.MediaSourceIn
 		if strings.HasPrefix(*item.Path, alistStrmConfig.Prefix) {
 			alistPath = *mediasource.Path
 			alistServer = alistStrmConfig.AlistServer
-			logger.ServerLogger.Debug("匹配AlistStrm路径：", *item.Path)
+			logger.ServerLogger.Debug(*item.Path, "匹配AlistStrm路径：", alistStrmConfig.Prefix, "成功")
 			break
 		}
 	}
