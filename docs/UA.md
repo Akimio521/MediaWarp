@@ -1,8 +1,5 @@
 # 常见客户端UA参考
 
-## Warnning
-1. undefined
-
 ## 安卓移动客户端
 1. Emby/3.2.32-17.41 (Linux;Android 14) ExoPlayerLib/2.13.2
 2. Emby/3.2.32-17.24 (Linux;Android 13) ExoPlayerLib/2.13.2
@@ -17,7 +14,8 @@
 ## iOS第三方客户端
 1. Fileball/238 CFNetwork/1410.0.3 Darwin/22.6.0
 2. Infuse-Direct/7.8
-3. VidHub/1.7.6
+3. Infuse-Library/7.8
+4. VidHub/1.7.6
 
 ## 第三方客户端
 1. dandanplay/android 4.1.0
