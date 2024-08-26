@@ -8,8 +8,14 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
+
+type CacheItem struct {
+	Data   interface{}
+	Expiry time.Time
+}
 
 type AlistServer struct {
 	URL         string
@@ -17,6 +23,8 @@ type AlistServer struct {
 	Password    string
 	token       string
 	tokenExpiry time.Time
+	cachePool   map[string]CacheItem
+	cacheMutex  sync.Mutex
 }
 
 // 登录Alist（获取Token）
@@ -95,10 +103,39 @@ func (alistServer *AlistServer) checkToken() (err error) {
 	return nil
 }
 
+// 更新缓存
+func (alistServer *AlistServer) updateCache(key string, data interface{}) {
+	alistServer.cacheMutex.Lock()
+	defer alistServer.cacheMutex.Unlock()
+	alistServer.cachePool[key] = CacheItem{
+		Data:   data,
+		Expiry: time.Now().Add(1 * time.Hour),
+	}
+}
+
+// 从缓存中获取数据
+func (alistServer *AlistServer) getCache(key string) (data interface{}, found bool) {
+	alistServer.cacheMutex.Lock()
+	defer alistServer.cacheMutex.Unlock()
+	item, found := alistServer.cachePool[key]
+	return item.Data, found
+}
+
 // 获取某个文件/目录信息
 func (alistServer *AlistServer) FsGet(path string) (fsGetData schemas_alist.FsGetData, err error) {
 	err = alistServer.checkToken()
 	if err != nil {
+		return
+	}
+	if alistServer.cachePool == nil {
+		alistServer.cachePool = make(map[string]CacheItem)
+	}
+
+	var alistResponse schemas_alist.AlistResponse
+	cacheKey := fmt.Sprintf("API_FsGet_%s", path)
+	cacheData, found := alistServer.getCache(cacheKey)
+	if found {
+		fsGetData = cacheData.(schemas_alist.FsGetData)
 		return
 	}
 
@@ -138,8 +175,6 @@ func (alistServer *AlistServer) FsGet(path string) (fsGetData schemas_alist.FsGe
 		return
 	}
 
-	var alistResponse schemas_alist.AlistResponse
-
 	err = json.Unmarshal(body, &alistResponse)
 	if err != nil {
 		err = fmt.Errorf("解析%s响应体失败: %w", funcInfo, err)
@@ -160,5 +195,6 @@ func (alistServer *AlistServer) FsGet(path string) (fsGetData schemas_alist.FsGe
 		err = fmt.Errorf("反序列化%s响应体data失败: %w", funcInfo, err)
 		return
 	}
+	alistServer.updateCache(cacheKey, fsGetData)
 	return
 }
