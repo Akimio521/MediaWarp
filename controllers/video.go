@@ -35,13 +35,12 @@ func VideosHandler(ctx *gin.Context) {
 	item := ItemResponse.Items[0]
 	for _, mediasource := range item.MediaSources {
 		if *mediasource.ID == mediaSourceID {
-
-			if strings.ToUpper(*mediasource.Container) == "STRM" { // 判断是否为Strm文件
-				if *mediasource.Protocol == schemas_emby.HTTP && config.HttpStrm.Enable { // 判断是否为http协议Strm
-					if httpStrmRedirect(ctx, &mediasource, &item) {
-						return
-					}
+			if *mediasource.Protocol == schemas_emby.HTTP && config.HttpStrm.Enable { // 判断是否为http协议Strm
+				if httpStrmRedirect(ctx, &mediasource, &item) {
+					return
 				}
+			}
+			if strings.ToUpper(*mediasource.Container) == "STRM" { // 判断是否为Strm文件
 				if config.AlistStrm.Enable { // 判断是否启用AlistStrm
 					if alistStrmRedirect(ctx, &mediasource, &item) {
 						return
@@ -60,14 +59,14 @@ func httpStrmRedirect(ctx *gin.Context, mediasource *schemas_emby.MediaSourceInf
 	mathed = false
 	logger := core.GetLogger()
 	for _, prefix := range config.HttpStrm.PrefixList {
-		if strings.HasPrefix(*mediasource.Path, prefix) {
+		if strings.HasPrefix(*item.Path, prefix) {
 			logger.ServerLogger.Debug("匹配HttpStrm路径：", *item.Path)
 			logger.ServerLogger.Info("Http协议Strm重定向：", *mediasource.Path)
 			ctx.Redirect(http.StatusFound, *mediasource.Path)
 			return true
 		}
 	}
-	logger.ServerLogger.Info("未匹配AlistStrm路径：", *item.Path)
+	logger.ServerLogger.Info("未匹配HttpStrm路径：", *item.Path)
 	return false
 }
 
