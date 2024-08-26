@@ -86,22 +86,18 @@ func getAlistStrmRedirect(mediasource *schemas_emby.MediaSourceInfo, item *schem
 	logger := core.GetLogger()
 	var (
 		alistPath   string
-		alistServer api.AlistServer
+		alistServer *api.AlistServer
 	)
-	for _, alistStrmConfig := range config.AlistStrm.List {
+	for index := range config.AlistStrm.List {
+		alistStrmConfig := &config.AlistStrm.List[index]
 		if strings.HasPrefix(*item.Path, alistStrmConfig.Prefix) {
 			alistPath = *mediasource.Path
-			alistServer = alistStrmConfig.AlistServer
+			alistServer = &alistStrmConfig.AlistServer // 获取AlistServer，无需重新生成实例
 			logger.ServerLogger.Debug(*item.Path, "匹配AlistStrm路径：", alistStrmConfig.Prefix, "成功")
 			break
 		}
 	}
 	if alistPath != "" { // 匹配成功
-		err := alistServer.AuthLogin()
-		if err != nil {
-			logger.ServerLogger.Warning("Alist登录失败：", err)
-			return ""
-		}
 		fsGet, err := alistServer.FsGet(alistPath)
 		if err != nil {
 			logger.ServerLogger.Warning("请求GetFile失败：", err)
