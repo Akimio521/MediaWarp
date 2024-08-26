@@ -1,5 +1,5 @@
 package schemas_alist
 
-type AuthLogin struct {
+type AuthLoginData struct {
 	Token string `json:"token"` // token
 }

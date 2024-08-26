@@ -1,6 +1,6 @@
 package schemas_alist
 
-type FsGet struct {
+type FsGetData struct {
 	Created  string      `json:"created"` // 创建时间
 	HashInfo interface{} `json:"hash_info"`
 	Hashinfo string      `json:"hashinfo"`

@@ -8,17 +8,19 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type AlistServer struct {
-	URL      string
-	Username string
-	Password string
-	Token    string
+	URL         string
+	Username    string
+	Password    string
+	token       string
+	tokenExpiry time.Time
 }
 
 // 登录Alist（获取Token）
-func (alistServer *AlistServer) AuthLogin() (err error) {
+func (alistServer *AlistServer) authLogin() (err error) {
 	funcInfo := "Alist登录"
 	url := alistServer.URL + "/api/auth/login"
 	method := "POST"
@@ -51,7 +53,7 @@ func (alistServer *AlistServer) AuthLogin() (err error) {
 	}
 
 	var (
-		authLogin     schemas_alist.AuthLogin
+		authLoginData schemas_alist.AuthLoginData
 		alistResponse schemas_alist.AlistResponse
 	)
 
@@ -70,19 +72,36 @@ func (alistServer *AlistServer) AuthLogin() (err error) {
 		return
 	}
 
-	// 将 JSON 字符串解析为 authLogin 结构体
-	err = json.Unmarshal(dataBytes, &authLogin)
+	// 将 JSON 字符串解析为 authLoginData 结构体
+	err = json.Unmarshal(dataBytes, &authLoginData)
 	if err != nil {
 		err = fmt.Errorf("反序列化%s响应体data失败: %w", funcInfo, err)
 		return
 	}
 
-	alistServer.Token = authLogin.Token
+	alistServer.token = authLoginData.Token
+	alistServer.tokenExpiry = time.Now().Add(48 * time.Hour) // Token 有效期为2天
 	return
 }
 
+// 检查alistServer.token是否过期，过期则自动重新登录获取新alistServer.token
+func (alistServer *AlistServer) checkToken() (err error) {
+	if time.Now().After(alistServer.tokenExpiry) {
+		err = alistServer.authLogin()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // 获取某个文件/目录信息
-func (alistServer *AlistServer) FsGet(path string) (fsGet schemas_alist.FsGet, err error) {
+func (alistServer *AlistServer) FsGet(path string) (fsGetData schemas_alist.FsGetData, err error) {
+	err = alistServer.checkToken()
+	if err != nil {
+		return
+	}
+
 	funcInfo := "Alist获取某个文件/目录信息"
 	url := alistServer.URL + "/api/fs/get"
 	method := "POST"
@@ -102,7 +121,7 @@ func (alistServer *AlistServer) FsGet(path string) (fsGet schemas_alist.FsGet, e
 		err = fmt.Errorf("创建%s请求失败: %w", funcInfo, err)
 		return
 	}
-	req.Header.Add("Authorization", alistServer.Token)
+	req.Header.Add("Authorization", alistServer.token)
 	req.Header.Add("User-Agent", "Apifox/1.0.0 (https://apifox.com)")
 	req.Header.Add("Content-Type", "application/json")
 
@@ -136,7 +155,7 @@ func (alistServer *AlistServer) FsGet(path string) (fsGet schemas_alist.FsGet, e
 		return
 	}
 
-	err = json.Unmarshal(dataBytes, &fsGet)
+	err = json.Unmarshal(dataBytes, &fsGetData)
 	if err != nil {
 		err = fmt.Errorf("反序列化%s响应体data失败: %w", funcInfo, err)
 		return
