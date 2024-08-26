@@ -53,7 +53,7 @@ MediaWarp 是**前置于EmbyServer的API服务器**，修改了原版EmbyServer�
 - [x] Strm文件内部为标准http协议链接实现302重定向
 - [x] 屏蔽特定客户端访问
 - [x] 提供多种Web前端样式
-- [ ] Strm文件内部为本地软连接实现特定解析方式（访问Alist获取raw_url后返回给客户端实现302重定向）
+- [x] Strm文件内部为本地软连接实现特定解析方式（访问Alist获取raw_url后返回给客户端实现302重定向）
 - [ ] 利用Mysql/PostgreSQL/Redis优化Infuse媒体库模式下扫库体验
 - [ ] 多服务器负载均衡
 - [ ] 多服务器转码推流
