@@ -31,7 +31,7 @@ jobs:
     uses: ./.github/workflows/docker-builder.yaml
     with:
       APP_VERSION: ${{ needs.get-version.outputs.app_version }}
-      IS_LATEST: true
+      IS_LATEST: false
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
