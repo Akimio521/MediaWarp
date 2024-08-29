@@ -49,7 +49,7 @@ type configManager struct {
 	LoggerSetting loggerConfig
 	Origin        string
 	ApiKey        string
-	Static        bool
+	Static        baseConfig
 	ClientFilter  clientFilterConfig
 	HttpStrm      httpStrmConfig
 	AlistStrm     alistStrmConfig
