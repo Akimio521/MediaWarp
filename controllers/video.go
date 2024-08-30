@@ -12,9 +12,17 @@ import (
 
 // /Videos/:itemId/:name，302重定向播放Strm
 func VideosHandler(ctx *gin.Context) {
+	var (
+		newMediaSourceID string
+		apiKey           string
+		err              error
+	)
 	params := ctx.Request.URL.Query()
 	mediaSourceID := params.Get("mediasourceid")
-	var apiKey string
+	if strings.HasPrefix(mediaSourceID, "mediasource_") {
+		newMediaSourceID = strings.Replace(mediaSourceID, "mediasource_", "", 1)
+	}
+
 	apiKey = params.Get("api_key")
 	if apiKey == "" {
 		apiKey = params.Get("x-emby-token")
@@ -27,7 +35,13 @@ func VideosHandler(ctx *gin.Context) {
 		ServerURL: config.Origin,
 		ApiKey:    apiKey,
 	}
-	ItemResponse, err := embyServer.ItemsServiceQueryItem(mediaSourceID, 1, "Path,MediaSources")
+	logger.ServerLogger.Warning("请求ItemsServiceQueryItem：", mediaSourceID)
+	var ItemResponse *schemas_emby.ItemResponse
+	if newMediaSourceID != "" {
+		ItemResponse, err = embyServer.ItemsServiceQueryItem(newMediaSourceID, 1, "Path,MediaSources")
+	} else {
+		ItemResponse, err = embyServer.ItemsServiceQueryItem(mediaSourceID, 1, "Path,MediaSources")
+	}
 	if err != nil {
 		logger.ServerLogger.Warning("请求ItemsServiceQueryItem失败：", err)
 		return
