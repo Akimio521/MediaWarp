@@ -95,9 +95,9 @@ func IndexHandler(ctx *gin.Context) {
 	}
 
 	if isFile {
-		headContent, err = pkg.GetFileContent(htmlFilePath)
+		headContent, err = pkg.GetFileContent(headFilePath)
 		if err != nil {
-			logger.ServerLogger.Warning("读取文件内容出错，使用回源策略，错误信息：", err)
+			logger.ServerLogger.Warning("读取文件内容出错，不添加额外HEAD，错误信息：", err)
 			retHtmlContent = string(htmlContent)
 		} else {
 			retHtmlContent = strings.Replace(string(htmlContent), "</head>", string(headContent)+"\n"+"</head>", 1)
