@@ -1,7 +1,7 @@
-package controllers
+package handlers_emby
 
 import (
-	"MediaWarp/api"
+	"MediaWarp/handlers"
 	"MediaWarp/pkg"
 	"fmt"
 	"io"
@@ -16,10 +16,10 @@ import (
 func ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 	version := ctx.Query("v")
 	logger.ServerLogger.Info("请求basehtmlplayer.js版本：", version)
-	resp, err := http.Get(config.Origin + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
+	resp, err := http.Get(config.Server.GetADDR() + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
 	if err != nil {
 		logger.ServerLogger.Warning("请求失败，使用回源策略，错误信息：", err)
-		DefaultHandler(ctx)
+		handlers.DefaultHandler(ctx)
 		return
 	}
 
@@ -27,7 +27,7 @@ func ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logger.ServerLogger.Warning("读取响应体失败，使用回源策略，错误信息：", err)
-		DefaultHandler(ctx)
+		handlers.DefaultHandler(ctx)
 		return
 	}
 	modifiedBody := strings.ReplaceAll(string(body), `mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`, "null")
@@ -50,12 +50,8 @@ func ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 // 首页处理函数
 func IndexHandler(ctx *gin.Context) {
 	var (
-		htmlFilePath string         = filepath.Join(config.StaticDir(), "index.html")
-		headFilePath string         = filepath.Join(config.StaticDir(), "head")
-		embyServer   api.EmbyServer = api.EmbyServer{
-			ServerURL: config.Origin,
-			ApiKey:    config.ApiKey,
-		}
+		htmlFilePath   string = filepath.Join(config.StaticDir(), "index.html")
+		headFilePath   string = filepath.Join(config.StaticDir(), "head")
 		isFile         bool
 		err            error
 		htmlContent    []byte
@@ -88,7 +84,7 @@ func IndexHandler(ctx *gin.Context) {
 	}
 
 	if htmlContent == nil {
-		DefaultHandler(ctx)
+		handlers.DefaultHandler(ctx)
 		return
 	}
 

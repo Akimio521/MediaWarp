@@ -1,4 +1,4 @@
-package controllers
+package handlers_emby
 
 import (
 	"MediaWarp/constants"
@@ -12,7 +12,7 @@ import (
 
 // /Items/:itemId/PlaybackInfo 处理播放信息请求
 func PlaybackInfoHandler(ctx *gin.Context) {
-	body, err := pkg.GetRespBody(ctx, config.Origin, config.ApiKey)
+	body, err := pkg.GetRespBody(ctx, config.Server.GetADDR(), config.Server.GetToken())
 	if err != nil {
 		logger.ServerLogger.Warning("获取Body出错：", err)
 		return

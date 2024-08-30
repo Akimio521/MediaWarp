@@ -1,8 +1,9 @@
-package controllers
+package handlers_emby
 
 import (
 	"MediaWarp/api"
 	"MediaWarp/core"
+	"MediaWarp/handlers"
 	"MediaWarp/schemas/schemas_emby"
 	"net/http"
 	"strings"
@@ -14,28 +15,16 @@ import (
 func VideosHandler(ctx *gin.Context) {
 	var (
 		newMediaSourceID string
-		apiKey           string
 		err              error
 	)
+
 	params := ctx.Request.URL.Query()
 	mediaSourceID := params.Get("mediasourceid")
 	if strings.HasPrefix(mediaSourceID, "mediasource_") {
 		newMediaSourceID = strings.Replace(mediaSourceID, "mediasource_", "", 1)
 	}
 
-	apiKey = params.Get("api_key")
-	if apiKey == "" {
-		apiKey = params.Get("x-emby-token")
-	}
-	if apiKey == "" {
-		apiKey = config.ApiKey
-	}
-
-	embyServer := api.EmbyServer{
-		ServerURL: config.Origin,
-		ApiKey:    apiKey,
-	}
-	logger.ServerLogger.Warning("请求ItemsServiceQueryItem：", mediaSourceID)
+	logger.ServerLogger.Debug("请求ItemsServiceQueryItem：", mediaSourceID)
 	var ItemResponse *schemas_emby.ItemResponse
 	if newMediaSourceID != "" {
 		ItemResponse, err = embyServer.ItemsServiceQueryItem(newMediaSourceID, 1, "Path,MediaSources")
@@ -56,7 +45,7 @@ func VideosHandler(ctx *gin.Context) {
 			}
 
 			logger.ServerLogger.Info("本地视频：", *mediasource.Path)
-			DefaultHandler(ctx)
+			handlers.DefaultHandler(ctx)
 			return
 		}
 	}

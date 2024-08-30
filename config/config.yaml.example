@@ -1,6 +1,10 @@
-Server:                                     # MideWarp配置
-  Host:                                     # MideWarp监听IP（留空代表监听所有网卡，默认留空即可）
-  Port: 9000                                # MideWarp监听端口
+Host:                                       # MideWarp监听IP（留空代表监听所有网卡，默认留空即可）
+Port: 9000                                  # MideWarp监听端口
+
+Server:                                     # 媒体服务器相关设置
+  TYPE: Emby                                # 媒体服务器类型（可选选项：Emby）
+  ADDR: http://127.0.0.1:8096               # 媒体服务器地址
+  TOKEN: 2eaxxxxxxxxxa8                     # 媒体服务器认证方式
 
 LoggerSetting:                              # 日志设定
   Enable: True                              # 是否启用日志文件记录
@@ -8,9 +12,6 @@ LoggerSetting:                              # 日志设定
     Enable: True                            # 是否启用访问日志文件记录
   ServiceLogger:                            # 服务日志设定
     Enable: True                            # 是否启用服务日志文件记录
-
-Origin: http://127.0.0.1:8096               # 上游Emby服务器地址
-ApiKey: 2eaxxxxxxxxxa8                      # 上游Emby服务器API KEY
 
 Web:                                        # Web页面修改相关设置
   Enable: True                              # 总开关

@@ -1,4 +1,4 @@
-package controllers
+package handlers
 
 import (
 	"MediaWarp/core"
@@ -10,15 +10,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var config = core.GetConfig()
-var logger = core.GetLogger()
+var (
+	config    = core.GetConfig()
+	remote, _ = url.Parse(config.Server.GetADDR())
+)
 
 // 默认路由（直接转发请求到后端）
 func DefaultHandler(ctx *gin.Context) {
 	hostName, _ := pkg.SplitHostPort(ctx.Request.Host)
-
-	remote, _ := url.Parse(config.Origin)
-
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	proxy.Director = func(req *http.Request) {
 		req.Header = ctx.Request.Header

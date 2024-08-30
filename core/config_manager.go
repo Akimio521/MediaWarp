@@ -2,17 +2,13 @@ package core
 
 import (
 	"MediaWarp/api"
+	"MediaWarp/constants"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/viper"
 )
-
-type serverConfig struct {
-	Host string
-	Port int
-}
 
 type baseConfig struct {
 	Enable bool
@@ -53,10 +49,10 @@ type httpStrmConfig struct {
 }
 
 type configManager struct {
-	Server        serverConfig
+	Host          string
+	Port          int
+	Server        api.MediaServer
 	LoggerSetting loggerConfig
-	Origin        string
-	ApiKey        string
 	Web           webConfig
 	ClientFilter  clientFilterConfig
 	HttpStrm      httpStrmConfig
@@ -64,42 +60,52 @@ type configManager struct {
 }
 
 // 读取并解析配置文件
-func (c *configManager) LoadConfig() {
+func (config *configManager) LoadConfig() {
 	vip := viper.New()
-	vip.SetConfigFile(c.ConfigPath())
+	vip.SetConfigFile(config.ConfigPath())
 	vip.SetConfigType("yaml")
 
 	if err := vip.ReadInConfig(); err != nil {
 		panic(err)
 	}
+	serverType := vip.GetString("Server.TYPE")
+	switch serverType {
+	case constants.EMBY:
+		config.Server = &api.EmbyServer{
+			ADDR:  vip.GetString("Server.ADDR"),
+			TOKEN: vip.GetString("Server.TOKEN"),
+		}
+	default:
+		panic("未知的媒体服务器类型：" + serverType)
+	}
 
-	err := vip.Unmarshal(c)
+	err := vip.Unmarshal(config)
 	if err != nil {
 		panic(err)
 	}
 }
 
 // 创建文件夹
-func (c *configManager) CreateDir() {
-	if err := os.MkdirAll(c.ConfigDir(), os.ModePerm); err != nil {
+func (config *configManager) CreateDir() {
+	if err := os.MkdirAll(config.ConfigDir(), os.ModePerm); err != nil {
 		panic(err)
 	}
-	if err := os.MkdirAll(c.LogDir(), os.ModePerm); err != nil {
+	if err := os.MkdirAll(config.LogDir(), os.ModePerm); err != nil {
 		panic(err)
 	}
-	if err := os.MkdirAll(c.StaticDir(), os.ModePerm); err != nil {
+	if err := os.MkdirAll(config.StaticDir(), os.ModePerm); err != nil {
 		panic(err)
 	}
 }
 
 // 初始化configManager
-func (c *configManager) Init() {
-	c.LoadConfig()
-	c.CreateDir()
+func (config *configManager) Init() {
+	config.LoadConfig()
+	config.CreateDir()
 }
 
 // 获取版本号
-func (c *configManager) Version() string {
+func (config *configManager) Version() string {
 	return APP_VERSION
 }
 
@@ -113,38 +119,38 @@ func (c *configManager) RootDir() string {
 }
 
 // 获取配置文件目录
-func (c *configManager) ConfigDir() string {
-	return filepath.Join(c.RootDir(), "config")
+func (config *configManager) ConfigDir() string {
+	return filepath.Join(config.RootDir(), "config")
 }
 
 // 获取配置文件路径
-func (c *configManager) ConfigPath() string {
-	return filepath.Join(c.ConfigDir(), "config.yaml")
+func (config *configManager) ConfigPath() string {
+	return filepath.Join(config.ConfigDir(), "config.yaml")
 }
 
 // 获取日志目录
-func (c *configManager) LogDir() string {
-	return filepath.Join(c.RootDir(), "logs")
+func (config *configManager) LogDir() string {
+	return filepath.Join(config.RootDir(), "logs")
 }
 
 // 获取访问日志文件路径
-func (c *configManager) AccessLogPath() string {
-	return filepath.Join(c.LogDir(), "access.log")
+func (config *configManager) AccessLogPath() string {
+	return filepath.Join(config.LogDir(), "access.log")
 }
 
 // 获取服务日志文件路径
-func (c *configManager) ServiceLogPath() string {
-	return filepath.Join(c.LogDir(), "service.log")
+func (config *configManager) ServiceLogPath() string {
+	return filepath.Join(config.LogDir(), "service.log")
 }
 
 // 获取静态资源文件目录
-func (c *configManager) StaticDir() string {
-	return filepath.Join(c.RootDir(), "static")
+func (config *configManager) StaticDir() string {
+	return filepath.Join(config.RootDir(), "static")
 }
 
 // MediaWarp监听地址
-func (c *configManager) ListenAddr() string {
-	return fmt.Sprintf("%s:%d", c.Server.Host, c.Server.Port)
+func (config *configManager) ListenAddr() string {
+	return fmt.Sprintf("%s:%d", config.Host, config.Port)
 }
 
 // -----------------外部引用部分----------------- //
