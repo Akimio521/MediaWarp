@@ -22,7 +22,7 @@ func InitRouter() *gin.Engine {
 
 	ginR.GET("/web/modules/htmlvideoplayer/basehtmlplayer.js", controllers.ModifyBaseHtmlPlayerHandler)
 	if config.Static.Enable { // 静态资源
-		ginR.GET("/web/index.html", controllers.ModifyIndexHandler)
+		ginR.GET("/web/index.html", controllers.IndexHandler)
 		ginR.Static("/MediaWarp/Static", config.StaticDir())
 	}
 	ginR.NoRoute(controllers.DefaultHandler)
