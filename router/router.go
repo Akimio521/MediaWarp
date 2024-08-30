@@ -4,13 +4,15 @@ import (
 	"MediaWarp/controllers"
 	"MediaWarp/core"
 	"MediaWarp/middleware"
+	"MediaWarp/resources"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func InitRouter() *gin.Engine {
-	var config = core.GetConfig()
+	config := core.GetConfig()
+
 	ginR := gin.New()
 	ginR.Use(middleware.QueryCaseInsensitive())
 	ginR.Use(middleware.LogMiddleware())
@@ -20,11 +22,14 @@ func InitRouter() *gin.Engine {
 	registerRoutes(ginR, "/Videos/:itemId/:name", controllers.VideosHandler, http.MethodGet)
 	registerRoutes(ginR, "/videos/:itemId/:name", controllers.VideosHandler, http.MethodGet)
 
-	ginR.GET("/web/modules/htmlvideoplayer/basehtmlplayer.js", controllers.ModifyBaseHtmlPlayerHandler)
-	if config.Static.Enable { // 静态资源
+	if config.Web.Enable {
 		ginR.GET("/web/index.html", controllers.IndexHandler)
-		ginR.Static("/MediaWarp/Static", config.StaticDir())
+		if config.Web.Static { // 自定义静态资源
+			ginR.Static("/MediaWarp/Static", config.StaticDir())
+		}
 	}
+	ginR.StaticFS("/MediaWarp/Resources", resources.ResourcesFS)
+	ginR.GET("/web/modules/htmlvideoplayer/basehtmlplayer.js", controllers.ModifyBaseHtmlPlayerHandler)
 	ginR.NoRoute(controllers.DefaultHandler)
 
 	return ginR

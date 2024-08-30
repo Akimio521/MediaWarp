@@ -12,8 +12,11 @@ LoggerSetting:                              # 日志设定
 Origin: http://127.0.0.1:8096               # 上游Emby服务器地址
 ApiKey: 2eaxxxxxxxxxa8                      # 上游Emby服务器API KEY
 
-Static:                                     # 是否开启静态资源路由（访问URI /MediaWarp/Static将返回static下的资源）
-  Enable: True
+Web:                                        # Web页面修改相关设置
+  Enable: True                              # 总开关
+  Static: True                              # 是否加载自定义静态资源
+  ExternalPlayerUrl: True                   # 是否开启外置播放器
+  BeautifyCSS: True                         # Emby美化CSS样式
 
 ClientFilter:                               # 客户端过滤器
   Enable: False                             # 是否启用客户端过滤器

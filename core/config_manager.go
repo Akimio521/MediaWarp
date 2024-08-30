@@ -24,11 +24,19 @@ type loggerConfig struct {
 	ServiceLogger baseConfig
 }
 
+type webConfig struct {
+	Enable            bool
+	Static            bool
+	ExternalPlayerUrl bool
+	BeautifyCSS       bool
+}
+
 type clientFilterConfig struct {
 	Enable     bool
 	Mode       string
 	ClientList []string
 }
+
 type alistStrmConfig struct {
 	Enable bool
 	List   []baseAlistStrmConfig
@@ -49,7 +57,7 @@ type configManager struct {
 	LoggerSetting loggerConfig
 	Origin        string
 	ApiKey        string
-	Static        baseConfig
+	Web           webConfig
 	ClientFilter  clientFilterConfig
 	HttpStrm      httpStrmConfig
 	AlistStrm     alistStrmConfig

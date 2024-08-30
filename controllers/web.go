@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"MediaWarp/api"
 	"MediaWarp/pkg"
 	"fmt"
 	"io"
@@ -49,8 +50,12 @@ func ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 // 首页处理函数
 func IndexHandler(ctx *gin.Context) {
 	var (
-		htmlFilePath   string = filepath.Join(config.StaticDir(), "index.html")
-		headFilePath   string = filepath.Join(config.StaticDir(), "head")
+		htmlFilePath string         = filepath.Join(config.StaticDir(), "index.html")
+		headFilePath string         = filepath.Join(config.StaticDir(), "head")
+		embyServer   api.EmbyServer = api.EmbyServer{
+			ServerURL: config.Origin,
+			ApiKey:    config.ApiKey,
+		}
 		isFile         bool
 		err            error
 		htmlContent    []byte
@@ -58,30 +63,31 @@ func IndexHandler(ctx *gin.Context) {
 		retHtmlContent string
 	)
 
-	isFile, err = pkg.IsFile(htmlFilePath)
-	if err != nil {
-		logger.ServerLogger.Warning("判断路径是否为文件出错，错误信息：", err)
-		isFile = false
-	}
-
-	if isFile {
-		logger.ServerLogger.Debug(htmlFilePath, "存在并且是文件")
-		htmlContent, err = pkg.GetFileContent(htmlFilePath)
+	if config.Web.Static { // 自定义静态资源
+		isFile, err = pkg.IsFile(htmlFilePath)
 		if err != nil {
-			logger.ServerLogger.Warning("读取文件内容出错，使用回源策略，错误信息：", err)
+			logger.ServerLogger.Warning("判断路径是否为文件出错，错误信息：", err)
+			isFile = false
+		}
+
+		if isFile {
+			logger.ServerLogger.Debug(htmlFilePath, "存在并且是文件")
+			htmlContent, err = pkg.GetFileContent(htmlFilePath)
+			if err != nil {
+				logger.ServerLogger.Warning("读取文件内容出错，使用回源策略，错误信息：", err)
+			}
+		} else { // 请求上游EmbyServer获取HTML内容
+			logger.ServerLogger.Debug("请求上游EmbyServer获取HTML内容")
+			htmlContent, err = embyServer.GetIndexHtml()
+			if err != nil {
+				logger.ServerLogger.Warning("请求上游EmbyServer获取HTML内容失败，使用回源策略，错误信息：", err)
+			}
 		}
 	} else { // 请求上游EmbyServer获取HTML内容
 		logger.ServerLogger.Debug("请求上游EmbyServer获取HTML内容")
-		resp, err := http.Get(config.Origin + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
+		htmlContent, err = embyServer.GetIndexHtml()
 		if err != nil {
-			logger.ServerLogger.Warning("请求失败，使用回源策略，错误信息：", err)
-		}
-		if resp != nil {
-			defer resp.Body.Close()
-			htmlContent, err = io.ReadAll(resp.Body)
-			if err != nil {
-				logger.ServerLogger.Warning("读取响应体失败，使用回源策略，错误信息：", err)
-			}
+			logger.ServerLogger.Warning("请求上游EmbyServer获取HTML内容失败，使用回源策略，错误信息：", err)
 		}
 	}
 
@@ -107,6 +113,13 @@ func IndexHandler(ctx *gin.Context) {
 	} else {
 		logger.ServerLogger.Debug(headFilePath, "不存在或不是文件")
 		retHtmlContent = string(htmlContent)
+	}
+
+	if config.Web.ExternalPlayerUrl {
+		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/Resources/js/ExternalPlayerUrl.js"></script>`+"\n"+"</head>", 1)
+	}
+	if config.Web.BeautifyCSS {
+		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<link rel="stylesheet" href="/MediaWarp/Resources/css/Beautify.css" type="text/css" media="all" />`+"\n"+"</head>", 1)
 	}
 
 	ctx.Header("Content-Type", "text/html; charset=UTF-8")

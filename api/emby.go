@@ -40,3 +40,18 @@ func (embyServer *EmbyServer) ItemsServiceQueryItem(ids string, limit int, field
 	}
 	return
 }
+
+// 获取index.html内容 API：/web/index.html
+func (embyServer *EmbyServer) GetIndexHtml() ([]byte, error) {
+	resp, err := http.Get(embyServer.ServerURL + "/web/index.html")
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	htmlContent, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return htmlContent, nil
+}
