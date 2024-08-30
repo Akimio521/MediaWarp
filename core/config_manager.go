@@ -29,7 +29,7 @@ type webConfig struct {
 
 type clientFilterConfig struct {
 	Enable     bool
-	Mode       string
+	Mode       constants.FliterMode
 	ClientList []string
 }
 

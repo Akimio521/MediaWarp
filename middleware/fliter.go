@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"MediaWarp/constants"
 	"MediaWarp/core"
 	"strings"
 
@@ -23,7 +24,7 @@ func ClientFilter() gin.HandlerFunc {
 		if userAgent == "" { // 开启了客户端过滤器后禁止所有未提供User-Agent的链接
 			allowed = false
 		} else {
-			if config.ClientFilter.Mode == "WhileList" { // 白名单模式
+			if config.ClientFilter.Mode == constants.WHITELIST { // 白名单模式
 				allowed = false
 				for _, ua := range config.ClientFilter.ClientList {
 					if strings.Contains(userAgent, ua) {
@@ -31,7 +32,7 @@ func ClientFilter() gin.HandlerFunc {
 						break
 					}
 				}
-			} else if config.ClientFilter.Mode == "BlackList" { // 黑名单模式
+			} else if config.ClientFilter.Mode == constants.BLACKLIST { // 黑名单模式
 				allowed = true
 				for _, ua := range config.ClientFilter.ClientList {
 					if strings.Contains(userAgent, ua) {
