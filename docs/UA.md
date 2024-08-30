@@ -16,6 +16,7 @@
 2. Infuse-Direct/7.8
 3. Infuse-Library/7.8
 4. VidHub/1.7.6
+5. Conflux/1.2.0 (app.svn.Conflux; build:1200; iOS 17.3.1) Alamofire/5.9.1
 
 ## 第三方客户端
 1. dandanplay/android 4.1.0
