@@ -4,6 +4,7 @@ import (
 	"MediaWarp/controllers"
 	"MediaWarp/core"
 	"MediaWarp/middleware"
+	"MediaWarp/pkg"
 	"MediaWarp/resources"
 	"net/http"
 
@@ -19,8 +20,8 @@ func InitRouter() *gin.Engine {
 	ginR.Use(middleware.ClientFilter())
 
 	// VideoService
-	registerRoutes(ginR, "/Videos/:itemId/:name", controllers.VideosHandler, http.MethodGet)
-	registerRoutes(ginR, "/videos/:itemId/:name", controllers.VideosHandler, http.MethodGet)
+	pkg.RegisterRoutesWithPrefixs(ginR, "/Videos/:itemId/:name", controllers.VideosHandler, http.MethodGet, "/emby")
+	pkg.RegisterRoutesWithPrefixs(ginR, "/videos/:itemId/:name", controllers.VideosHandler, http.MethodGet, "/emby")
 
 	if config.Web.Enable {
 		ginR.GET("/web/index.html", controllers.IndexHandler)
@@ -33,17 +34,4 @@ func InitRouter() *gin.Engine {
 	ginR.NoRoute(controllers.DefaultHandler)
 
 	return ginR
-}
-
-// 注册路由
-func registerRoutes(router *gin.Engine, path string, handler gin.HandlerFunc, method string) {
-	embyPath := "/emby" + path
-	switch method {
-	case http.MethodGet:
-		router.GET(path, handler)
-		router.GET(embyPath, handler)
-	case http.MethodPost:
-		router.POST(path, handler)
-		router.POST(embyPath, handler)
-	}
 }
