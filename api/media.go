@@ -1,7 +1,9 @@
 package api
 
+import "MediaWarp/constants"
+
 type MediaServer interface {
-	GetType() string
+	GetType() constants.ServerType
 	GetADDR() string
 	GetToken() string
 }

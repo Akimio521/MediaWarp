@@ -16,7 +16,7 @@ type EmbyServer struct {
 	TOKEN string
 }
 
-func (embyServer *EmbyServer) GetType() string {
+func (embyServer *EmbyServer) GetType() constants.ServerType {
 	return constants.EMBY
 }
 
