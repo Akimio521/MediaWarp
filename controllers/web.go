@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -49,27 +48,28 @@ func ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 
 // 首页处理函数
 func IndexHandler(ctx *gin.Context) {
-	htmlFilePath := filepath.Join(config.StaticDir(), "index.html")
-	headFilePath := filepath.Join(config.StaticDir(), "head")
 	var (
+		htmlFilePath   string = filepath.Join(config.StaticDir(), "index.html")
+		headFilePath   string = filepath.Join(config.StaticDir(), "head")
+		isFile         bool
+		err            error
 		htmlContent    []byte
+		headContent    []byte
 		retHtmlContent string
 	)
 
-	if pkg.PathExists(htmlFilePath) && pkg.IsFile(htmlFilePath) { // 检查htmlFilePath是否存在并且是文件
-		logger.ServerLogger.Debug(htmlFilePath, "存在并且是文件")
-		indexFile, err := os.OpenFile(htmlFilePath, os.O_RDONLY, 0666)
-		if err != nil {
-			logger.ServerLogger.Warning("打开", htmlFilePath, "失败，错误信息：", err)
-		}
-		if indexFile != nil {
-			defer indexFile.Close()
-			htmlContent, err = io.ReadAll(indexFile)
-			if err != nil {
-				logger.ServerLogger.Warning("读取", htmlFilePath, "内容失败，错误信息：", err)
-			}
-		}
+	isFile, err = pkg.IsFile(htmlFilePath)
+	if err != nil {
+		logger.ServerLogger.Warning("判断路径是否为文件出错，错误信息：", err)
+		isFile = false
+	}
 
+	if isFile {
+		logger.ServerLogger.Debug(htmlFilePath, "存在并且是文件")
+		htmlContent, err = pkg.GetFileContent(htmlFilePath)
+		if err != nil {
+			logger.ServerLogger.Warning("读取文件内容出错，使用回源策略，错误信息：", err)
+		}
 	} else { // 请求上游EmbyServer获取HTML内容
 		logger.ServerLogger.Debug("请求上游EmbyServer获取HTML内容")
 		resp, err := http.Get(config.Origin + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
@@ -90,25 +90,19 @@ func IndexHandler(ctx *gin.Context) {
 		return
 	}
 
-	if pkg.PathExists(headFilePath) && pkg.IsFile(headFilePath) { // 检查 headFilePath 是否存在并且是文件
-		logger.ServerLogger.Debug(headFilePath, "存在并且是文件")
-		headFile, err := os.OpenFile(headFilePath, os.O_RDONLY, 0666)
+	isFile, err = pkg.IsFile(headFilePath)
+	if err != nil {
+		logger.ServerLogger.Warning("判断路径是否为文件出错，错误信息：", err)
+		isFile = false
+	}
+
+	if isFile {
+		headContent, err = pkg.GetFileContent(htmlFilePath)
 		if err != nil {
-			logger.ServerLogger.Warning("打开", headFilePath, "失败，错误信息：", err)
+			logger.ServerLogger.Warning("读取文件内容出错，使用回源策略，错误信息：", err)
 			retHtmlContent = string(htmlContent)
 		} else {
-			defer headFile.Close()
-			headContent, err := io.ReadAll(headFile)
-			if err != nil {
-				logger.ServerLogger.Warning("读取", headFilePath, "内容失败，错误信息：", err)
-				retHtmlContent = string(htmlContent)
-			} else if len(headContent) > 0 {
-				// 将 headContent 插入到 htmlContent 的 </head> 标签之前
-				retHtmlContent = strings.Replace(string(htmlContent), "</head>", string(headContent)+"\n"+"</head>", 1)
-			} else {
-				logger.ServerLogger.Warning(headFilePath, "文件内容为空")
-				retHtmlContent = string(htmlContent)
-			}
+			retHtmlContent = strings.Replace(string(htmlContent), "</head>", string(headContent)+"\n"+"</head>", 1)
 		}
 	} else {
 		logger.ServerLogger.Debug(headFilePath, "不存在或不是文件")
