@@ -76,14 +76,10 @@ func IndexHandler(ctx *gin.Context) {
 			if err != nil {
 				logger.ServerLogger.Warning("读取文件内容出错，使用回源策略，错误信息：", err)
 			}
-		} else { // 请求上游EmbyServer获取HTML内容
-			logger.ServerLogger.Debug("请求上游EmbyServer获取HTML内容")
-			htmlContent, err = embyServer.GetIndexHtml()
-			if err != nil {
-				logger.ServerLogger.Warning("请求上游EmbyServer获取HTML内容失败，使用回源策略，错误信息：", err)
-			}
 		}
-	} else { // 请求上游EmbyServer获取HTML内容
+	}
+
+	if htmlContent == nil { // 请求上游EmbyServer获取HTML内容
 		logger.ServerLogger.Debug("请求上游EmbyServer获取HTML内容")
 		htmlContent, err = embyServer.GetIndexHtml()
 		if err != nil {
