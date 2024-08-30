@@ -39,8 +39,8 @@ type alistStrmConfig struct {
 }
 
 type baseAlistStrmConfig struct {
-	Prefix      string
 	AlistServer api.AlistServer
+	PrefixList  []string
 }
 
 type httpStrmConfig struct {

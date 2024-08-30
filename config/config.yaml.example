@@ -35,13 +35,16 @@ HttpStrm:
 AlistStrm:                                  # AlistStrm相关配置（Strm文件内容是Alist上文件的路径，目前仅支持适配Alist V3）
   Enable: True                              # 是否启用AlistStrm重定向
   List:                                     # 访问列表
-    - Prefix: /media/strm/MyAlist           # EmbyServer中Strm文件的前缀（符合该前缀的Strm文件都会路由到该规则下）
-      AlistServer:                          # Alist服务器相关配置
+    - AlistServer:                          # Alist服务器相关配置
         URL: http://192.168.1.100:5244      # Alist服务器地址（MediaWarp可以正常访问到就可以）
         Username: admin                     # Alist服务器账号
         Password: adminadmin                # Alist服务器密码
-    - Prefix: /media/strm/xiaoya            # 可以填写多个配置
-      AlistServer:                          
+      PrefixList:                           # EmbyServer中Strm文件的前缀（符合该前缀的Strm文件都会路由到该规则下）
+        - /media/strm/MyAlist               # 同一个Alist可以有多个前缀规则
+        - /mnt/cd2/strm
+    - AlistServer:                          # 可以填写多个配置
         URL: https://xiaoya.com
         Username: admin
         Password: adminadmin
+        PrefixList: 
+          - /media/strm

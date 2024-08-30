@@ -93,12 +93,15 @@ func getAlistStrmRedirect(mediasource *schemas_emby.MediaSourceInfo, item *schem
 	)
 	for index := range config.AlistStrm.List {
 		alistStrmConfig := &config.AlistStrm.List[index]
-		if strings.HasPrefix(*item.Path, alistStrmConfig.Prefix) {
-			alistPath = *mediasource.Path
-			alistServer = &alistStrmConfig.AlistServer // 获取AlistServer，无需重新生成实例
-			logger.ServerLogger.Debug(*item.Path, "匹配AlistStrm路径：", alistStrmConfig.Prefix, "成功")
-			break
+		for _, perfix := range alistStrmConfig.PrefixList {
+			if strings.HasPrefix(*item.Path, perfix) {
+				alistPath = *mediasource.Path
+				alistServer = &alistStrmConfig.AlistServer // 获取AlistServer，无需重新生成实例
+				logger.ServerLogger.Debug(*item.Path, "匹配AlistStrm路径：", perfix, "成功")
+				break
+			}
 		}
+
 	}
 	if alistPath != "" { // 匹配成功
 		fsGet, err := alistServer.FsGet(alistPath)
