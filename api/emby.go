@@ -16,12 +16,12 @@ type EmbyServer struct {
 	TOKEN string
 }
 
-func (embyServer EmbyServer) GetType() string {
+func (embyServer *EmbyServer) GetType() string {
 	return constants.EMBY
 }
 
 // 获取EmbyServer的地址
-func (embyServer EmbyServer) GetADDR() string {
+func (embyServer *EmbyServer) GetADDR() string {
 	addr := embyServer.ADDR
 	if !strings.HasPrefix(addr, "http") {
 		addr = "http://" + addr
@@ -31,7 +31,7 @@ func (embyServer EmbyServer) GetADDR() string {
 }
 
 // 获取EmbyServer的APIKey
-func (embyServer EmbyServer) GetToken() string {
+func (embyServer *EmbyServer) GetToken() string {
 	return embyServer.TOKEN
 }
 
