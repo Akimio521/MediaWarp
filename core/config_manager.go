@@ -79,7 +79,7 @@ func (c *configManager) CreateDir() {
 	if err := os.MkdirAll(c.LogDir(), os.ModePerm); err != nil {
 		panic(err)
 	}
-	if err := os.Mkdir(c.StaticDir(), os.ModePerm); err != nil {
+	if err := os.MkdirAll(c.StaticDir(), os.ModePerm); err != nil {
 		panic(err)
 	}
 }
