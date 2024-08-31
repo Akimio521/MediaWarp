@@ -12,8 +12,10 @@ func RegisterRoutesWithPrefixs(router *gin.Engine, rawPath string, handler gin.H
 		path := prefix + rawPath
 		switch method {
 		case http.MethodGet:
+			router.GET(rawPath, handler)
 			router.GET(path, handler)
 		case http.MethodPost:
+			router.POST(rawPath, handler)
 			router.POST(path, handler)
 		}
 	}
