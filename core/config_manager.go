@@ -23,6 +23,8 @@ type loggerConfig struct {
 type webConfig struct {
 	Enable            bool
 	Static            bool
+	Index             bool
+	Head              bool
 	ExternalPlayerUrl bool
 	BeautifyCSS       bool
 }

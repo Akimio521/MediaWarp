@@ -14,9 +14,8 @@ func initEmbyRouter(router *gin.Engine) {
 	pkg.RegisterRoutesWithPrefixs(router, "/videos/:itemId/:name", handlers_emby.VideosHandler, http.MethodGet, "/emby")
 
 	if config.Web.Enable {
-		router.GET("/web/index.html", handlers_emby.IndexHandler)
-		if config.Web.Static { // 自定义静态资源
-			router.Static("/MediaWarp/Static", config.StaticDir())
+		if config.Web.Index || config.Web.Head || config.Web.ExternalPlayerUrl || config.Web.BeautifyCSS {
+			pkg.RegisterRoutesWithPrefixs(router, "/web/index.html", handlers_emby.IndexHandler, http.MethodGet)
 		}
 	}
 	router.GET("/web/modules/htmlvideoplayer/basehtmlplayer.js", handlers_emby.ModifyBaseHtmlPlayerHandler)

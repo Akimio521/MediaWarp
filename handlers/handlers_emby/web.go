@@ -59,7 +59,7 @@ func IndexHandler(ctx *gin.Context) {
 		retHtmlContent string
 	)
 
-	if config.Web.Static { // 自定义静态资源
+	if config.Web.Index { // 自定义首页
 		isFile, err = pkg.IsFile(htmlFilePath)
 		if err != nil {
 			logger.ServerLogger.Warning("判断路径是否为文件出错，错误信息：", err)
@@ -74,8 +74,7 @@ func IndexHandler(ctx *gin.Context) {
 			}
 		}
 	}
-
-	if htmlContent == nil { // 请求上游EmbyServer获取HTML内容
+	if len(htmlContent) == 0 { // 未启用自定义首页或自定义首页文件内容读取失败
 		logger.ServerLogger.Debug("请求上游EmbyServer获取HTML内容")
 		htmlContent, err = embyServer.GetIndexHtml()
 		if err != nil {
@@ -83,28 +82,32 @@ func IndexHandler(ctx *gin.Context) {
 		}
 	}
 
-	if htmlContent == nil {
+	if len(htmlContent) == 0 {
 		handlers.DefaultHandler(ctx)
 		return
 	}
 
-	isFile, err = pkg.IsFile(headFilePath)
-	if err != nil {
-		logger.ServerLogger.Warning("判断路径是否为文件出错，错误信息：", err)
-		isFile = false
+	if config.Web.Head { // 自定义HEAD
+		isFile, err = pkg.IsFile(headFilePath)
+		if err != nil {
+			logger.ServerLogger.Warning("判断路径是否为文件出错，错误信息：", err)
+			isFile = false
+		}
+
+		if isFile {
+			headContent, err = pkg.GetFileContent(headFilePath)
+			if err != nil {
+				logger.ServerLogger.Warning("读取文件内容出错，不添加额外HEAD，错误信息：", err)
+			}
+		} else {
+			logger.ServerLogger.Debug(headFilePath, "不存在或不是文件")
+		}
 	}
 
-	if isFile {
-		headContent, err = pkg.GetFileContent(headFilePath)
-		if err != nil {
-			logger.ServerLogger.Warning("读取文件内容出错，不添加额外HEAD，错误信息：", err)
-			retHtmlContent = string(htmlContent)
-		} else {
-			retHtmlContent = strings.Replace(string(htmlContent), "</head>", string(headContent)+"\n"+"</head>", 1)
-		}
-	} else {
-		logger.ServerLogger.Debug(headFilePath, "不存在或不是文件")
+	if len(headContent) == 0 {
 		retHtmlContent = string(htmlContent)
+	} else {
+		retHtmlContent = strings.Replace(string(htmlContent), "</head>", string(headContent)+"\n"+"</head>", 1)
 	}
 
 	if config.Web.ExternalPlayerUrl {
