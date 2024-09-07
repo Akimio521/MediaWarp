@@ -14,5 +14,5 @@ COPY --from=builder /builder/MediaWarp /MediaWarp
 RUN chmod +x /MediaWarp
 
 EXPOSE 9000
-VOLUME ["/config", "/logs"]
+VOLUME ["/config", "/logs", "/static"]
 ENTRYPOINT ["/MediaWarp"]
