@@ -27,6 +27,7 @@ type webConfig struct {
 	Head              bool
 	ExternalPlayerUrl bool
 	ActorPlus         bool
+	FanartShow        bool
 	BeautifyCSS       bool
 }
 
