@@ -25,7 +25,8 @@ MediaWarp 是**前置于EmbyServer的API服务器**，修改了原版EmbyServer�
 
 [功能](#功能) •
 [TODO LIST](#todo-list) •
-[更新日志](#更新日志) •
+[相关文档](#相关文档) •
+[鸣谢](#鸣谢) •
 [Star History](#star-history)
 
 </div>
@@ -49,25 +50,32 @@ MediaWarp 是**前置于EmbyServer的API服务器**，修改了原版EmbyServer�
     <img src="./img/movie.jpg" alt="电影" width=310px />
     <img src="./img/series.jpg" alt="电视剧" width=310px />
 
-  - 感谢以下作者提供相关脚本、前端样式（排名不分先后）：
-    - [Nolovenodie/emby-crx](https://github.com/Nolovenodie/emby-crx)
-    - [newday-life/emby-front-end-mod](https://github.com/newday-life/emby-front-end-mod)
-    - [chen3861229/embyExternalUrl](https://github.com/chen3861229/embyExternalUrl)
+  
 
 # TODO LIST
 - [x] HttpStrm实现302重定向
 - [x] 屏蔽特定客户端访问
 - [x] 提供多种Web前端样式
 - [x] AlistStrm实现302重定向
-- [ ] 嵌入一些实用的JavaScript方便使用
+- [x] 嵌入一些实用的JavaScript方便使用
 - [ ] 缓存图片、字幕提高性能
 - [ ] 利用Redis做数据缓存
 - [ ] 利用Mysql/PostgreSQL/Redis优化Infuse媒体库模式下扫库体验
 - [ ] 多服务器负载均衡
 - [ ] 多服务器转码推流
 
-# 更新日志
-[更新日志](./docs/UpdateLog.md)
+# 相关文档
+- [更新日志](./docs/UpdateLog.md)
+- [开发文档](./docs/DEV.md)
+- [User-Agent参考](./docs/UA.md)
+
+# 鸣谢
+感谢一下人员、组织提供技术支持，仓库提供相关脚本、前端样式。**排名不分先后**
+- [chen3861229](https://github.com/chen3861229)
+- [bpking1/embyExternalUrl](https://github.com/bpking1/embyExternalUrl)
+- [newday-life/emby-front-end-mod](https://github.com/newday-life/emby-front-end-mod)
+- [9channel/dd-danmaku](https://github.com/9channel/dd-danmaku)
+- [Nolovenodie/emby-crx](https://github.com/Nolovenodie/emby-crx)
 
 # Star History
 <a href="https://github.com/Akimio521/MediaWarp/stargazers">
