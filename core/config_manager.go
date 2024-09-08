@@ -28,6 +28,7 @@ type webConfig struct {
 	ExternalPlayerUrl bool
 	ActorPlus         bool
 	FanartShow        bool
+	Danmaku           bool
 	BeautifyCSS       bool
 }
 

@@ -21,6 +21,7 @@ Web:                                        # Web页面修改相关设置
   ExternalPlayerUrl: True                   # 是否开启外置播放器
   ActorPlus: True                           # 隐藏没有头像的演员和制作人员
   FanartShow: False                         # 显示同人图（fanart图）
+  Danmaku: True                             # Web显示弹幕
   BeautifyCSS: True                         # Emby美化CSS样式
 
 ClientFilter:                               # 客户端过滤器

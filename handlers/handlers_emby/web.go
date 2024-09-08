@@ -119,6 +119,9 @@ func IndexHandler(ctx *gin.Context) {
 	if config.Web.FanartShow {
 		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/Resources/js/FanartShow.js"></script>`+"\n"+"</head>", 1)
 	}
+	if config.Web.Danmaku {
+		retHtmlContent = strings.Replace(retHtmlContent, "</body>", `<script src="https://cdn.jsdelivr.net/gh/RyoLee/emby-danmaku@gh-pages/ede.user.js" defer></script>`+"\n"+"</body>", 1)
+	}
 
 	if config.Web.BeautifyCSS {
 		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<link rel="stylesheet" href="/MediaWarp/Resources/css/Beautify.css" type="text/css" media="all" />`+"\n"+"</head>", 1)
