@@ -64,6 +64,8 @@ jobs:
           name: v${{ needs.get-version.outputs.app_version }}
           tag_name: v${{ needs.get-version.outputs.app_version }}
           body: ${{ github.event.commits[0].message }}
-          files: ${{ github.workspace }}/bin/*
+          files: |
+            ${{ github.workspace }}/bin/*
+            ${{ github.workspace }}/config/config.yaml.example
           draft: false
           prerelease: false
