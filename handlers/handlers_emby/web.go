@@ -113,6 +113,10 @@ func IndexHandler(ctx *gin.Context) {
 	if config.Web.ExternalPlayerUrl {
 		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/Resources/js/ExternalPlayerUrl.js"></script>`+"\n"+"</head>", 1)
 	}
+	if config.Web.ActorPlus {
+		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/Resources/js/ActorPlus.js"></script>`+"\n"+"</head>", 1)
+	}
+
 	if config.Web.BeautifyCSS {
 		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<link rel="stylesheet" href="/MediaWarp/Resources/css/Beautify.css" type="text/css" media="all" />`+"\n"+"</head>", 1)
 	}
