@@ -3,7 +3,7 @@
 // @description 显示同人图（fanart图）
 // @version      2d08ca3
 // @author       @newday-life
-// @github       https://github.com/newday-life/emby-front-end-mod/blob/main/actorPlus/actorPlus.js
+// @github       https://github.com/newday-life/emby-front-end-mod/blob/main/fanart_show/fanart_show.js
 // ==/UserScript==
 
 class CommonUtilsStage {
