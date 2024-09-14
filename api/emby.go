@@ -30,6 +30,11 @@ func (embyServer *EmbyServer) GetHTTPEndpoint() string {
 	return addr
 }
 
+// 获取EmbyServer的WebSocket连接地址
+func (embyServer *EmbyServer) GetWebSocketEndpoint() string {
+	return strings.Replace(embyServer.GetHTTPEndpoint(), "http", "ws", 1)
+}
+
 // 获取EmbyServer的APIKey
 func (embyServer *EmbyServer) GetToken() string {
 	return embyServer.TOKEN
