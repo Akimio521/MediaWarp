@@ -1,6 +1,7 @@
 package router
 
 import (
+	"MediaWarp/handlers"
 	"MediaWarp/handlers/handlers_emby"
 	"MediaWarp/pkg"
 	"net/http"
@@ -18,5 +19,5 @@ func initEmbyRouter(router *gin.Engine) {
 			pkg.RegisterRoutesWithPrefixs(router, "/web/index.html", handlers_emby.IndexHandler, http.MethodGet)
 		}
 	}
-	router.GET("/web/modules/htmlvideoplayer/basehtmlplayer.js", handlers_emby.ModifyBaseHtmlPlayerHandler)
+	router.GET("/web/modules/htmlvideoplayer/basehtmlplayer.js", handlers.DefaultHandler)
 }

@@ -4,6 +4,6 @@ import "MediaWarp/constants"
 
 type MediaServer interface {
 	GetType() constants.ServerType
-	GetADDR() string
+	GetHTTPEndpoint() string
 	GetToken() string
 }

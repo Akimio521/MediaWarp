@@ -16,7 +16,7 @@ import (
 func ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 	version := ctx.Query("v")
 	logger.ServerLogger.Info("请求basehtmlplayer.js版本：", version)
-	resp, err := http.Get(config.Server.GetADDR() + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
+	resp, err := http.Get(config.Server.GetHTTPEndpoint() + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
 	if err != nil {
 		logger.ServerLogger.Warning("请求失败，使用回源策略，错误信息：", err)
 		handlers.DefaultHandler(ctx)

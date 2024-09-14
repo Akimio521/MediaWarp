@@ -12,7 +12,7 @@ import (
 
 var (
 	config    = core.GetConfig()
-	remote, _ = url.Parse(config.Server.GetADDR())
+	remote, _ = url.Parse(config.Server.GetHTTPEndpoint())
 )
 
 // 默认路由（直接转发请求到后端）

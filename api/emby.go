@@ -20,8 +20,8 @@ func (embyServer *EmbyServer) GetType() constants.ServerType {
 	return constants.EMBY
 }
 
-// 获取EmbyServer的地址
-func (embyServer *EmbyServer) GetADDR() string {
+// 获取EmbyServer的HTTP连接地址
+func (embyServer *EmbyServer) GetHTTPEndpoint() string {
 	addr := embyServer.ADDR
 	if !strings.HasPrefix(addr, "http") {
 		addr = "http://" + addr
@@ -43,7 +43,7 @@ func (embyServer *EmbyServer) ItemsServiceQueryItem(ids string, limit int, field
 	params.Add("Limit", strconv.Itoa(limit))
 	params.Add("Fields", fields)
 	params.Add("api_key", embyServer.GetToken())
-	api := embyServer.GetADDR() + "/Items?" + params.Encode()
+	api := embyServer.GetHTTPEndpoint() + "/Items?" + params.Encode()
 	resp, err := http.Get(api)
 	if err != nil {
 		return
@@ -64,7 +64,7 @@ func (embyServer *EmbyServer) ItemsServiceQueryItem(ids string, limit int, field
 
 // 获取index.html内容 API：/web/index.html
 func (embyServer *EmbyServer) GetIndexHtml() ([]byte, error) {
-	resp, err := http.Get(embyServer.GetADDR() + "/web/index.html")
+	resp, err := http.Get(embyServer.GetHTTPEndpoint() + "/web/index.html")
 	if err != nil {
 		return nil, err
 	}
