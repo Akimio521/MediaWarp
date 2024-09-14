@@ -50,7 +50,12 @@ MediaWarp 是**前置于EmbyServer的API服务器**，修改了原版EmbyServer�
     <img src="./img/movie.jpg" alt="电影" width=310px />
     <img src="./img/series.jpg" alt="电视剧" width=310px />
 
-  
+- 嵌入功能
+  - ExternalPlayerUrl：调用外部播放器
+  - ActorPlus：隐藏没有头像的演员和制作人员
+  - FanartShow：显示同人图（fanart图）
+  - Danmaku：Web显示弹幕
+  - BeautifyCSS：Emby美化CSS样式
 
 # TODO LIST
 - [x] HttpStrm实现302重定向
