@@ -10,7 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func LogMiddleware() gin.HandlerFunc {
+// 记录访问日志
+func Logger() gin.HandlerFunc {
 	logger := core.GetLogger()
 	return func(ctx *gin.Context) {
 		startTime := time.Now()

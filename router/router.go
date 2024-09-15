@@ -12,7 +12,7 @@ import (
 func InitRouter() *gin.Engine {
 	ginR := gin.New()
 	ginR.Use(middleware.QueryCaseInsensitive())
-	ginR.Use(middleware.LogMiddleware())
+	ginR.Use(middleware.Logger())
 	ginR.Use(middleware.ClientFilter())
 
 	switch config.Server.GetType() {
