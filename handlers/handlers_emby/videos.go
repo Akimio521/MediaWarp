@@ -13,31 +13,21 @@ import (
 
 // /Videos/:itemId/:name，302重定向播放Strm
 func VideosHandler(ctx *gin.Context) {
-	var (
-		newMediaSourceID string
-		err              error
-	)
-
+	// EmbyServer <= 4.8 ====> mediaSourceID = 343121
+	// EmbyServer >= 4.9 ====> mediaSourceID = mediasource_31
 	params := ctx.Request.URL.Query()
 	mediaSourceID := params.Get("mediasourceid")
-	if strings.HasPrefix(mediaSourceID, "mediasource_") {
-		newMediaSourceID = strings.Replace(mediaSourceID, "mediasource_", "", 1)
-	}
 
 	logger.ServerLogger.Debug("请求ItemsServiceQueryItem：", mediaSourceID)
-	var ItemResponse *schemas_emby.ItemResponse
-	if newMediaSourceID != "" {
-		ItemResponse, err = embyServer.ItemsServiceQueryItem(newMediaSourceID, 1, "Path,MediaSources")
-	} else {
-		ItemResponse, err = embyServer.ItemsServiceQueryItem(mediaSourceID, 1, "Path,MediaSources")
-	}
+	itemResponse, err := embyServer.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询item需要去除前缀仅保留数字部分
+
 	if err != nil {
 		logger.ServerLogger.Warning("请求ItemsServiceQueryItem失败：", err)
 		return
 	}
-	item := ItemResponse.Items[0]
+	item := itemResponse.Items[0]
 	for _, mediasource := range item.MediaSources {
-		if *mediasource.ID == mediaSourceID {
+		if *mediasource.ID == mediaSourceID { // EmbyServer >= 4.9 返回的ID带有前缀mediasource_
 			redirectURL := getRedirctURL(&mediasource, &item)
 			if redirectURL != "" {
 				ctx.Redirect(http.StatusFound, redirectURL)
