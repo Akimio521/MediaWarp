@@ -15,8 +15,7 @@ import (
 func VideosHandler(ctx *gin.Context) {
 	// EmbyServer <= 4.8 ====> mediaSourceID = 343121
 	// EmbyServer >= 4.9 ====> mediaSourceID = mediasource_31
-	params := ctx.Request.URL.Query()
-	mediaSourceID := params.Get("mediasourceid")
+	mediaSourceID := ctx.Query("mediasourceid")
 
 	logger.ServerLogger.Debug("请求ItemsServiceQueryItem：", mediaSourceID)
 	itemResponse, err := embyServer.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询item需要去除前缀仅保留数字部分
