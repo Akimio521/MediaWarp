@@ -157,14 +157,3 @@ func (config *configManager) StaticDir() string {
 func (config *configManager) ListenAddr() string {
 	return fmt.Sprintf("%s:%d", config.Host, config.Port)
 }
-
-// -----------------外部引用部分----------------- //
-var config configManager
-
-func GetConfig() *configManager {
-	return &config
-}
-
-func init() {
-	config.Init()
-}

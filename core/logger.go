@@ -9,6 +9,7 @@ type loggerManager struct {
 	ServerLogger *logrus.Logger
 }
 
+// 初始化loggerManager
 func (l *loggerManager) Init() {
 	var sLS = &serviceLoggerSetting{}
 	var aLS = &accessLoggerSetting{}
@@ -34,15 +35,4 @@ func (l *loggerManager) Init() {
 	} else {
 		l.ServerLogger.Debug("不启用日志记录")
 	}
-}
-
-func init() {
-	logger.Init()
-}
-
-// -----------------外部引用部分----------------- //
-var logger = loggerManager{logrus.New(), logrus.New()}
-
-func GetLogger() *loggerManager {
-	return &logger
 }
