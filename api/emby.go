@@ -20,19 +20,17 @@ func (embyServer *EmbyServer) GetType() constants.ServerType {
 	return constants.EMBY
 }
 
-// 获取EmbyServer的HTTP连接地址
-func (embyServer *EmbyServer) GetHTTPEndpoint() string {
+// 获取EmbyServer连接地址
+//
+// 包含协议、服务器域名（IP）、端口号
+// 示例：return "http://emby.example.com:8096"
+func (embyServer *EmbyServer) GetEndpoint() string {
 	addr := embyServer.ADDR
 	if !strings.HasPrefix(addr, "http") {
 		addr = "http://" + addr
 	}
 	addr = strings.TrimSuffix(addr, "/")
 	return addr
-}
-
-// 获取EmbyServer的WebSocket连接地址
-func (embyServer *EmbyServer) GetWebSocketEndpoint() string {
-	return strings.Replace(embyServer.GetHTTPEndpoint(), "http", "ws", 1)
 }
 
 // 获取EmbyServer的APIKey
@@ -48,7 +46,7 @@ func (embyServer *EmbyServer) ItemsServiceQueryItem(ids string, limit int, field
 	params.Add("Limit", strconv.Itoa(limit))
 	params.Add("Fields", fields)
 	params.Add("api_key", embyServer.GetToken())
-	api := embyServer.GetHTTPEndpoint() + "/Items?" + params.Encode()
+	api := embyServer.GetEndpoint() + "/Items?" + params.Encode()
 	resp, err := http.Get(api)
 	if err != nil {
 		return
@@ -69,7 +67,7 @@ func (embyServer *EmbyServer) ItemsServiceQueryItem(ids string, limit int, field
 
 // 获取index.html内容 API：/web/index.html
 func (embyServer *EmbyServer) GetIndexHtml() ([]byte, error) {
-	resp, err := http.Get(embyServer.GetHTTPEndpoint() + "/web/index.html")
+	resp, err := http.Get(embyServer.GetEndpoint() + "/web/index.html")
 	if err != nil {
 		return nil, err
 	}

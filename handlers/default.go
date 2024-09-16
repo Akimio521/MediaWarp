@@ -12,7 +12,7 @@ import (
 
 var (
 	config                 = core.GetConfig()
-	mediaServerEndpoint, _ = url.Parse(config.Server.GetHTTPEndpoint())
+	mediaServerEndpoint, _ = url.Parse(config.Server.GetEndpoint())
 )
 
 // 默认路由（直接转发请求到后端）

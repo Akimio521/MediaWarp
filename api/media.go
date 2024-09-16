@@ -4,7 +4,6 @@ import "MediaWarp/constants"
 
 type MediaServer interface {
 	GetType() constants.ServerType
-	GetHTTPEndpoint() string
-	GetWebSocketEndpoint() string
+	GetEndpoint() string // 包含协议、服务器域名（IP）、端口号
 	GetToken() string
 }
