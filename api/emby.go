@@ -9,11 +9,14 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type EmbyServer struct {
-	ADDR  string
-	TOKEN string
+	ADDR     string
+	TOKEN    string
+	endpoint string
+	once     sync.Once
 }
 
 func (embyServer *EmbyServer) GetType() constants.ServerType {
@@ -25,12 +28,15 @@ func (embyServer *EmbyServer) GetType() constants.ServerType {
 // 包含协议、服务器域名（IP）、端口号
 // 示例：return "http://emby.example.com:8096"
 func (embyServer *EmbyServer) GetEndpoint() string {
-	addr := embyServer.ADDR
-	if !strings.HasPrefix(addr, "http") {
-		addr = "http://" + addr
-	}
-	addr = strings.TrimSuffix(addr, "/")
-	return addr
+	embyServer.once.Do(func() {
+		endpoint := embyServer.ADDR
+		if !strings.HasPrefix(endpoint, "http") {
+			endpoint = "http://" + endpoint
+		}
+		embyServer.endpoint = strings.TrimSuffix(endpoint, "/")
+	})
+
+	return embyServer.endpoint
 }
 
 // 获取EmbyServer的APIKey
