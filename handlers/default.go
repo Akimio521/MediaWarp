@@ -1,18 +1,11 @@
 package handlers
 
 import (
-	"MediaWarp/core"
 	"MediaWarp/pkg"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 
 	"github.com/gin-gonic/gin"
-)
-
-var (
-	config                 = core.GetConfig()
-	mediaServerEndpoint, _ = url.Parse(config.Server.GetEndpoint())
 )
 
 // 默认路由（直接转发请求到后端）
