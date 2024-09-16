@@ -8,7 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SplitHostPort(hostPort string) (host, port string) {
+// 分离主机域名（IP）和端口号
+//
+// 示例：
+// "example.com:8096" 					=> 	"example.com", "8096"
+// "[240e:da8:a801:5a47::316]:8096" 	=> 	"240e:da8:a801:5a47::316" "8096"
+// "192.168.1.1:8096" 					=> 	"192.168.1.1" "8096"
+func SplitHostPort(hostPort string) (host string, port string) {
 	host = hostPort
 
 	colon := strings.LastIndexByte(host, ':')
@@ -16,6 +22,7 @@ func SplitHostPort(hostPort string) (host, port string) {
 		host, port = host[:colon], host[colon+1:]
 	}
 
+	// 对地址是IPv6地址进行处理
 	if strings.HasPrefix(host, "[") && strings.HasSuffix(host, "]") {
 		host = host[1 : len(host)-1]
 	}
