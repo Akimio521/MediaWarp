@@ -3,7 +3,6 @@ package handlers_emby
 import (
 	"MediaWarp/api"
 	"MediaWarp/core"
-	"MediaWarp/handlers"
 	"MediaWarp/schemas/schemas_emby"
 	"net/http"
 	"strings"
@@ -34,7 +33,7 @@ func VideosHandler(ctx *gin.Context) {
 			}
 
 			logger.ServerLogger.Info("本地视频：", *mediasource.Path)
-			handlers.DefaultHandler(ctx)
+			DefaultHandler(ctx)
 			return
 		}
 	}

@@ -2,7 +2,7 @@ package router
 
 import (
 	"MediaWarp/constants"
-	"MediaWarp/handlers"
+	"MediaWarp/handlers/handlers_emby"
 	"MediaWarp/middleware"
 	"MediaWarp/resources"
 
@@ -48,5 +48,5 @@ func RegexpRouterHandler(ctx *gin.Context) {
 		}
 	}
 	// 未匹配路由
-	handlers.DefaultHandler(ctx)
+	handlers_emby.DefaultHandler(ctx)
 }

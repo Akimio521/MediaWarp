@@ -1,7 +1,6 @@
 package handlers_emby
 
 import (
-	"MediaWarp/handlers"
 	"MediaWarp/pkg"
 	"fmt"
 	"io"
@@ -19,7 +18,7 @@ func ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 	resp, err := http.Get(config.Server.GetEndpoint() + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
 	if err != nil {
 		logger.ServerLogger.Warning("请求失败，使用回源策略，错误信息：", err)
-		handlers.DefaultHandler(ctx)
+		DefaultHandler(ctx)
 		return
 	}
 
@@ -27,7 +26,7 @@ func ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logger.ServerLogger.Warning("读取响应体失败，使用回源策略，错误信息：", err)
-		handlers.DefaultHandler(ctx)
+		DefaultHandler(ctx)
 		return
 	}
 	modifiedBody := strings.ReplaceAll(string(body), `mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`, "null")
@@ -83,7 +82,7 @@ func IndexHandler(ctx *gin.Context) {
 	}
 
 	if len(htmlContent) == 0 {
-		handlers.DefaultHandler(ctx)
+		DefaultHandler(ctx)
 		return
 	}
 
