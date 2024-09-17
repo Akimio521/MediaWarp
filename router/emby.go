@@ -1,23 +1,35 @@
 package router
 
 import (
-	"MediaWarp/handlers"
 	"MediaWarp/handlers/handlers_emby"
-	"MediaWarp/pkg"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"regexp"
 )
 
-func initEmbyRouter(router *gin.Engine) {
-	// VideoService
-	pkg.RegisterRoutesWithPrefixs(router, "/Videos/:itemId/:name", handlers_emby.VideosHandler, http.MethodGet, "/emby")
-	pkg.RegisterRoutesWithPrefixs(router, "/videos/:itemId/:name", handlers_emby.VideosHandler, http.MethodGet, "/emby")
+// Emby路由初始化
+func initEmbyRouterRule() []RegexpRouterPair {
+	embyRouterRules := []RegexpRouterPair{
+		{
+			Regexp:  regexp.MustCompile(`(?i)^/.*videos/.*/(stream|original)`),
+			Handler: handlers_emby.VideosHandler,
+		},
+	}
 
 	if config.Web.Enable {
 		if config.Web.Index || config.Web.Head || config.Web.ExternalPlayerUrl || config.Web.BeautifyCSS {
-			pkg.RegisterRoutesWithPrefixs(router, "/web/index.html", handlers_emby.IndexHandler, http.MethodGet)
+			embyRouterRules = append(embyRouterRules,
+				RegexpRouterPair{
+					Regexp:  regexp.MustCompile(`^/web/index.html$`),
+					Handler: handlers_emby.IndexHandler,
+				},
+			)
 		}
 	}
-	router.GET("/web/modules/htmlvideoplayer/basehtmlplayer.js", handlers.DefaultHandler)
+	embyRouterRules = append(embyRouterRules,
+		RegexpRouterPair{
+			Regexp:  regexp.MustCompile(`^/web/modules/htmlvideoplayer/basehtmlplayer.js$`),
+			Handler: handlers_emby.ModifyBaseHtmlPlayerHandler,
+		},
+	)
+
+	return embyRouterRules
 }
