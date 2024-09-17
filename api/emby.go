@@ -9,14 +9,26 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type EmbyServer struct {
 	ADDR     string
 	TOKEN    string
 	endpoint string
-	once     sync.Once
+}
+
+// 初始化函数
+func (embyServer *EmbyServer) Init() {
+	embyServer.initEndpoint()
+}
+
+// 初始化endpoint
+func (embyServer *EmbyServer) initEndpoint() {
+	endpoint := embyServer.ADDR
+	if !strings.HasPrefix(endpoint, "http") {
+		endpoint = "http://" + endpoint
+	}
+	embyServer.endpoint = strings.TrimSuffix(endpoint, "/")
 }
 
 func (embyServer *EmbyServer) GetType() constants.MediaServerType {
@@ -28,14 +40,6 @@ func (embyServer *EmbyServer) GetType() constants.MediaServerType {
 // 包含协议、服务器域名（IP）、端口号
 // 示例：return "http://emby.example.com:8096"
 func (embyServer *EmbyServer) GetEndpoint() string {
-	embyServer.once.Do(func() {
-		endpoint := embyServer.ADDR
-		if !strings.HasPrefix(endpoint, "http") {
-			endpoint = "http://" + endpoint
-		}
-		embyServer.endpoint = strings.TrimSuffix(endpoint, "/")
-	})
-
 	return embyServer.endpoint
 }
 
@@ -84,4 +88,19 @@ func (embyServer *EmbyServer) GetIndexHtml() ([]byte, error) {
 		return nil, err
 	}
 	return htmlContent, nil
+}
+
+// 实例化EmbyServer
+func NewEmbyServer(addr string, token string) *EmbyServer {
+	emby := &EmbyServer{
+		ADDR:  addr,
+		TOKEN: token,
+	}
+	emby.Init()
+	return emby
+}
+
+// 实例化EmbyServer（返回一个符合MediaServer的接口）
+func registerEmbyServer(addr string, token string) MediaServer {
+	return NewEmbyServer(addr, token)
 }

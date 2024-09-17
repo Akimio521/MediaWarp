@@ -66,25 +66,27 @@ type configManager struct {
 
 // 读取并解析配置文件
 func (config *configManager) LoadConfig() {
-	vip := viper.New()
+	var (
+		vip = viper.New()
+		err error
+	)
+
 	vip.SetConfigFile(config.ConfigPath())
 	vip.SetConfigType("yaml")
 
-	if err := vip.ReadInConfig(); err != nil {
+	if err = vip.ReadInConfig(); err != nil {
 		panic(err)
 	}
-	serverType := constants.MediaServerType(vip.GetString("Server.TYPE"))
-	switch serverType {
-	case constants.EMBY:
-		config.Server = &api.EmbyServer{
-			ADDR:  vip.GetString("Server.ADDR"),
-			TOKEN: vip.GetString("Server.TOKEN"),
-		}
-	default:
-		panic("未知的媒体服务器类型：" + serverType)
+	config.Server, err = api.GetMediaServer(
+		constants.MediaServerType(vip.GetString("Server.TYPE")),
+		vip.GetString("Server.ADDR"),
+		vip.GetString("Server.TOKEN"),
+	)
+	if err != nil {
+		panic(err)
 	}
 
-	err := vip.Unmarshal(config)
+	err = vip.Unmarshal(config)
 	if err != nil {
 		panic(err)
 	}
