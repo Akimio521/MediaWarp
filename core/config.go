@@ -73,7 +73,7 @@ func (config *configManager) LoadConfig() {
 	if err := vip.ReadInConfig(); err != nil {
 		panic(err)
 	}
-	serverType := constants.ServerType(vip.GetString("Server.TYPE"))
+	serverType := constants.MediaServerType(vip.GetString("Server.TYPE"))
 	switch serverType {
 	case constants.EMBY:
 		config.Server = &api.EmbyServer{

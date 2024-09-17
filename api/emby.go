@@ -19,7 +19,7 @@ type EmbyServer struct {
 	once     sync.Once
 }
 
-func (embyServer *EmbyServer) GetType() constants.ServerType {
+func (embyServer *EmbyServer) GetType() constants.MediaServerType {
 	return constants.EMBY
 }
 
