@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"strings"
@@ -15,11 +16,13 @@ type EmbyServer struct {
 	ADDR     string
 	TOKEN    string
 	endpoint string
+	proxy    *httputil.ReverseProxy
 }
 
 // 初始化函数
 func (embyServer *EmbyServer) Init() {
 	embyServer.initEndpoint()
+	embyServer.initProxy()
 }
 
 // 初始化endpoint
@@ -29,6 +32,12 @@ func (embyServer *EmbyServer) initEndpoint() {
 		endpoint = "http://" + endpoint
 	}
 	embyServer.endpoint = strings.TrimSuffix(endpoint, "/")
+}
+
+// 初始化proxy
+func (embyServer *EmbyServer) initProxy() {
+	target, _ := url.Parse(embyServer.GetEndpoint())
+	embyServer.proxy = httputil.NewSingleHostReverseProxy(target)
 }
 
 func (embyServer *EmbyServer) GetType() constants.MediaServerType {
@@ -46,6 +55,11 @@ func (embyServer *EmbyServer) GetEndpoint() string {
 // 获取EmbyServer的APIKey
 func (embyServer *EmbyServer) GetToken() string {
 	return embyServer.TOKEN
+}
+
+// 反代代理处理函数
+func (embyServer *EmbyServer) ReverseProxy(rw http.ResponseWriter, req *http.Request) {
+	embyServer.proxy.ServeHTTP(rw, req)
 }
 
 // ItemsService

@@ -3,6 +3,7 @@ package api
 import (
 	"MediaWarp/constants"
 	"errors"
+	"net/http"
 )
 
 type MediaServer interface {
@@ -10,6 +11,7 @@ type MediaServer interface {
 	GetType() constants.MediaServerType
 	GetEndpoint() string // 包含协议、服务器域名（IP）、端口号
 	GetToken() string
+	ReverseProxy(rw http.ResponseWriter, req *http.Request)
 }
 
 type NewMediaServer func(string, string) MediaServer
