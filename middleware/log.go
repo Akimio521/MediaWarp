@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"MediaWarp/constants"
-	"MediaWarp/core"
 	"fmt"
 	"net/http"
 	"time"
@@ -12,7 +11,6 @@ import (
 
 // 记录访问日志
 func Logger() gin.HandlerFunc {
-	logger := core.GetLogger()
 	return func(ctx *gin.Context) {
 		startTime := time.Now()
 		method := ctx.Request.Method

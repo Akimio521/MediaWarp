@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"MediaWarp/constants"
-	"MediaWarp/core"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -11,9 +10,6 @@ import (
 // 客户端过滤器
 func ClientFilter() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		config := core.GetConfig()
-		logger := core.GetLogger()
-
 		if !config.ClientFilter.Enable { // 未启用客户端过滤器
 			ctx.Next()
 			return
