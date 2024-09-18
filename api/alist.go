@@ -60,34 +60,19 @@ func (alistServer *AlistServer) authLogin() (err error) {
 		return
 	}
 
-	var (
-		authLoginData schemas_alist.AuthLoginData
-		alistResponse schemas_alist.AlistResponse
-	)
+	var authLoginResponse schemas_alist.AlistResponse[schemas_alist.AuthLoginData]
 
-	err = json.Unmarshal(body, &alistResponse)
+	err = json.Unmarshal(body, &authLoginResponse)
 	if err != nil {
 		err = fmt.Errorf("解析%s响应体失败: %w", funcInfo, err)
 		return
 	}
-	if alistResponse.Code != 200 {
-		err = errors.New(alistResponse.Message)
-		return
-	}
-	dataBytes, err := json.Marshal(alistResponse.Data)
-	if err != nil {
-		err = fmt.Errorf("序列化%s响应体data失败: %w", funcInfo, err)
+	if authLoginResponse.Code != 200 {
+		err = errors.New(authLoginResponse.Message)
 		return
 	}
 
-	// 将 JSON 字符串解析为 authLoginData 结构体
-	err = json.Unmarshal(dataBytes, &authLoginData)
-	if err != nil {
-		err = fmt.Errorf("反序列化%s响应体data失败: %w", funcInfo, err)
-		return
-	}
-
-	alistServer.token = authLoginData.Token
+	alistServer.token = authLoginResponse.Data.Token
 	alistServer.tokenExpiry = time.Now().Add(48 * time.Hour) // Token 有效期为2天
 	return
 }
@@ -122,21 +107,22 @@ func (alistServer *AlistServer) getCache(key string) (data interface{}, found bo
 }
 
 // 获取某个文件/目录信息
-func (alistServer *AlistServer) FsGet(path string) (fsGetData schemas_alist.FsGetData, err error) {
-	err = alistServer.checkToken()
+func (alistServer *AlistServer) FsGet(path string) (schemas_alist.FsGetData, error) {
+	var fsGetDataResponse schemas_alist.AlistResponse[schemas_alist.FsGetData]
+
+	err := alistServer.checkToken()
 	if err != nil {
-		return
+		return fsGetDataResponse.Data, err
 	}
 	if alistServer.cachePool == nil {
 		alistServer.cachePool = make(map[string]CacheItem)
 	}
 
-	var alistResponse schemas_alist.AlistResponse
 	cacheKey := fmt.Sprintf("API_FsGet_%s", path)
 	cacheData, found := alistServer.getCache(cacheKey)
-	if found {
-		fsGetData = cacheData.(schemas_alist.FsGetData)
-		return
+	if found { // 在缓存中查询到数据
+		fsGetData := cacheData.(schemas_alist.FsGetData)
+		return fsGetData, nil
 	}
 
 	funcInfo := "Alist获取某个文件/目录信息"
@@ -156,7 +142,7 @@ func (alistServer *AlistServer) FsGet(path string) (fsGetData schemas_alist.FsGe
 
 	if err != nil {
 		err = fmt.Errorf("创建%s请求失败: %w", funcInfo, err)
-		return
+		return fsGetDataResponse.Data, err
 	}
 	req.Header.Add("Authorization", alistServer.token)
 	req.Header.Add("User-Agent", "Apifox/1.0.0 (https://apifox.com)")
@@ -165,36 +151,26 @@ func (alistServer *AlistServer) FsGet(path string) (fsGetData schemas_alist.FsGe
 	res, err := client.Do(req)
 	if err != nil {
 		err = fmt.Errorf("请求%s信息失败: %w", funcInfo, err)
-		return
+		return fsGetDataResponse.Data, err
 	}
 
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		err = fmt.Errorf("读取%s响应体失败: %w", funcInfo, err)
-		return
+		return fsGetDataResponse.Data, err
 	}
 
-	err = json.Unmarshal(body, &alistResponse)
+	err = json.Unmarshal(body, &fsGetDataResponse)
 	if err != nil {
 		err = fmt.Errorf("解析%s响应体失败: %w", funcInfo, err)
-		return
+		return fsGetDataResponse.Data, err
 	}
-	if alistResponse.Code != 200 {
-		err = errors.New(alistResponse.Message)
-		return
-	}
-	dataBytes, err := json.Marshal(alistResponse.Data)
-	if err != nil {
-		err = fmt.Errorf("序列化%s响应体data失败: %w", funcInfo, err)
-		return
+	if fsGetDataResponse.Code != 200 {
+		err = errors.New(fsGetDataResponse.Message)
+		return fsGetDataResponse.Data, err
 	}
 
-	err = json.Unmarshal(dataBytes, &fsGetData)
-	if err != nil {
-		err = fmt.Errorf("反序列化%s响应体data失败: %w", funcInfo, err)
-		return
-	}
-	alistServer.updateCache(cacheKey, fsGetData)
-	return
+	alistServer.updateCache(cacheKey, fsGetDataResponse.Data)
+	return fsGetDataResponse.Data, nil
 }
