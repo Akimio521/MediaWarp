@@ -26,12 +26,12 @@ type AlistServer struct {
 }
 
 // 更新缓存中的数据
-func (alistServer *AlistServer) updateCache(key string, data interface{}) {
+func (alistServer *AlistServer) updateCache(key string, data interface{}, cacheDuration time.Duration) {
 	alistServer.cacheMutex.Lock()
 	defer alistServer.cacheMutex.Unlock()
 	alistServer.cachePool[key] = CacheItem{
 		Data:   data,
-		Expiry: time.Now().Add(1 * time.Hour),
+		Expiry: time.Now().Add(cacheDuration),
 	}
 }
 
@@ -40,6 +40,10 @@ func (alistServer *AlistServer) getCache(key string) (data interface{}, found bo
 	alistServer.cacheMutex.Lock()
 	defer alistServer.cacheMutex.Unlock()
 	item, found := alistServer.cachePool[key]
+	if found && time.Now().After(item.Expiry) { // 找到缓存并且缓存已过期
+		delete(alistServer.cachePool, key) // 删除缓存
+		found = false                      // 修改为未找到缓存
+	}
 	return item.Data, found
 }
 
@@ -48,8 +52,9 @@ func (alistServer *AlistServer) getCache(key string) (data interface{}, found bo
 // 先从缓存池中读取，若过期或者未找到则重新生成
 func (alistServer *AlistServer) getToken() (string, error) {
 	var (
-		cacheKey = "API_TOKEN"
-		token    string
+		cacheKey      = "API_TOKEN"
+		token         string
+		cacheDuration = 48*time.Hour - 5*time.Minute // Alist v3 Token默认有效期为2天，5分钟作为误差
 	)
 	cacheToken, found := alistServer.getCache(cacheKey)
 	if found { // 找到token
@@ -62,7 +67,7 @@ func (alistServer *AlistServer) getToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	alistServer.updateCache(cacheKey, token) // 将新生成的token添加到缓存池中
+	alistServer.updateCache(cacheKey, token, cacheDuration) // 将新生成的token添加到缓存池中
 
 	return token, nil
 }
@@ -119,6 +124,7 @@ func (alistServer *AlistServer) FsGet(path string) (schemas_alist.FsGetData, err
 		fsGetDataResponse schemas_alist.AlistResponse[schemas_alist.FsGetData]
 		token             string
 		cacheKey          = fmt.Sprintf("API_FsGet_%s", path)
+		cacheDuration     = 30 * time.Minute // 缓存时间为30分钟
 		funcInfo          = "Alist获取某个文件/目录信息"
 		url               = alistServer.URL + "/api/fs/get"
 		method            = "POST"
@@ -174,6 +180,6 @@ func (alistServer *AlistServer) FsGet(path string) (schemas_alist.FsGetData, err
 		return fsGetDataResponse.Data, err
 	}
 
-	alistServer.updateCache(cacheKey, fsGetDataResponse.Data)
+	alistServer.updateCache(cacheKey, fsGetDataResponse.Data, cacheDuration)
 	return fsGetDataResponse.Data, nil
 }
