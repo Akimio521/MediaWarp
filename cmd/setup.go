@@ -15,6 +15,8 @@ func SetUP() {
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	ginR := router.InitRouter()   // 路由初始化
+
+	ginR := router.InitRouter() // 路由初始化
+	logger.ServerLogger.Info("MediaWarp启动成功")
 	ginR.Run(config.ListenAddr()) // 启动服务
 }
