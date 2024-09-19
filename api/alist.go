@@ -1,6 +1,7 @@
 package api
 
 import (
+	"MediaWarp/globle"
 	"MediaWarp/schemas/schemas_alist"
 	"encoding/json"
 	"errors"
@@ -8,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -18,33 +18,14 @@ type CacheItem struct {
 }
 
 type AlistServer struct {
-	URL        string
-	Username   string
-	Password   string
-	cachePool  map[string]CacheItem
-	cacheMutex sync.Mutex
+	URL      string
+	Username string
+	Password string
 }
 
-// 更新缓存中的数据
-func (alistServer *AlistServer) updateCache(key string, data interface{}, cacheDuration time.Duration) {
-	alistServer.cacheMutex.Lock()
-	defer alistServer.cacheMutex.Unlock()
-	alistServer.cachePool[key] = CacheItem{
-		Data:   data,
-		Expiry: time.Now().Add(cacheDuration),
-	}
-}
-
-// 从缓存中获取数据
-func (alistServer *AlistServer) getCache(key string) (data interface{}, found bool) {
-	alistServer.cacheMutex.Lock()
-	defer alistServer.cacheMutex.Unlock()
-	item, found := alistServer.cachePool[key]
-	if found && time.Now().After(item.Expiry) { // 找到缓存并且缓存已过期
-		delete(alistServer.cachePool, key) // 删除缓存
-		found = false                      // 修改为未找到缓存
-	}
-	return item.Data, found
+// 得到缓存SpaceName
+func (alistServer *AlistServer) getSpaceName() string {
+	return alistServer.URL + alistServer.Username + alistServer.Password
 }
 
 // 得到一个可用的Token
@@ -56,7 +37,7 @@ func (alistServer *AlistServer) getToken() (string, error) {
 		token         string
 		cacheDuration = 48*time.Hour - 5*time.Minute // Alist v3 Token默认有效期为2天，5分钟作为误差
 	)
-	cacheToken, found := alistServer.getCache(cacheKey)
+	cacheToken, found := globle.GlobleCache.GetCache(alistServer.getSpaceName(), cacheKey)
 	if found { // 找到token
 		token = cacheToken.(string)
 		return token, nil
@@ -67,7 +48,7 @@ func (alistServer *AlistServer) getToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	alistServer.updateCache(cacheKey, token, cacheDuration) // 将新生成的token添加到缓存池中
+	globle.GlobleCache.UpdateCache(alistServer.getSpaceName(), cacheKey, token, cacheDuration) // 将新生成的token添加到缓存池中
 
 	return token, nil
 }
@@ -131,11 +112,7 @@ func (alistServer *AlistServer) FsGet(path string) (schemas_alist.FsGetData, err
 		payload           = strings.NewReader(fmt.Sprintf(`{"path": "%s","password": "","page": 1,"per_page": 0,"refresh": false}`, path))
 	)
 
-	if alistServer.cachePool == nil {
-		alistServer.cachePool = make(map[string]CacheItem)
-	}
-
-	cacheData, found := alistServer.getCache(cacheKey)
+	cacheData, found := globle.GlobleCache.GetCache(alistServer.getSpaceName(), cacheKey)
 	if found { // 在缓存中查询到数据
 		fsGetData := cacheData.(schemas_alist.FsGetData)
 		return fsGetData, nil
@@ -180,6 +157,6 @@ func (alistServer *AlistServer) FsGet(path string) (schemas_alist.FsGetData, err
 		return fsGetDataResponse.Data, err
 	}
 
-	alistServer.updateCache(cacheKey, fsGetDataResponse.Data, cacheDuration)
+	globle.GlobleCache.UpdateCache(alistServer.getSpaceName(), cacheKey, fsGetDataResponse.Data, cacheDuration)
 	return fsGetDataResponse.Data, nil
 }
