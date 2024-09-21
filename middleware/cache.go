@@ -68,7 +68,7 @@ func Cache() gin.HandlerFunc {
 					Header:     ctx.Writer.Header().Clone(),
 					Body:       customWirter.body.Bytes(),
 				}
-				globle.GlobleCache.UpdateCache("GIN-Cache", cacheKey, responseCacheData, cacheDuration)
+				go globle.GlobleCache.UpdateCache("GIN-Cache", cacheKey, responseCacheData, cacheDuration)
 			}
 		}
 	}
