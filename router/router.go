@@ -14,6 +14,7 @@ func InitRouter() *gin.Engine {
 	ginR.Use(middleware.SetRefererPolicy(constants.SAME_ORIGIN))
 	ginR.Use(middleware.Logger())
 	ginR.Use(middleware.ClientFilter())
+	ginR.Use(middleware.Cache())
 
 	mediawarpRouter := ginR.Group("/MediaWarp")
 	{
