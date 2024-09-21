@@ -48,7 +48,7 @@ func (alistServer *AlistServer) getToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	globle.GlobleCache.UpdateCache(alistServer.getSpaceName(), cacheKey, token, cacheDuration) // 将新生成的token添加到缓存池中
+	go globle.GlobleCache.UpdateCache(alistServer.getSpaceName(), cacheKey, token, cacheDuration) // 将新生成的token添加到缓存池中
 
 	return token, nil
 }
@@ -157,6 +157,6 @@ func (alistServer *AlistServer) FsGet(path string) (schemas_alist.FsGetData, err
 		return fsGetDataResponse.Data, err
 	}
 
-	globle.GlobleCache.UpdateCache(alistServer.getSpaceName(), cacheKey, fsGetDataResponse.Data, cacheDuration)
+	go globle.GlobleCache.UpdateCache(alistServer.getSpaceName(), cacheKey, fsGetDataResponse.Data, cacheDuration)
 	return fsGetDataResponse.Data, nil
 }
