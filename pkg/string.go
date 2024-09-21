@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"regexp"
 	"strings"
 )
@@ -57,4 +59,13 @@ func validOptionalPort(port string) bool {
 		}
 	}
 	return true
+}
+
+// MD5编码
+//
+// 对字符串进行MD5哈希运算, 返回十六进制
+func MD5Hash(raw string) string {
+	hash := md5.New()
+	hash.Write([]byte(raw))
+	return hex.EncodeToString(hash.Sum(nil))
 }
