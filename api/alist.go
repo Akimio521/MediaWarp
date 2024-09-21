@@ -2,6 +2,7 @@ package api
 
 import (
 	"MediaWarp/globle"
+	"MediaWarp/pkg"
 	"MediaWarp/schemas/schemas_alist"
 	"encoding/json"
 	"errors"
@@ -9,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -18,14 +20,19 @@ type CacheItem struct {
 }
 
 type AlistServer struct {
-	URL      string
-	Username string
-	Password string
+	URL        string
+	Username   string
+	Password   string
+	sapaceName string
+	once       sync.Once
 }
 
 // 得到缓存SpaceName
 func (alistServer *AlistServer) getSpaceName() string {
-	return alistServer.URL + alistServer.Username + alistServer.Password
+	alistServer.once.Do(func() {
+		pkg.MD5Hash(alistServer.URL + alistServer.Username + alistServer.Password)
+	})
+	return alistServer.sapaceName
 }
 
 // 得到一个可用的Token
