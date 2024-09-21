@@ -19,6 +19,7 @@ import (
 //
 // 根据请求路径自定义缓存时间
 var cacheRules = []CacheRule{
+	{Regexp: regexp.MustCompile(`(?i)^/.*embywebsocket\??`), Time: 0},                         // WebSocket不进入缓存处理
 	{Regexp: regexp.MustCompile(`(?i)^/.*items/.*/playbackinfo\??`), Time: 1 * time.Hour},     // 播放信息
 	{Regexp: regexp.MustCompile(`(?i)^/.*videos/.*/subtitles`), Time: 30 * 24 * time.Hour},    // 字幕
 	{Regexp: regexp.MustCompile(`(?i)^/.*(\.html|\.css|\.js|\.woff)`), Time: 1 * time.Minute}, // 静态资源
