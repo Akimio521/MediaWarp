@@ -50,5 +50,5 @@ func RegexpRouterHandler(ctx *gin.Context) {
 	}
 
 	// 未匹配路由
-	config.Server.ReverseProxy(ctx.Writer, ctx.Request)
+	config.Server.ReverseProxy().ServeHTTP(ctx.Writer, ctx.Request)
 }

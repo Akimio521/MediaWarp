@@ -33,7 +33,7 @@ func VideosHandler(ctx *gin.Context) {
 			}
 
 			logger.ServerLogger.Info("本地视频：", *mediasource.Path)
-			DefaultHandler(ctx)
+			embyServer.ReverseProxy().ServeHTTP(ctx.Writer, ctx.Request)
 			return
 		}
 	}

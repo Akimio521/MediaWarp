@@ -57,9 +57,9 @@ func (embyServer *EmbyServer) GetToken() string {
 	return embyServer.TOKEN
 }
 
-// 反代代理处理函数
-func (embyServer *EmbyServer) ReverseProxy(rw http.ResponseWriter, req *http.Request) {
-	embyServer.proxy.ServeHTTP(rw, req)
+// 获取反代服务器
+func (embyServer *EmbyServer) ReverseProxy() *httputil.ReverseProxy {
+	return embyServer.proxy
 }
 
 // ItemsService
