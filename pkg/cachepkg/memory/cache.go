@@ -20,6 +20,8 @@ func (memoryCache *MemoryCache) getCacheSpace(spaceName string) *MemoryCacheSpac
 
 	// 生成一个新的子缓存空间
 	newCacheSpace := &MemoryCacheSpace{}
+
+	// fmt.Println("创建子缓存空间", spaceName)
 	memoryCache.cacheSpaceMap.Store(spaceName, newCacheSpace)
 	return newCacheSpace
 }

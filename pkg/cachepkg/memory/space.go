@@ -17,6 +17,7 @@ func (memoryCacheSpace *MemoryCacheSpace) UpdateCache(cacheKey string, cacheData
 		Expiry: time.Now().Add(cacheDuration),
 	}
 
+	// fmt.Println("更新缓存")
 	memoryCacheSpace.cachePool.Store(cacheKey, cacheItem)
 }
 
@@ -31,7 +32,8 @@ func (memoryCacheSpace *MemoryCacheSpace) GetCache(cacheKey string) (any, bool) 
 			return nil, false                           // 修改为未找到缓存
 		}
 
-		return cacheItem.Data, ok
+		// fmt.Println("命中缓存")
+		return cacheItem.Data, true
 	}
 
 	// 未找到缓存
