@@ -69,3 +69,15 @@ func MD5Hash(raw string) string {
 	hash.Write([]byte(raw))
 	return hex.EncodeToString(hash.Sum(nil))
 }
+
+// 获取服务器入口
+//
+// 包含协议、主机域名（IP）、端口号（标准端口号可省略）
+// Example1: https://example1.com:8920
+// Example2: http://example2.com:5224
+func GetEndpoint(addr string) string {
+	if !strings.HasPrefix(addr, "http") {
+		addr = "http://" + addr
+	}
+	return strings.TrimSuffix(addr, "/")
+}
