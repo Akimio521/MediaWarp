@@ -5,6 +5,7 @@ import (
 	"MediaWarp/internal/service/alist"
 	"MediaWarp/internal/service/emby"
 	"MediaWarp/pkg"
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -87,39 +88,31 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	}
 }
 
-// 拦截basehtmlplayer.js实现Web跨域播放Strm
+// 修改basehtmlplayer.js
+//
+// 用于修改播放器JS，实现跨域播放Strm
 func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 	version := ctx.Query("v")
-	logger.ServiceLogger.Info("请求basehtmlplayer.js版本：", version)
-	resp, err := http.Get(embyServerHandler.server.GetEndpoint() + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
-	if err != nil {
-		logger.ServiceLogger.Warning("请求失败，使用回源策略，错误信息：", err)
-		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
-		return
-	}
+	logger.ServiceLogger.Debug("请求basehtmlplayer.js版本：", version)
 
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		logger.ServiceLogger.Warning("读取响应体失败，使用回源策略，错误信息：", err)
-		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
-		return
-	}
-	modifiedBody := strings.ReplaceAll(string(body), `mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`, "null")
-
-	for key, values := range resp.Header {
-		for _, value := range values {
-			if key != "Content-Length" {
-				ctx.Writer.Header().Add(key, value)
-			} else {
-				ctx.Header("Content-Length", fmt.Sprintf("%d", len(modifiedBody)))
-			}
+	proxy := embyServerHandler.server.GetReverseProxy()
+	proxy.ModifyResponse = func(rw *http.Response) error {
+		defer rw.Body.Close()
+		body, err := io.ReadAll(rw.Body)
+		if err != nil {
+			return err
 		}
+
+		modifiedBody := strings.ReplaceAll(string(body), `mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`, "null") // 修改响应体
+		rw.Body = io.NopCloser(bytes.NewBuffer([]byte(modifiedBody)))                                                                // 重置响应体
+
+		// 更新 Content-Length 头
+		rw.ContentLength = int64(len(modifiedBody))
+		rw.Header.Set("Content-Length", string(len(modifiedBody)))
+		return nil
 	}
 
-	// 返回修改后的内容
-	ctx.Data(resp.StatusCode, resp.Header.Get("Content-Type"), []byte(modifiedBody))
-
+	proxy.ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 // 首页处理方法
