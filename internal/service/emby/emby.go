@@ -47,8 +47,11 @@ func (embyServer *EmbyServer) GetAPIKey() string {
 }
 
 // 获取反代服务器
+//
+// 根据EmbyServer的proxy创建一个新的反代服务器用于处理请求
+// 对此httputil.ReverseProxy进行修改不影响EmbyServer的ReverseProxy()方法的行为
 func (embyServer *EmbyServer) GetReverseProxy() *httputil.ReverseProxy {
-	return embyServer.proxy
+	return &httputil.ReverseProxy{Director: embyServer.proxy.Director}
 }
 
 // 反代上游响应
