@@ -35,11 +35,12 @@ func InitRouter() *gin.Engine {
 
 // 正则表达式路由处理器
 //
-// 依次匹配路由规则, 找到对应的处理器
+// 从媒体服务器处理结构体中获取正则路由规则
+// 依次匹配请求, 找到对应的处理器
 func RegexpRouterHandler(ctx *gin.Context) {
-	mediaServer := handler.GetMediaServer()
+	mediaServerHandler := handler.GetMediaServer()
 
-	for _, rule := range mediaServer.GetRegexpRouteRules() {
+	for _, rule := range mediaServerHandler.GetRegexpRouteRules() {
 		if rule.Regexp.MatchString(ctx.Request.RequestURI) {
 			rule.Handler(ctx)
 			return
@@ -47,5 +48,5 @@ func RegexpRouterHandler(ctx *gin.Context) {
 	}
 
 	// 未匹配路由
-	mediaServer.ReverseProxy(ctx.Writer, ctx.Request)
+	mediaServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
 }

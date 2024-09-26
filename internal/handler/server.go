@@ -9,7 +9,7 @@ import (
 type MediaServerHandler interface {
 	Init()                                           // 初始化函数
 	ReverseProxy(http.ResponseWriter, *http.Request) // 转发请求至上游服务器
-	GetRegexpRouteRules() []RegexpRouteRule          // 正则路由表
+	GetRegexpRouteRules() []RegexpRouteRule          // 获取正则路由表
 }
 
 var mediaServerHandler MediaServerHandler
