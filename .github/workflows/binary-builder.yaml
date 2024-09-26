@@ -28,7 +28,7 @@ jobs:
             echo "版本号：${{ env.APP_VERSION }}"
             echo "操作系统：${{ matrix.os }}"
             echo "架构：${{ matrix.arch }}"
-            echo "可执行文件：${{ env.APP_NAME }}-v${{ env.APP_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}"
+            echo "可执行文件：${{ env.APP_NAME }}-${{ env.APP_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}"
 
         - name: Clone Repository
           uses: actions/checkout@v4
