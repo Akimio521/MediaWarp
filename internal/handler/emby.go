@@ -15,30 +15,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type EmbyServer struct {
+// Emby服务器处理器
+type EmbyServerHandler struct {
 	server *emby.EmbyServer
 }
 
 // 初始化
-func (embyServer *EmbyServer) Init() {
-	embyServer.server = emby.New(cfg.MeidaServer.ADDR, cfg.MeidaServer.AUTH)
+func (embyServerHandler *EmbyServerHandler) Init() {
+	embyServerHandler.server = emby.New(cfg.MeidaServer.ADDR, cfg.MeidaServer.AUTH)
 }
 
 // 转发请求至上游服务器
-func (embyServer *EmbyServer) ReverseProxy(rw http.ResponseWriter, req *http.Request) {
-	embyServer.server.ReverseProxy(rw, req)
+func (embyServerHandler *EmbyServerHandler) ReverseProxy(rw http.ResponseWriter, req *http.Request) {
+	embyServerHandler.server.ReverseProxy(rw, req)
 }
 
 // 正则路由表
-func (embyServer *EmbyServer) GetRegexpRouteRules() []RegexpRouteRule {
+func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteRule {
 	embyRouterRules := []RegexpRouteRule{
 		{
 			Regexp:  regexp.MustCompile(`(?i)^/.*videos/.*/(stream|original)`),
-			Handler: embyServer.VideosHandler,
+			Handler: embyServerHandler.VideosHandler,
 		},
 		{
 			Regexp:  regexp.MustCompile(`^/web/modules/htmlvideoplayer/basehtmlplayer.js$`),
-			Handler: embyServer.ModifyBaseHtmlPlayerHandler,
+			Handler: embyServerHandler.ModifyBaseHtmlPlayerHandler,
 		},
 	}
 
@@ -47,7 +48,7 @@ func (embyServer *EmbyServer) GetRegexpRouteRules() []RegexpRouteRule {
 			embyRouterRules = append(embyRouterRules,
 				RegexpRouteRule{
 					Regexp:  regexp.MustCompile(`^/web/index.html$`),
-					Handler: embyServer.IndexHandler,
+					Handler: embyServerHandler.IndexHandler,
 				},
 			)
 		}
@@ -58,13 +59,13 @@ func (embyServer *EmbyServer) GetRegexpRouteRules() []RegexpRouteRule {
 // 视频流处理器
 //
 // 支持播放本地视频、重定向HttpStrm、AlistStrm
-func (embyServer *EmbyServer) VideosHandler(ctx *gin.Context) {
+func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	// EmbyServer <= 4.8 ====> mediaSourceID = 343121
 	// EmbyServer >= 4.9 ====> mediaSourceID = mediasource_31
 	mediaSourceID := ctx.Query("mediasourceid")
 
 	logger.ServiceLogger.Debug("请求ItemsServiceQueryItem：", mediaSourceID)
-	itemResponse, err := embyServer.server.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询item需要去除前缀仅保留数字部分
+	itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询item需要去除前缀仅保留数字部分
 
 	if err != nil {
 		logger.ServiceLogger.Warning("请求ItemsServiceQueryItem失败：", err)
@@ -80,20 +81,20 @@ func (embyServer *EmbyServer) VideosHandler(ctx *gin.Context) {
 			}
 
 			logger.ServiceLogger.Info("本地视频：", *mediasource.Path)
-			embyServer.server.ReverseProxy(ctx.Writer, ctx.Request)
+			embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
 			return
 		}
 	}
 }
 
 // 拦截basehtmlplayer.js实现Web跨域播放Strm
-func (embyServer *EmbyServer) ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
+func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 	version := ctx.Query("v")
 	logger.ServiceLogger.Info("请求basehtmlplayer.js版本：", version)
-	resp, err := http.Get(embyServer.server.GetEndpoint() + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
+	resp, err := http.Get(embyServerHandler.server.GetEndpoint() + ctx.Request.URL.Path + "?" + ctx.Request.URL.RawQuery)
 	if err != nil {
 		logger.ServiceLogger.Warning("请求失败，使用回源策略，错误信息：", err)
-		embyServer.ReverseProxy(ctx.Writer, ctx.Request)
+		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
 		return
 	}
 
@@ -101,7 +102,7 @@ func (embyServer *EmbyServer) ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logger.ServiceLogger.Warning("读取响应体失败，使用回源策略，错误信息：", err)
-		embyServer.ReverseProxy(ctx.Writer, ctx.Request)
+		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
 		return
 	}
 	modifiedBody := strings.ReplaceAll(string(body), `mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`, "null")
@@ -121,7 +122,8 @@ func (embyServer *EmbyServer) ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 
 }
 
-func (embyServer *EmbyServer) IndexHandler(ctx *gin.Context) {
+// 首页处理方法
+func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 	var (
 		htmlFilePath   string = filepath.Join(cfg.StaticDir(), "index.html")
 		headFilePath   string = filepath.Join(cfg.StaticDir(), "head")
@@ -149,14 +151,14 @@ func (embyServer *EmbyServer) IndexHandler(ctx *gin.Context) {
 	}
 	if len(htmlContent) == 0 { // 未启用自定义首页或自定义首页文件内容读取失败
 		logger.ServiceLogger.Debug("请求上游EmbyServer获取HTML内容")
-		htmlContent, err = embyServer.server.GetIndexHtml()
+		htmlContent, err = embyServerHandler.server.GetIndexHtml()
 		if err != nil {
 			logger.ServiceLogger.Warning("请求上游EmbyServer获取HTML内容失败，使用回源策略，错误信息：", err)
 		}
 	}
 
 	if len(htmlContent) == 0 {
-		embyServer.ReverseProxy(ctx.Writer, ctx.Request)
+		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
 		return
 	}
 
