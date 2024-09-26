@@ -185,21 +185,21 @@ func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 		retHtmlContent = strings.Replace(string(htmlContent), "</head>", string(headContent)+"\n"+"</head>", 1)
 	}
 
-	if cfg.Web.ExternalPlayerUrl {
-		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/Resources/js/ExternalPlayerUrl.js"></script>`+"\n"+"</head>", 1)
+	if cfg.Web.ExternalPlayerUrl { // 外部播放器
+		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/static/embedded/js/ExternalPlayerUrl.js"></script>`+"\n"+"</head>", 1)
 	}
-	if cfg.Web.ActorPlus {
-		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/Resources/js/ActorPlus.js"></script>`+"\n"+"</head>", 1)
+	if cfg.Web.ActorPlus { // 过滤没有头像的演员和制作人员
+		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/static/embedded/js/ActorPlus.js"></script>`+"\n"+"</head>", 1)
 	}
-	if cfg.Web.FanartShow {
-		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/Resources/js/FanartShow.js"></script>`+"\n"+"</head>", 1)
+	if cfg.Web.FanartShow { // 显示同人图（fanart图）
+		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/static/embedded/js/FanartShow.js"></script>`+"\n"+"</head>", 1)
 	}
-	if cfg.Web.Danmaku {
+	if cfg.Web.Danmaku { // 弹幕
 		retHtmlContent = strings.Replace(retHtmlContent, "</body>", `<script src="https://cdn.jsdelivr.net/gh/RyoLee/emby-danmaku@gh-pages/ede.user.js" defer></script>`+"\n"+"</body>", 1)
 	}
 
-	if cfg.Web.BeautifyCSS {
-		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<link rel="stylesheet" href="/MediaWarp/Resources/css/Beautify.css" type="text/css" media="all" />`+"\n"+"</head>", 1)
+	if cfg.Web.BeautifyCSS { // 美化CSS
+		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<link rel="stylesheet" href="/MediaWarp/static/embedded/css/Beautify.css" type="text/css" media="all" />`+"\n"+"</head>", 1)
 	}
 
 	ctx.Header("Content-Type", "text/html; charset=UTF-8")

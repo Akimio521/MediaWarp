@@ -20,10 +20,13 @@ func InitRouter() *gin.Engine {
 
 	mediawarpRouter := ginR.Group("/MediaWarp")
 	{
-		if cfg.Web.Enable && cfg.Web.Static {
-			mediawarpRouter.Static("/Static", cfg.StaticDir())
+		static := mediawarpRouter.Group("/static")
+		{
+			if cfg.Web.Enable && cfg.Web.Static {
+				static.Static("/custom ", cfg.StaticDir())
+			}
+			static.StaticFS("/embedded", http.FS(assets.EmbeddedStaticAssets))
 		}
-		mediawarpRouter.StaticFS("/Dist", http.FS(assets.EmbeddedStaticAssets))
 	}
 
 	ginR.NoRoute(RegexpRouterHandler)
