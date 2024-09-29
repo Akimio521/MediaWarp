@@ -56,12 +56,20 @@ func (s *serviceLoggerSetting) Levels() []logrus.Level {
 	return []logrus.Level{logrus.ErrorLevel, logrus.WarnLevel}
 }
 
+// HOOK
+//
+// 将日志写入文件
 func (s *serviceLoggerSetting) Fire(entry *logrus.Entry) error {
+	if err := os.MkdirAll(cfg.LogDirWithDate(), os.ModePerm); err != nil {
+		return err
+	}
+
 	serviceLogFile, err := os.OpenFile(cfg.ServiceLogPath(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}
 	defer serviceLogFile.Close()
+
 	line, err := entry.String()
 	if err != nil {
 		return err

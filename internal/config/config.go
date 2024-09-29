@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -102,14 +103,14 @@ func (configManager *ConfigManager) loadConfig() {
 }
 
 // 创建文件夹
-func (*ConfigManager) createDir() {
-	if err := os.MkdirAll(cfg.ConfigDir(), os.ModePerm); err != nil {
+func (configManager *ConfigManager) createDir() {
+	if err := os.MkdirAll(configManager.ConfigDir(), os.ModePerm); err != nil {
 		panic(err)
 	}
-	if err := os.MkdirAll(cfg.LogDir(), os.ModePerm); err != nil {
+	if err := os.MkdirAll(configManager.LogDir(), os.ModePerm); err != nil {
 		panic(err)
 	}
-	if err := os.MkdirAll(cfg.StaticDir(), os.ModePerm); err != nil {
+	if err := os.MkdirAll(configManager.StaticDir(), os.ModePerm); err != nil {
 		panic(err)
 	}
 }
@@ -155,18 +156,29 @@ func (configManager *ConfigManager) ConfigPath() string {
 }
 
 // 获取日志目录
+//
+// 总日志目录
+// ./logs
 func (configManager *ConfigManager) LogDir() string {
 	return filepath.Join(configManager.RootDir(), "logs")
 }
 
+// 获取日志目录
+//
+// 带有日期
+// ./logs/2024-9-29
+func (configManager *ConfigManager) LogDirWithDate() string {
+	return filepath.Join(configManager.LogDir(), time.Now().Format("2006-1-2"))
+}
+
 // 访问日志文件路径
 func (configManager *ConfigManager) AccessLogPath() string {
-	return filepath.Join(configManager.LogDir(), "access.log")
+	return filepath.Join(configManager.LogDirWithDate(), "access.log")
 }
 
 // 服务日志文件路径
 func (configManager *ConfigManager) ServiceLogPath() string {
-	return filepath.Join(configManager.LogDir(), "service.log")
+	return filepath.Join(configManager.LogDirWithDate(), "service.log")
 }
 
 // 静态资源文件目录

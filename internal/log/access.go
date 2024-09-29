@@ -31,12 +31,20 @@ func (s *accessLoggerSetting) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
+// HOOK
+//
+// 将日志写入文件
 func (s *accessLoggerSetting) Fire(entry *logrus.Entry) error {
+	if err := os.MkdirAll(cfg.LogDirWithDate(), os.ModePerm); err != nil {
+		return err
+	}
+
 	accessLogFile, err := os.OpenFile(cfg.AccessLogPath(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}
 	defer accessLogFile.Close()
+
 	line, err := entry.String()
 	if err != nil {
 		return err
