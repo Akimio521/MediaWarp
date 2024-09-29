@@ -72,37 +72,32 @@ type AlistStrmSetting struct {
 }
 
 type ConfigManager struct {
-	Port         int
-	CacheType    constants.CacheType
-	Cache        cache.Cache
-	MeidaServer  MeidaServerSetting
-	Logger       LoggerSetting
-	Web          WebSetting
-	ClientFilter ClientFilterSetting
-	HTTPStrm     HTTPStrmSetting
-	AlistStrm    AlistStrmSetting
+	Port         int                 // MediaWarp开放端口
+	CacheType    constants.CacheType // 缓存类型
+	Cache        cache.Cache         // 全局缓存接口
+	MeidaServer  MeidaServerSetting  // 上游媒体服务器设置
+	Logger       LoggerSetting       // 日志设置
+	Web          WebSetting          // Web服务器设置
+	ClientFilter ClientFilterSetting // 客户端过滤设置
+	HTTPStrm     HTTPStrmSetting     // HTTPSTRM设置
+	AlistStrm    AlistStrmSetting    // AlistStrm设置
 }
 
 // 读取并解析配置文件
 func (configManager *ConfigManager) loadConfig() {
-	var (
-		vip = viper.New()
-		err error
-	)
+	viper.SetConfigFile(configManager.ConfigPath())
+	viper.SetConfigType("yaml")
 
-	vip.SetConfigFile(configManager.ConfigPath())
-	vip.SetConfigType("yaml")
-
-	if err = vip.ReadInConfig(); err != nil {
+	if err := viper.ReadInConfig(); err != nil {
 		panic(err)
 	}
 
-	configManager.MeidaServer.Type = constants.MediaServerType(vip.GetString("Server.Type"))
-	configManager.CacheType = constants.CacheType(vip.GetString("Cache.Type"))
+	configManager.MeidaServer.Type = constants.MediaServerType(viper.GetString("Server.Type"))
+	configManager.CacheType = constants.CacheType(viper.GetString("Cache.Type"))
+
 	configManager.Cache = cache.GetCache(configManager.CacheType)
 
-	err = vip.Unmarshal(configManager)
-	if err != nil {
+	if err := viper.Unmarshal(configManager); err != nil {
 		panic(err)
 	}
 }
@@ -139,7 +134,9 @@ func (*ConfigManager) Version() string {
 	return APP_VERSION
 }
 
-// 获取项目根目录
+// 项目根目录
+//
+// 二进制可执行文件存放地址
 func (*ConfigManager) RootDir() string {
 	executablePath, err := os.Executable()
 	if err != nil {
@@ -148,12 +145,12 @@ func (*ConfigManager) RootDir() string {
 	return filepath.Dir(executablePath)
 }
 
-// 获取配置文件目录
+// 配置文件目录
 func (configManager *ConfigManager) ConfigDir() string {
 	return filepath.Join(configManager.RootDir(), "config")
 }
 
-// 获取配置文件路径
+// 配置文件路径
 func (configManager *ConfigManager) ConfigPath() string {
 	return filepath.Join(configManager.ConfigDir(), "config.yaml")
 }
@@ -163,17 +160,19 @@ func (configManager *ConfigManager) LogDir() string {
 	return filepath.Join(configManager.RootDir(), "logs")
 }
 
-// 获取访问日志文件路径
+// 访问日志文件路径
 func (configManager *ConfigManager) AccessLogPath() string {
 	return filepath.Join(configManager.LogDir(), "access.log")
 }
 
-// 获取服务日志文件路径
+// 服务日志文件路径
 func (configManager *ConfigManager) ServiceLogPath() string {
 	return filepath.Join(configManager.LogDir(), "service.log")
 }
 
-// 获取静态资源文件目录
+// 静态资源文件目录
+//
+// 用户自定义静态文件存放地址
 func (configManager *ConfigManager) StaticDir() string {
 	return filepath.Join(configManager.RootDir(), "static")
 }
