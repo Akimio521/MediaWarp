@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"MediaWarp/pkg"
 	"bytes"
 	"fmt"
 	"net/http"
@@ -148,7 +147,7 @@ var cacheKeyIgnoreHeaders = []string{
 
 // 得到请求的CacheKey
 //
-// 计算方式: 取出 请求方法（method）， 请求路径（path），请求头（header），请求体（body）转换成字符串之后字典排序,再进行MD5Hash编码
+// 计算方式: 取出 请求方法（method）， 请求路径（path），请求头（header），请求体（body）转换成字符串之后字典排序
 func getCacheKey(ctx *gin.Context) string {
 	var (
 		method    string      = ctx.Request.Method      // 请求方法
@@ -183,7 +182,7 @@ func getCacheKey(ctx *gin.Context) string {
 		headerStr += fmt.Sprintf("%s=%s;", key, strings.Join(header[key], "|"))
 	}
 
-	return pkg.MD5Hash(method + path + queryStr + headerStr)
+	return method + path + queryStr + headerStr
 }
 
 // 缓存正则表达式和缓存时间对

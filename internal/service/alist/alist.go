@@ -27,7 +27,7 @@ type AlistServer struct {
 
 // 得到缓存SpaceName
 func (alistServer *AlistServer) Init() {
-	alistServer.sapaceName = pkg.MD5Hash(alistServer.GetEndpoint() + alistServer.GetUsername() + alistServer.password)
+	alistServer.sapaceName = alistServer.GetEndpoint() + alistServer.GetUsername() + alistServer.password
 }
 
 // 得到服务器入口
