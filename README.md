@@ -63,11 +63,12 @@ MediaWarp 是**前置于EmbyServer的API服务器**，修改了原版EmbyServer�
 - [x] 提供多种Web前端样式
 - [x] AlistStrm实现302重定向
 - [x] 嵌入一些实用的JavaScript方便使用
-- [ ] 缓存图片、字幕提高性能
+- [x] 缓存图片、字幕提高性能
 - [ ] 利用Redis做数据缓存
+- [ ] 适配Jellyfin
+- [ ] 多服务器转码推流
 - [ ] 利用Mysql/PostgreSQL/Redis优化Infuse媒体库模式下扫库体验
 - [ ] 多服务器负载均衡
-- [ ] 多服务器转码推流
 
 # 相关文档
 - [更新日志](./docs/UpdateLog.md)
