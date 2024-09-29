@@ -1,12 +1,18 @@
 package config
 
-var cfg ConfigManager // 全局配置实例
+var cfg *ConfigManager // 全局配置实例
 
-func init() {
-	cfg.Init()
+// 实例化一个ConfigManager对象
+func NewConfig() *ConfigManager {
+	cm := ConfigManager{}
+	cm.Init()
+	return &cm
 }
 
-// 获取配置
+// 获取全局ConfigManager对象
 func GetConfig() *ConfigManager {
-	return &cfg
+	if cfg == nil {
+		cfg = NewConfig()
+	}
+	return cfg
 }
