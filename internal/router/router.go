@@ -22,10 +22,12 @@ func InitRouter() *gin.Engine {
 	{
 		static := mediawarpRouter.Group("/static")
 		{
-			if cfg.Web.Enable && cfg.Web.Static {
-				static.Static("/custom ", cfg.StaticDir())
+			if cfg.Web.Enable {
+				static.StaticFS("/embedded", http.FS(assets.EmbeddedStaticAssets))
+				if cfg.Web.Custom {
+					static.Static("/custom", cfg.StaticDir())
+				}
 			}
-			static.StaticFS("/embedded", http.FS(assets.EmbeddedStaticAssets))
 		}
 	}
 

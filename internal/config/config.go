@@ -33,15 +33,15 @@ type BaseLoggerSetting struct {
 
 // Web前端自定义设置
 type WebSetting struct {
-	Enable            bool
-	Static            bool
-	Index             bool
-	Head              bool
-	ExternalPlayerUrl bool
-	ActorPlus         bool
-	FanartShow        bool
-	Danmaku           bool
-	BeautifyCSS       bool
+	Enable            bool   // 启用自定义前端设置
+	Custom            bool   // 启用用户自定义静态资源
+	Index             bool   // 是否从static目录读取index.html文件作为首页
+	Head              string // 添加到index.html的HEAD中
+	ExternalPlayerUrl bool   // 是否开启外置播放器
+	ActorPlus         bool   // 过滤没有头像的演员和制作人员
+	FanartShow        bool   // 显示同人图（fanart图）
+	Danmaku           bool   // Web显示弹幕
+	BeautifyCSS       bool   // Emby美化CSS样式
 }
 
 // 客户端User-Agent过滤设置
