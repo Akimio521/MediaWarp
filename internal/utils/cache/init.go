@@ -1,8 +1,8 @@
-package cacheutils
+package cache
 
 import (
 	"MediaWarp/constants"
-	"MediaWarp/internal/utils/cacheutils/memory"
+	"MediaWarp/internal/utils/cache/memory"
 )
 
 var (

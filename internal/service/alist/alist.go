@@ -1,7 +1,7 @@
 package alist
 
 import (
-	"MediaWarp/internal/utils/cacheutils"
+	"MediaWarp/internal/utils/cache"
 	"MediaWarp/pkg"
 	"encoding/json"
 	"errors"
@@ -21,7 +21,7 @@ type AlistServer struct {
 	endpoint   string
 	username   string
 	password   string
-	cache      cacheutils.Cache
+	cache      cache.Cache
 	sapaceName string
 }
 
@@ -178,7 +178,7 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 }
 
 // 获得AlistServer实例
-func New(addr string, username string, password string, cache cacheutils.Cache) *AlistServer {
+func New(addr string, username string, password string, cache cache.Cache) *AlistServer {
 	return &AlistServer{
 		endpoint: pkg.GetEndpoint(addr),
 		username: username,

@@ -3,7 +3,7 @@ package config
 import (
 	"MediaWarp/constants"
 	"MediaWarp/internal/service"
-	"MediaWarp/internal/utils/cacheutils"
+	"MediaWarp/internal/utils/cache"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -74,7 +74,7 @@ type AlistStrmSetting struct {
 type ConfigManager struct {
 	Port         int
 	CacheType    constants.CacheType
-	Cache        cacheutils.Cache
+	Cache        cache.Cache
 	MeidaServer  MeidaServerSetting
 	Logger       LoggerSetting
 	Web          WebSetting
@@ -99,7 +99,7 @@ func (configManager *ConfigManager) loadConfig() {
 
 	configManager.MeidaServer.Type = constants.MediaServerType(vip.GetString("Server.Type"))
 	configManager.CacheType = constants.CacheType(vip.GetString("Cache.Type"))
-	configManager.Cache = cacheutils.GetCache(configManager.CacheType)
+	configManager.Cache = cache.GetCache(configManager.CacheType)
 
 	err = vip.Unmarshal(configManager)
 	if err != nil {

@@ -1,4 +1,4 @@
-package cacheutils
+package cache
 
 import "time"
 

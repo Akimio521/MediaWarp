@@ -2,7 +2,7 @@ package service
 
 import (
 	"MediaWarp/internal/service/alist"
-	"MediaWarp/internal/utils/cacheutils"
+	"MediaWarp/internal/utils/cache"
 	"MediaWarp/pkg"
 	"sync"
 )
@@ -14,7 +14,7 @@ var (
 // 注册Alist服务器
 //
 // 将Alist服务器注册到全局Map中
-func RegisterAlistServer(addr string, username string, password string, cache cacheutils.Cache) {
+func RegisterAlistServer(addr string, username string, password string, cache cache.Cache) {
 	alistServer := alist.New(addr, username, password, cache)
 	alistServer.Init()
 	alistSeverMap.Store(alistServer.GetEndpoint(), alistServer)
