@@ -7,10 +7,11 @@ import (
 	"strings"
 )
 
+var removeColorCodesRegexp = regexp.MustCompile(`\033\[[0-9]*m`)
+
 // RemoveColorCodes 移除字符串中的 ANSI 颜色代码
 func RemoveColorCodes(line string) string {
-	re := regexp.MustCompile(`\033\[[0-9]*m`)
-	return re.ReplaceAllString(line, "")
+	return removeColorCodesRegexp.ReplaceAllString(line, "")
 }
 
 // 将字符串居中
