@@ -13,22 +13,21 @@ import (
 
 // 上游媒体服务器相关设置
 type MeidaServerSetting struct {
-	Type constants.MediaServerType
-	ADDR string
-	AUTH string
+	Type constants.MediaServerType // 媒体服务器类型
+	ADDR string                    // 地址
+	AUTH string                    // 认证授权KEY
 }
 
 // 日志设置
 type LoggerSetting struct {
-	Enable        bool              // 是否启用日志
 	AccessLogger  BaseLoggerSetting // 访问日志相关配置
 	ServiceLogger BaseLoggerSetting // 服务日志相关配置
 }
 
 // 基础日志配置字段
 type BaseLoggerSetting struct {
-	Enable bool // 是否启用日志
-	File   bool // 是否将日志输出到文件中
+	Console bool // 是否将日志输出到终端中
+	File    bool // 是否将日志输出到文件中
 }
 
 // Web前端自定义设置
