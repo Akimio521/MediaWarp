@@ -6,11 +6,11 @@ import (
 	"MediaWarp/internal/service/emby"
 	"MediaWarp/pkg"
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
-	"path/filepath"
+	"path"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -45,7 +45,7 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 	}
 
 	if cfg.Web.Enable {
-		if cfg.Web.Index || cfg.Web.Head || cfg.Web.ExternalPlayerUrl || cfg.Web.BeautifyCSS {
+		if cfg.Web.Index || cfg.Web.Head != "" || cfg.Web.ExternalPlayerUrl || cfg.Web.BeautifyCSS {
 			embyRouterRules = append(embyRouterRules,
 				RegexpRouteRule{
 					Regexp:  regexp.MustCompile(`^/web/index.html$`),
@@ -103,12 +103,8 @@ func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayerHandler(ctx *gin
 			return err
 		}
 
-		modifiedBody := strings.ReplaceAll(string(body), `mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`, "null") // 修改响应体
-		rw.Body = io.NopCloser(bytes.NewBuffer([]byte(modifiedBody)))                                                                // 重置响应体
-
-		// 更新 Content-Length 头
-		rw.ContentLength = int64(len(modifiedBody))
-		rw.Header.Set("Content-Length", string(len(modifiedBody)))
+		modifiedBodyStr := strings.ReplaceAll(string(body), `mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`, "null") // 修改响应体
+		updateBody(rw, modifiedBodyStr)
 		return nil
 	}
 
@@ -118,87 +114,58 @@ func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayerHandler(ctx *gin
 // 首页处理方法
 func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 	var (
-		htmlFilePath   string = filepath.Join(cfg.StaticDir(), "index.html")
-		headFilePath   string = filepath.Join(cfg.StaticDir(), "head")
-		isFile         bool
-		err            error
-		htmlContent    []byte
-		headContent    []byte
-		retHtmlContent string
+		htmlFilePath    string = path.Join(cfg.StaticDir(), "index.html")
+		modifiedBodyStr string
+		addHEAD         string
 	)
+	if !cfg.Web.Enable { //直接转发相关请求
+		embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
+	} else { // 修改请求
+		proxy := embyServerHandler.server.GetReverseProxy()
+		proxy.ModifyResponse = func(rw *http.Response) error {
 
-	if cfg.Web.Index { // 自定义首页
-		isFile, err = pkg.IsFile(htmlFilePath)
-		if err != nil {
-			logger.ServiceLogger.Warning("判断路径是否为文件出错，错误信息：", err)
-			isFile = false
-		}
-
-		if isFile {
-			logger.ServiceLogger.Debug(htmlFilePath, "存在并且是文件")
-			htmlContent, err = pkg.GetFileContent(htmlFilePath)
-			if err != nil {
-				logger.ServiceLogger.Warning("读取文件内容出错，使用回源策略，错误信息：", err)
+			if !cfg.Web.Index { // 从上游获取响应体
+				body, err := io.ReadAll(rw.Body)
+				defer rw.Body.Close()
+				if err != nil {
+					return err
+				}
+				modifiedBodyStr = string(body)
+			} else { // 从本地文件读取index.html
+				htmlContent, err := pkg.GetFileContent(htmlFilePath)
+				if err != nil {
+					logger.ServiceLogger.Warning("读取文件内容出错，错误信息：", err)
+					return err
+				} else {
+					modifiedBodyStr = string(htmlContent)
+				}
 			}
-		}
-	}
-	if len(htmlContent) == 0 { // 未启用自定义首页或自定义首页文件内容读取失败
-		logger.ServiceLogger.Debug("请求上游EmbyServer获取HTML内容")
-		htmlContent, err = embyServerHandler.server.GetIndexHtml()
-		if err != nil {
-			logger.ServiceLogger.Warning("请求上游EmbyServer获取HTML内容失败，使用回源策略，错误信息：", err)
-		}
-	}
 
-	if len(htmlContent) == 0 {
-		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
-		return
-	}
-
-	if cfg.Web.Head { // 自定义HEAD
-		isFile, err = pkg.IsFile(headFilePath)
-		if err != nil {
-			logger.ServiceLogger.Warning("判断路径是否为文件出错，错误信息：", err)
-			isFile = false
-		}
-
-		if isFile {
-			headContent, err = pkg.GetFileContent(headFilePath)
-			if err != nil {
-				logger.ServiceLogger.Warning("读取文件内容出错，不添加额外HEAD，错误信息：", err)
+			if cfg.Web.Head != "" { // 用户自定义HEAD
+				addHEAD += cfg.Web.Head + "\n"
 			}
-		} else {
-			logger.ServiceLogger.Debug(headFilePath, "不存在或不是文件")
+			if cfg.Web.ExternalPlayerUrl { // 外部播放器
+				addHEAD += `<script src="/MediaWarp/static/embedded/js/ExternalPlayerUrl.js"></script>` + "\n"
+			}
+			if cfg.Web.ActorPlus { // 过滤没有头像的演员和制作人员
+				addHEAD += `<script src="/MediaWarp/static/embedded/js/ActorPlus.js"></script>` + "\n"
+			}
+			if cfg.Web.FanartShow { // 显示同人图（fanart图）
+				addHEAD += `<script src="/MediaWarp/static/embedded/js/FanartShow.js"></script>` + "\n"
+			}
+			if cfg.Web.Danmaku { // 弹幕
+				addHEAD += `<script src="https://cdn.jsdelivr.net/gh/RyoLee/emby-danmaku@gh-pages/ede.user.js" defer></script>` + "\n"
+			}
+
+			if cfg.Web.BeautifyCSS { // 美化CSS
+				addHEAD += `<link rel="stylesheet" href="/MediaWarp/static/embedded/css/Beautify.css" type="text/css" media="all" />` + "\n"
+			}
+			modifiedBodyStr = strings.Replace(modifiedBodyStr, "</head>", addHEAD+"</head>", 1) // 将添加HEAD
+			updateBody(rw, modifiedBodyStr)
+			return nil
 		}
+		proxy.ServeHTTP(ctx.Writer, ctx.Request)
 	}
-
-	if len(headContent) == 0 {
-		retHtmlContent = string(htmlContent)
-	} else {
-		retHtmlContent = strings.Replace(string(htmlContent), "</head>", string(headContent)+"\n"+"</head>", 1)
-	}
-
-	if cfg.Web.ExternalPlayerUrl { // 外部播放器
-		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/static/embedded/js/ExternalPlayerUrl.js"></script>`+"\n"+"</head>", 1)
-	}
-	if cfg.Web.ActorPlus { // 过滤没有头像的演员和制作人员
-		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/static/embedded/js/ActorPlus.js"></script>`+"\n"+"</head>", 1)
-	}
-	if cfg.Web.FanartShow { // 显示同人图（fanart图）
-		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<script src="/MediaWarp/static/embedded/js/FanartShow.js"></script>`+"\n"+"</head>", 1)
-	}
-	if cfg.Web.Danmaku { // 弹幕
-		retHtmlContent = strings.Replace(retHtmlContent, "</body>", `<script src="https://cdn.jsdelivr.net/gh/RyoLee/emby-danmaku@gh-pages/ede.user.js" defer></script>`+"\n"+"</body>", 1)
-	}
-
-	if cfg.Web.BeautifyCSS { // 美化CSS
-		retHtmlContent = strings.Replace(retHtmlContent, "</head>", `<link rel="stylesheet" href="/MediaWarp/static/embedded/css/Beautify.css" type="text/css" media="all" />`+"\n"+"</head>", 1)
-	}
-
-	ctx.Header("Content-Type", "text/html; charset=UTF-8")
-	ctx.Header("Content-Length", fmt.Sprintf("%d", len(retHtmlContent)))
-	ctx.Header("expires", "-1")
-	ctx.String(http.StatusOK, retHtmlContent)
 }
 
 // 获取302重定向URL
@@ -261,4 +228,16 @@ func getAlistStrmRedirect(mediasource *emby.MediaSourceInfo, item *emby.BaseItem
 	}
 	logger.ServiceLogger.Info("未匹配AlistStrm路径：", *item.Path)
 	return ""
+}
+
+// 更新响应体
+//
+// 修改响应体、更新Content-Length
+func updateBody(rw *http.Response, s string) {
+	rw.Body = io.NopCloser(bytes.NewBuffer([]byte(s))) // 重置响应体
+
+	// 更新 Content-Length 头
+	rw.ContentLength = int64(len(s))
+	rw.Header.Set("Content-Length", strconv.Itoa(len(s)))
+
 }
