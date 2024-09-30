@@ -13,10 +13,10 @@ import (
 )
 
 // 上游媒体服务器相关设置
-type MeidaServerSetting struct {
+type MediaServerSetting struct {
 	Type constants.MediaServerType // 媒体服务器类型
-	ADDR string                    // 地址
-	AUTH string                    // 认证授权KEY
+	Addr string                    // 地址
+	Auth string                    // 认证授权KEY
 }
 
 // 日志设置
@@ -59,7 +59,7 @@ type HTTPStrmSetting struct {
 
 // AlistStrm具体设置
 type AlistSetting struct {
-	ADDR       string
+	Addr       string
 	Username   string
 	Password   string
 	PrefixList []string
@@ -72,15 +72,14 @@ type AlistStrmSetting struct {
 }
 
 type ConfigManager struct {
-	Port         int                 // MediaWarp开放端口
+	Port         int                 // MediaWarp 监听端口
 	CacheType    constants.CacheType // 缓存类型
-	Cache        cache.Cache         // 全局缓存接口
-	MeidaServer  MeidaServerSetting  // 上游媒体服务器设置
+	MediaServer  MediaServerSetting  // 上游媒体服务器设置
 	Logger       LoggerSetting       // 日志设置
 	Web          WebSetting          // Web服务器设置
 	ClientFilter ClientFilterSetting // 客户端过滤设置
-	HTTPStrm     HTTPStrmSetting     // HTTPSTRM设置
-	AlistStrm    AlistStrmSetting    // AlistStrm设置
+	HTTPStrm     HTTPStrmSetting     // HttpStrm 设置
+	AlistStrm    AlistStrmSetting    // AlistStrm 设置
 }
 
 // 读取并解析配置文件
@@ -91,11 +90,6 @@ func (configManager *ConfigManager) loadConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)
 	}
-
-	configManager.MeidaServer.Type = constants.MediaServerType(viper.GetString("Server.Type"))
-	configManager.CacheType = constants.CacheType(viper.GetString("Cache.Type"))
-
-	configManager.Cache = cache.GetCache(configManager.CacheType)
 
 	if err := viper.Unmarshal(configManager); err != nil {
 		panic(err)
@@ -117,8 +111,9 @@ func (configManager *ConfigManager) createDir() {
 
 // 注册Alist服务器
 func (configManager *ConfigManager) registerAlistServer() {
+	cacheService := cache.GetCache(configManager.CacheType)
 	for _, alistConfig := range configManager.AlistStrm.List {
-		service.RegisterAlistServer(alistConfig.ADDR, alistConfig.Username, alistConfig.Password, configManager.Cache)
+		service.RegisterAlistServer(alistConfig.Addr, alistConfig.Username, alistConfig.Password, cacheService)
 	}
 }
 
