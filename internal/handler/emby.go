@@ -23,7 +23,7 @@ type EmbyServerHandler struct {
 
 // 初始化
 func (embyServerHandler *EmbyServerHandler) Init() {
-	embyServerHandler.server = emby.New(cfg.MeidaServer.ADDR, cfg.MeidaServer.AUTH)
+	embyServerHandler.server = emby.New(cfg.MediaServer.Addr, cfg.MediaServer.Auth)
 }
 
 // 转发请求至上游服务器
@@ -210,7 +210,7 @@ func getAlistStrmRedirect(mediasource *emby.MediaSourceInfo, item *emby.BaseItem
 		for _, perfix := range alistStrmConfig.PrefixList {
 			if strings.HasPrefix(*item.Path, perfix) {
 				alistPath = *mediasource.Path                              // 获取Strm文件中的AlistPath
-				alistServer = service.GetAlistServer(alistStrmConfig.ADDR) // 获取AlistServer，无需重新生成实例
+				alistServer = service.GetAlistServer(alistStrmConfig.Addr) // 获取AlistServer，无需重新生成实例
 				logger.ServiceLogger.Debug(*item.Path, "匹配AlistStrm路径：", perfix, "成功")
 				break
 			}
