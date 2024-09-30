@@ -3,6 +3,7 @@ config/config.yaml
 *.log
 /static/*
 !/static/.gitkeep
+.idea
 
 # 执行文件
 bin/*

@@ -15,7 +15,7 @@ type MediaServerHandler interface {
 var mediaServerHandler MediaServerHandler
 
 func init() {
-	switch cfg.MeidaServer.Type {
+	switch cfg.MediaServer.Type {
 	case constants.EMBY:
 		mediaServerHandler = &EmbyServerHandler{}
 	default:
