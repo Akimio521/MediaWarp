@@ -22,7 +22,7 @@ jobs:
       - name: APP Version
         id: get-version
         run: |
-          APP_VERSION=$(cat core/version.go | sed -ne 's/const\sAPP_VERSION\sstring\s=\s"v\(.*\)"/\1/gp')
+          APP_VERSION=$(cat internal/config/version.go | sed -ne 's/const\sAPP_VERSION\sstring\s=\s"v\(.*\)"/\1/gp')
           echo "检测到版本号为 $APP_VERSION"
           echo "app_version=$APP_VERSION" >> "$GITHUB_OUTPUT"
 
