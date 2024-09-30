@@ -19,7 +19,7 @@ Logger:                                     # 日志设定
 
 Web:                                        # Web页面修改相关设置
   Enable: True                              # 总开关
-  Static: True                              # 是否加载自定义静态资源
+  Custom: True                              # 是否加载自定义静态资源
   Index: True                               # 是否从static目录读取index.html文件 
   Head: |                                   # 是否添加自定义字段到index.html的HEAD中
     <script src="/MediaWarp/static/custom/emby-front-end-mod/actor-plus.js"></script>
