@@ -40,11 +40,11 @@ jobs:
 
         - name: Build Binary for ${{ matrix.os }}-${{ matrix.arch }}
           run: |
-            GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o ${{ env.BINARY_DIR }}/${{ env.APP_NAME }}-v${{ env.APP_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
+            GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o ${{ env.BINARY_DIR }}/${{ env.APP_NAME }}-${{ env.APP_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
 
         - name: Upload Binary
           uses: actions/upload-artifact@v4
           with:
-            name: ${{ env.APP_NAME }}-v${{ env.APP_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
-            path: ${{ env.BINARY_DIR }}/${{ env.APP_NAME }}-v${{ env.APP_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
+            name: ${{ env.APP_NAME }}-${{ env.APP_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
+            path: ${{ env.BINARY_DIR }}/${{ env.APP_NAME }}-${{ env.APP_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
 
