@@ -1,7 +1,7 @@
 Port: 9000                                  # MideWarp监听端口
 
-MeidaServer:                                # 媒体服务器相关设置
-  TYPE: Emby                                # 媒体服务器类型（可选选项：Emby）
+MediaServer:                                # 媒体服务器相关设置
+  Type: Emby                                # 媒体服务器类型（可选选项：Emby）
   ADDR: http://127.0.0.1:8096               # 媒体服务器地址
   AUTH: 2eaxxxxxxxxxa8                      # 媒体服务器认证方式
 
@@ -9,7 +9,7 @@ Cache:                                      # 缓存设置
   Type: Memory                              # 缓存类型（可选项：Memory内存缓存）
 
 Logger:                                     # 日志设定
-  AccessLogger                              # 访问日志设定
+  AccessLogger:                             # 访问日志设定
     Console: True                           # 是否将访问日志文件输出到终端中
     File: False                             # 是否将访问日志文件记录到文件中
   ServiceLogger:                            # 服务日志设定

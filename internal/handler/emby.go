@@ -23,7 +23,7 @@ type EmbyServerHandler struct {
 
 // 初始化
 func (embyServerHandler *EmbyServerHandler) Init() {
-	embyServerHandler.server = emby.New(cfg.MeidaServer.ADDR, cfg.MeidaServer.AUTH)
+	embyServerHandler.server = emby.New(cfg.MediaServer.ADDR, cfg.MediaServer.AUTH)
 }
 
 // 转发请求至上游服务器

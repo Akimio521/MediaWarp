@@ -13,7 +13,7 @@ import (
 )
 
 // 上游媒体服务器相关设置
-type MeidaServerSetting struct {
+type MediaServerSetting struct {
 	Type constants.MediaServerType // 媒体服务器类型
 	ADDR string                    // 地址
 	AUTH string                    // 认证授权KEY
@@ -75,7 +75,7 @@ type ConfigManager struct {
 	Port         int                 // MediaWarp开放端口
 	CacheType    constants.CacheType // 缓存类型
 	Cache        cache.Cache         // 全局缓存接口
-	MeidaServer  MeidaServerSetting  // 上游媒体服务器设置
+	MediaServer  MediaServerSetting  // 上游媒体服务器设置
 	Logger       LoggerSetting       // 日志设置
 	Web          WebSetting          // Web服务器设置
 	ClientFilter ClientFilterSetting // 客户端过滤设置
@@ -92,7 +92,7 @@ func (configManager *ConfigManager) loadConfig() {
 		panic(err)
 	}
 
-	configManager.MeidaServer.Type = constants.MediaServerType(viper.GetString("Server.Type"))
+	configManager.MediaServer.Type = constants.MediaServerType(viper.GetString("Server.Type"))
 	configManager.CacheType = constants.CacheType(viper.GetString("Cache.Type"))
 
 	configManager.Cache = cache.GetCache(configManager.CacheType)
