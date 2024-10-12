@@ -1,21 +1,20 @@
 Port: 9000                                  # MideWarp监听端口
 
-MeidaServer:                                # 媒体服务器相关设置
-  TYPE: Emby                                # 媒体服务器类型（可选选项：Emby）
-  ADDR: http://127.0.0.1:8096               # 媒体服务器地址
-  AUTH: 2eaxxxxxxxxxa8                      # 媒体服务器认证方式
+MediaServer:                                # 媒体服务器相关设置
+  Type: Emby                                # 媒体服务器类型（可选选项：Emby）
+  Addr: http://127.0.0.1:8096               # 媒体服务器地址
+  Auth: 2eaxxxxxxxxxa8                      # 媒体服务器认证方式
 
 Cache:                                      # 缓存设置
   Type: Memory                              # 缓存类型（可选项：Memory内存缓存）
 
 Logger:                                     # 日志设定
-  AccessLogger                              # 访问日志设定
+  AccessLogger:                             # 访问日志设定
     Console: True                           # 是否将访问日志文件输出到终端中
     File: False                             # 是否将访问日志文件记录到文件中
   ServiceLogger:                            # 服务日志设定
     Console: True                           # 是否将服务日志文件输出到终端中
     File: True                              # 是否将服务日志文件记录到文件中
-
 
 Web:                                        # Web页面修改相关设置
   Enable: True                              # 总开关
@@ -52,13 +51,13 @@ HTTPStrm:
 AlistStrm:                                  # AlistStrm相关配置（Strm文件内容是Alist上文件的路径，目前仅支持适配Alist V3）
   Enable: True                              # 是否启用AlistStrm重定向
   List:                                     # Alist服务关配置列表
-    - ADDR: http://192.168.1.100:5244       # Alist服务器地址（MediaWarp可以正常访问到就可以）
+    - Addr: http://192.168.1.100:5244       # Alist服务器地址（MediaWarp可以正常访问到就可以）
       Username: admin                       # Alist服务器账号
       Password: adminadmin                  # Alist服务器密码
       PrefixList:                           # EmbyServer中Strm文件的前缀（符合该前缀的Strm文件都会路由到该规则下）
         - /media/strm/MyAlist               # 同一个Alist可以有多个前缀规则
         - /mnt/cd2/strm
-    - ADDR: https://xiaoya.com              # 可以填写多个配置
+    - Addr: https://xiaoya.com              # 可以填写多个配置
       Username: admin
       Password: adminadmin
       PrefixList: 
