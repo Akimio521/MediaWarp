@@ -1,7 +1,7 @@
 package alist
 
 import (
-	"MediaWarp/internal/utils/cache"
+	"MediaWarp/internal/cache"
 	"MediaWarp/pkg"
 	"encoding/json"
 	"errors"
@@ -12,16 +12,12 @@ import (
 	"time"
 )
 
-type CacheItem struct {
-	Data   interface{}
-	Expiry time.Time
-}
+var cacheManager cache.CacheManager = cache.GetCacheManager()
 
 type AlistServer struct {
 	endpoint   string
 	username   string
 	password   string
-	cache      cache.Cache
 	sapaceName string
 }
 
@@ -53,7 +49,8 @@ func (alistServer *AlistServer) getToken() (string, error) {
 		token         string
 		cacheDuration = 48*time.Hour - 5*time.Minute // Alist v3 Token默认有效期为2天，5分钟作为误差
 	)
-	cacheToken, found := alistServer.cache.GetCache(alistServer.sapaceName, cacheKey)
+
+	cacheToken, found := cacheManager.GetCache(alistServer.sapaceName, cacheKey)
 	if found { // 找到token
 		token = cacheToken.(string)
 		return token, nil
@@ -64,7 +61,7 @@ func (alistServer *AlistServer) getToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	go alistServer.cache.UpdateCache(alistServer.sapaceName, cacheKey, token, cacheDuration) // 将新生成的token添加到缓存池中
+	go cacheManager.UpdateCache(alistServer.sapaceName, cacheKey, token, cacheDuration) // 将新生成的token添加到缓存池中
 
 	return token, nil
 }
@@ -128,7 +125,7 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 		payload           = strings.NewReader(fmt.Sprintf(`{"path": "%s","password": "","page": 1,"per_page": 0,"refresh": false}`, path))
 	)
 
-	cacheData, found := alistServer.cache.GetCache(alistServer.sapaceName, cacheKey)
+	cacheData, found := cacheManager.GetCache(alistServer.sapaceName, cacheKey)
 	if found { // 在缓存中查询到数据
 		fsGetData := cacheData.(FsGetData)
 		return fsGetData, nil
@@ -173,16 +170,15 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 		return fsGetDataResponse.Data, err
 	}
 
-	go alistServer.cache.UpdateCache(alistServer.sapaceName, cacheKey, fsGetDataResponse.Data, cacheDuration)
+	go cacheManager.UpdateCache(alistServer.sapaceName, cacheKey, fsGetDataResponse.Data, cacheDuration)
 	return fsGetDataResponse.Data, nil
 }
 
 // 获得AlistServer实例
-func New(addr string, username string, password string, cache cache.Cache) *AlistServer {
+func New(addr string, username string, password string) *AlistServer {
 	return &AlistServer{
 		endpoint: pkg.GetEndpoint(addr),
 		username: username,
 		password: password,
-		cache:    cache,
 	}
 }

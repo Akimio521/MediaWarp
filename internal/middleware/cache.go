@@ -41,8 +41,8 @@ func Cache() gin.HandlerFunc {
 		}
 
 		// 缓存逻辑
-		cacheKey := getCacheKey(ctx)                               // 计算缓存Key
-		cacheData, ok := cfg.Cache.GetCache("GIN-Cache", cacheKey) // 查询缓存记录
+		cacheKey := getCacheKey(ctx)                                  // 计算缓存Key
+		cacheData, ok := cacheManager.GetCache("GIN-Cache", cacheKey) // 查询缓存记录
 		logger.ServiceLogger.Debug("GIN-Cache：", "OK:", ok, ",KEY:", cacheKey)
 
 		if ok { // 缓存存在，直接返回缓存数据
@@ -66,7 +66,7 @@ func Cache() gin.HandlerFunc {
 					Header:     ctx.Writer.Header().Clone(),
 					Body:       customWirter.body.Bytes(),
 				}
-				go cfg.Cache.UpdateCache("GIN-Cache", cacheKey, responseCacheData, cacheDuration)
+				go cacheManager.UpdateCache("GIN-Cache", cacheKey, responseCacheData, cacheDuration)
 			}
 		}
 	}

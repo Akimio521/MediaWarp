@@ -1,21 +1,31 @@
 package service
 
 import (
+	"MediaWarp/internal/config"
 	"MediaWarp/internal/service/alist"
-	"MediaWarp/internal/utils/cache"
+
 	"MediaWarp/pkg"
 	"sync"
 )
 
 var (
 	alistSeverMap sync.Map
+	cfg           *config.ConfigManager = config.GetConfig()
 )
+
+func init() {
+	if cfg.AlistStrm.Enable {
+		for _, alist := range cfg.AlistStrm.List {
+			registerAlistServer(alist.ADDR, alist.Username, alist.Password)
+		}
+	}
+}
 
 // 注册Alist服务器
 //
 // 将Alist服务器注册到全局Map中
-func RegisterAlistServer(addr string, username string, password string, cache cache.Cache) {
-	alistServer := alist.New(addr, username, password, cache)
+func registerAlistServer(addr string, username string, password string) {
+	alistServer := alist.New(addr, username, password)
 	alistServer.Init()
 	alistSeverMap.Store(alistServer.GetEndpoint(), alistServer)
 }

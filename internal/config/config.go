@@ -2,8 +2,6 @@ package config
 
 import (
 	"MediaWarp/constants"
-	"MediaWarp/internal/service"
-	"MediaWarp/internal/utils/cache"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -74,7 +72,6 @@ type AlistStrmSetting struct {
 type ConfigManager struct {
 	Port         int                 // MediaWarp开放端口
 	CacheType    constants.CacheType // 缓存类型
-	Cache        cache.Cache         // 全局缓存接口
 	MediaServer  MediaServerSetting  // 上游媒体服务器设置
 	Logger       LoggerSetting       // 日志设置
 	Web          WebSetting          // Web服务器设置
@@ -95,8 +92,6 @@ func (configManager *ConfigManager) loadConfig() {
 	configManager.MediaServer.Type = constants.MediaServerType(viper.GetString("Server.Type"))
 	configManager.CacheType = constants.CacheType(viper.GetString("Cache.Type"))
 
-	configManager.Cache = cache.GetCache(configManager.CacheType)
-
 	if err := viper.Unmarshal(configManager); err != nil {
 		panic(err)
 	}
@@ -115,18 +110,10 @@ func (configManager *ConfigManager) createDir() {
 	}
 }
 
-// 注册Alist服务器
-func (configManager *ConfigManager) registerAlistServer() {
-	for _, alistConfig := range configManager.AlistStrm.List {
-		service.RegisterAlistServer(alistConfig.ADDR, alistConfig.Username, alistConfig.Password, configManager.Cache)
-	}
-}
-
 // 初始化configManager
 func (configManager *ConfigManager) Init() {
 	configManager.loadConfig()
 	configManager.createDir()
-	configManager.registerAlistServer()
 }
 
 // 获取版本号
