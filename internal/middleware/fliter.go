@@ -10,11 +10,6 @@ import (
 // 客户端过滤器
 func ClientFilter() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if !cfg.ClientFilter.Enable { // 未启用客户端过滤器
-			ctx.Next()
-			return
-		}
-
 		userAgent := ctx.Request.UserAgent()
 		var allowed bool
 		if userAgent == "" { // 开启了客户端过滤器后禁止所有未提供User-Agent的链接

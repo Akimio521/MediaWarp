@@ -15,7 +15,13 @@ func InitRouter() *gin.Engine {
 	ginR.Use(middleware.QueryCaseInsensitive())
 	ginR.Use(middleware.SetRefererPolicy(constants.SAME_ORIGIN))
 	ginR.Use(middleware.Logger())
-	ginR.Use(middleware.ClientFilter())
+
+	if cfg.ClientFilter.Enable {
+		ginR.Use(middleware.ClientFilter())
+		logger.ServiceLogger.Info("客户端过滤中间件已启用")
+	} else {
+		logger.ServiceLogger.Info("客户端过滤中间件未启用")
+	}
 
 	if cfg.Cache.WebCache {
 		ginR.Use(middleware.Cache())
