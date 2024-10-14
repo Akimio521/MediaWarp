@@ -2,7 +2,6 @@ package handler
 
 import (
 	"MediaWarp/internal/service"
-	"MediaWarp/internal/service/alist"
 	"MediaWarp/internal/service/emby"
 	"MediaWarp/pkg"
 	"bytes"
@@ -75,10 +74,41 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	item := itemResponse.Items[0]
 	for _, mediasource := range item.MediaSources {
 		if *mediasource.ID == mediaSourceID { // EmbyServer >= 4.9 返回的ID带有前缀mediasource_
-			redirectURL := getRedirctURL(&mediasource, &item)
-			if redirectURL != "" {
-				ctx.Redirect(http.StatusFound, redirectURL)
-				return
+			isRedirect := true
+
+			// HTTPStrm 处理
+			if *mediasource.Protocol == emby.HTTP && cfg.HTTPStrm.Enable {
+				for _, prefix := range cfg.HTTPStrm.PrefixList {
+					if strings.HasPrefix(*item.Path, prefix) {
+						logger.ServiceLogger.Debug(item.Path, "匹配HTTPStrm路径：", prefix, "成功")
+						logger.ServiceLogger.Info("HTTP协议Strm重定向：", *mediasource.Path)
+						ctx.Redirect(http.StatusFound, *mediasource.Path)
+						return
+					}
+				}
+				logger.ServiceLogger.Info("未匹配HTTPStrm路径：", *item.Path)
+				isRedirect = false // 未匹配到 HTTPStrm 路径，但未启用，不进行后续重定向
+			}
+
+			// AlistStrm 处理
+			if isRedirect && strings.ToUpper(*mediasource.Container) == "STRM" && cfg.AlistStrm.Enable { // 判断是否为Strm文件
+				for _, alistStrmConfig := range cfg.AlistStrm.List {
+					for _, perfix := range alistStrmConfig.PrefixList {
+						if strings.HasPrefix(*item.Path, perfix) {
+							alistServer := service.GetAlistServer(alistStrmConfig.ADDR)
+							fsGetData, err := alistServer.FsGet(*mediasource.Path)
+							if err != nil {
+								logger.ServiceLogger.Warning("请求FsGet失败：", err)
+								return
+							}
+							logger.ServiceLogger.Info("AlistStrm重定向：", fsGetData.RawURL)
+							ctx.Redirect(http.StatusFound, fsGetData.RawURL)
+							return
+						}
+					}
+				}
+				logger.ServiceLogger.Info("未匹配AlistStrm路径：", *item.Path)
+				isRedirect = false // 未匹配到 AlistStrm 路径，但未启用，不进行后续重定向
 			}
 
 			logger.ServiceLogger.Info("本地视频：", *mediasource.Path)
@@ -166,68 +196,6 @@ func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 		}
 		proxy.ServeHTTP(ctx.Writer, ctx.Request)
 	}
-}
-
-// 获取302重定向URL
-func getRedirctURL(mediasource *emby.MediaSourceInfo, item *emby.BaseItemDto) (redirectURL string) {
-	if *mediasource.Protocol == emby.HTTP && cfg.HTTPStrm.Enable { // 判断是否为http协议Strm
-		httpStrmRedirectURL := getHttpStrmRedirectURL(mediasource, item)
-		if httpStrmRedirectURL != "" {
-			return httpStrmRedirectURL
-		}
-	}
-	if strings.ToUpper(*mediasource.Container) == "STRM" { // 判断是否为Strm文件
-		if cfg.AlistStrm.Enable { // 判断是否启用AlistStrm
-			alistStrmRedirectURL := getAlistStrmRedirect(mediasource, item)
-			if alistStrmRedirectURL != "" {
-				return alistStrmRedirectURL
-			}
-		}
-	}
-	return ""
-}
-
-// Strm文件内部为标准http协议时，获取302重定向URL
-func getHttpStrmRedirectURL(mediasource *emby.MediaSourceInfo, item *emby.BaseItemDto) (url string) {
-	for _, prefix := range cfg.HTTPStrm.PrefixList {
-		if strings.HasPrefix(*item.Path, prefix) {
-			logger.ServiceLogger.Debug(*item.Path, "匹配HttpStrm路径：", prefix, "成功")
-			logger.ServiceLogger.Info("Http协议Strm重定向：", *mediasource.Path)
-			return *mediasource.Path
-		}
-	}
-	logger.ServiceLogger.Info("未匹配HttpStrm路径：", *item.Path)
-	return ""
-}
-
-// 判断是否注册为AlistStrm，获取302重定向URL
-func getAlistStrmRedirect(mediasource *emby.MediaSourceInfo, item *emby.BaseItemDto) (url string) {
-	var (
-		alistPath   string
-		alistServer *alist.AlistServer
-	)
-	for _, alistStrmConfig := range cfg.AlistStrm.List {
-		for _, perfix := range alistStrmConfig.PrefixList {
-			if strings.HasPrefix(*item.Path, perfix) {
-				alistPath = *mediasource.Path                              // 获取Strm文件中的AlistPath
-				alistServer = service.GetAlistServer(alistStrmConfig.ADDR) // 获取AlistServer，无需重新生成实例
-				logger.ServiceLogger.Debug(*item.Path, "匹配AlistStrm路径：", perfix, "成功")
-				break
-			}
-		}
-
-	}
-	if alistPath != "" { // 匹配成功
-		fsGet, err := alistServer.FsGet(alistPath)
-		if err != nil {
-			logger.ServiceLogger.Warning("请求GetFile失败：", err)
-			return ""
-		}
-		logger.ServiceLogger.Info("AlistStrm重定向：", fsGet.RawURL)
-		return fsGet.RawURL
-	}
-	logger.ServiceLogger.Info("未匹配AlistStrm路径：", *item.Path)
-	return ""
 }
 
 // 更新响应体
