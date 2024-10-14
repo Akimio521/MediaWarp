@@ -7,6 +7,7 @@ MediaServer:                                # 媒体服务器相关设置
 
 Cache:                                      # 缓存设置
   Type: Memory                              # 缓存类型（可选项：Memory内存缓存）
+  WebCache: False                           # 是否启用Web缓存中间件（若MdiaWarp离上游服务距离较近则不建议启用）
 
 Logger:                                     # 日志设定
   AccessLogger:                             # 访问日志设定
@@ -15,7 +16,6 @@ Logger:                                     # 日志设定
   ServiceLogger:                            # 服务日志设定
     Console: True                           # 是否将服务日志文件输出到终端中
     File: True                              # 是否将服务日志文件记录到文件中
-
 
 Web:                                        # Web页面修改相关设置
   Enable: True                              # 总开关

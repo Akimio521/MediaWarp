@@ -11,7 +11,7 @@ var c CacheManager
 // 获取缓存
 func GetCacheManager() CacheManager {
 	if c == nil {
-		switch config.GetConfig().CacheType {
+		switch config.GetConfig().Cache.Type {
 		case constants.MEMORY_CACHE:
 			c = &memory.MemoryCache{}
 		default:

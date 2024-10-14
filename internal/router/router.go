@@ -16,7 +16,13 @@ func InitRouter() *gin.Engine {
 	ginR.Use(middleware.SetRefererPolicy(constants.SAME_ORIGIN))
 	ginR.Use(middleware.Logger())
 	ginR.Use(middleware.ClientFilter())
-	ginR.Use(middleware.Cache())
+
+	if cfg.Cache.WebCache {
+		ginR.Use(middleware.Cache())
+		logger.ServiceLogger.Info("Web缓存中间件已启用")
+	} else {
+		logger.ServiceLogger.Info("Web缓存中间件未启用")
+	}
 
 	mediawarpRouter := ginR.Group("/MediaWarp")
 	{

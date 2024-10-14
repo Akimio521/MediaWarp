@@ -17,6 +17,12 @@ type MediaServerSetting struct {
 	AUTH string                    // 认证授权KEY
 }
 
+// 缓存相关设置
+type CacheSetting struct {
+	Type     constants.CacheType // 缓存类型
+	WebCache bool                // 是否启用Web缓存中间件
+}
+
 // 日志设置
 type LoggerSetting struct {
 	AccessLogger  BaseLoggerSetting // 访问日志相关配置
@@ -71,8 +77,8 @@ type AlistStrmSetting struct {
 
 type ConfigManager struct {
 	Port         int                 // MediaWarp开放端口
-	CacheType    constants.CacheType // 缓存类型
 	MediaServer  MediaServerSetting  // 上游媒体服务器设置
+	Cache        CacheSetting        // 缓存相关设置
 	Logger       LoggerSetting       // 日志设置
 	Web          WebSetting          // Web服务器设置
 	ClientFilter ClientFilterSetting // 客户端过滤设置
@@ -90,7 +96,7 @@ func (configManager *ConfigManager) loadConfig() {
 	}
 
 	configManager.MediaServer.Type = constants.MediaServerType(viper.GetString("Server.Type"))
-	configManager.CacheType = constants.CacheType(viper.GetString("Cache.Type"))
+	configManager.Cache.Type = constants.CacheType(viper.GetString("Cache.Type"))
 
 	if err := viper.Unmarshal(configManager); err != nil {
 		panic(err)
