@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"MediaWarp/internal/router"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -12,12 +11,13 @@ import (
 func SetUP() {
 	if isDebug {
 		logger.ServiceLogger.SetLevel(logrus.DebugLevel)
-		fmt.Println("已启用调试模式")
+		logger.ServiceLogger.Warning("已启用调试模式")
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	logger.ServiceLogger.Info("MediaWarp 监听端口：", cfg.Port)
 	ginR := router.InitRouter() // 路由初始化
-	fmt.Println("MediaWarp启动成功")
+	logger.ServiceLogger.Info("MediaWarp 启动成功")
 	ginR.Run(cfg.ListenAddr()) // 启动服务
 }
