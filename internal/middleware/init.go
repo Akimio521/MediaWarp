@@ -7,7 +7,13 @@ import (
 )
 
 var (
-	cfg          = config.GetConfig()
-	logger       = log.GetLogger()
-	cacheManager = cache.GetCacheManager()
+	cfg          *config.ConfigManager
+	logger       *log.LoggerManager
+	cacheManager cache.CacheManager
 )
+
+func init() {
+	cfg = config.GetConfig()
+	logger = log.GetLogger()
+	cacheManager = cache.GetCacheManager()
+}

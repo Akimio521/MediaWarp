@@ -10,10 +10,11 @@ import (
 
 var (
 	alistSeverMap sync.Map
-	cfg           *config.ConfigManager = config.GetConfig()
+	cfg           *config.ConfigManager
 )
 
 func init() {
+	cfg = config.GetConfig()
 	if cfg.AlistStrm.Enable {
 		for _, alist := range cfg.AlistStrm.List {
 			registerAlistServer(alist.ADDR, alist.Username, alist.Password)
@@ -39,5 +40,5 @@ func GetAlistServer(addr string) *alist.AlistServer {
 	if server, ok := alistSeverMap.Load(endpoint); ok {
 		return server.(*alist.AlistServer)
 	}
-	panic("Alist服务器：" + endpoint + "未注册")
+	panic("Alist服务器：" + endpoint + " 未注册")
 }
