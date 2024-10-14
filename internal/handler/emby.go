@@ -35,7 +35,7 @@ func (embyServerHandler *EmbyServerHandler) ReverseProxy(rw http.ResponseWriter,
 func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteRule {
 	embyRouterRules := []RegexpRouteRule{
 		{
-			Regexp:  regexp.MustCompile(`(?i)^/.*videos/.*/(stream|original)`),
+			Regexp:  regexp.MustCompile(`(?i)^/.*videos/.*`),
 			Handler: embyServerHandler.VideosHandler,
 		},
 		{
