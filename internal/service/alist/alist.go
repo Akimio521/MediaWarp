@@ -9,14 +9,20 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
 type AlistServer struct {
-	endpoint   string
-	username   string
-	password   string
-	sapaceName string
+	endpoint string // 服务器入口 URL
+	username string // 用户名
+	password string // 密码
+	token    struct {
+		value    string       // 令牌 Token
+		expireAt time.Time    // 令牌过期时间
+		mutex    sync.RWMutex // 令牌锁
+	}
+	sapaceName string // 缓存空间键 key
 }
 
 // 得到缓存SpaceName
@@ -26,40 +32,42 @@ func (alistServer *AlistServer) Init() {
 
 // 得到服务器入口
 //
-// 避免直接访问endpoint字段
+// 避免直接访问 endpoint 字段
 func (alistServer *AlistServer) GetEndpoint() string {
 	return alistServer.endpoint
 }
 
 // 得到用户名
 //
-// 避免直接访问username字段
+// 避免直接访问 username 字段
 func (alistServer *AlistServer) GetUsername() string {
 	return alistServer.username
 }
 
-// 得到一个可用的Token
+// 得到一个可用的 Token
 //
 // 先从缓存池中读取，若过期或者未找到则重新生成
 func (alistServer *AlistServer) getToken() (string, error) {
-	var (
-		cacheKey      = "API_TOKEN"
-		token         string
-		cacheDuration = 48*time.Hour - 5*time.Minute // Alist v3 Token默认有效期为2天，5分钟作为误差
-	)
+	var tokenDuration = 2*24*time.Hour - 5*time.Minute // Token 有效期为 2 天，提前 5 分钟刷新
 
-	cacheToken, found := cache.Get(alistServer.sapaceName, cacheKey)
-	if found { // 找到token
-		token = cacheToken.(string)
-		return token, nil
+	alistServer.token.mutex.RLock()
+	if alistServer.token.value != "" {
+		if time.Now().Before(alistServer.token.expireAt) { // Token 未过期
+			defer alistServer.token.mutex.RUnlock()
+			return alistServer.token.value, nil
+		}
 	}
 
-	// 未找到已缓存的token
 	token, err := alistServer.authLogin() // 重新生成一个token
+	alistServer.token.mutex.RUnlock()
 	if err != nil {
 		return "", err
 	}
-	go cache.Update(alistServer.sapaceName, cacheKey, token, cacheDuration) // 将新生成的token添加到缓存池中
+
+	alistServer.token.mutex.Lock()
+	defer alistServer.token.mutex.Unlock()
+	alistServer.token.value = token
+	alistServer.token.expireAt = time.Now().Add(tokenDuration) // Token 有效期为30分钟
 
 	return token, nil
 }
@@ -79,27 +87,27 @@ func (alistServer *AlistServer) authLogin() (string, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
 	if err != nil {
-		err = fmt.Errorf("创建%s请求失败: %w", funcInfo, err)
+		err = fmt.Errorf("创建 %s 请求失败: %w", funcInfo, err)
 		return "", err
 	}
 	req.Header.Add("Content-Type", "application/json")
 
 	res, err := client.Do(req)
 	if err != nil {
-		err = fmt.Errorf("请求%s失败: %w", funcInfo, err)
+		err = fmt.Errorf("请求 %s 失败: %w", funcInfo, err)
 		return "", err
 	}
 
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		err = fmt.Errorf("读取%s响应体失败: %w", funcInfo, err)
+		err = fmt.Errorf("读取 %s 响应体失败: %w", funcInfo, err)
 		return "", err
 	}
 
 	err = json.Unmarshal(body, &authLoginResponse)
 	if err != nil {
-		err = fmt.Errorf("解析%s响应体失败: %w", funcInfo, err)
+		err = fmt.Errorf("解析 %s 响应体失败: %w", funcInfo, err)
 		return "", err
 	}
 	if authLoginResponse.Code != 200 {
@@ -139,7 +147,7 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
-		err = fmt.Errorf("创建%s请求失败: %w", funcInfo, err)
+		err = fmt.Errorf("创建 %s 请求失败: %w", funcInfo, err)
 		return fsGetDataResponse.Data, err
 	}
 	req.Header.Add("Authorization", token)
@@ -147,20 +155,20 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		err = fmt.Errorf("请求%s信息失败: %w", funcInfo, err)
+		err = fmt.Errorf("请求 %s 信息失败: %w", funcInfo, err)
 		return fsGetDataResponse.Data, err
 	}
 
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		err = fmt.Errorf("读取%s响应体失败: %w", funcInfo, err)
+		err = fmt.Errorf("读取 %s 响应体失败: %w", funcInfo, err)
 		return fsGetDataResponse.Data, err
 	}
 
 	err = json.Unmarshal(body, &fsGetDataResponse)
 	if err != nil {
-		err = fmt.Errorf("解析%s响应体失败: %w", funcInfo, err)
+		err = fmt.Errorf("解析 %s 响应体失败: %w", funcInfo, err)
 		return fsGetDataResponse.Data, err
 	}
 	if fsGetDataResponse.Code != 200 {
