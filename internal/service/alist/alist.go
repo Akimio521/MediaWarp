@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-var cacheManager cache.CacheManager = cache.GetCacheManager()
-
 type AlistServer struct {
 	endpoint   string
 	username   string
@@ -50,7 +48,7 @@ func (alistServer *AlistServer) getToken() (string, error) {
 		cacheDuration = 48*time.Hour - 5*time.Minute // Alist v3 Token默认有效期为2天，5分钟作为误差
 	)
 
-	cacheToken, found := cacheManager.GetCache(alistServer.sapaceName, cacheKey)
+	cacheToken, found := cache.Get(alistServer.sapaceName, cacheKey)
 	if found { // 找到token
 		token = cacheToken.(string)
 		return token, nil
@@ -61,7 +59,7 @@ func (alistServer *AlistServer) getToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	go cacheManager.UpdateCache(alistServer.sapaceName, cacheKey, token, cacheDuration) // 将新生成的token添加到缓存池中
+	go cache.Update(alistServer.sapaceName, cacheKey, token, cacheDuration) // 将新生成的token添加到缓存池中
 
 	return token, nil
 }
@@ -125,7 +123,7 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 		payload           = strings.NewReader(fmt.Sprintf(`{"path": "%s","password": "","page": 1,"per_page": 0,"refresh": false}`, path))
 	)
 
-	cacheData, found := cacheManager.GetCache(alistServer.sapaceName, cacheKey)
+	cacheData, found := cache.Get(alistServer.sapaceName, cacheKey)
 	if found { // 在缓存中查询到数据
 		fsGetData := cacheData.(FsGetData)
 		return fsGetData, nil
@@ -170,7 +168,7 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 		return fsGetDataResponse.Data, err
 	}
 
-	go cacheManager.UpdateCache(alistServer.sapaceName, cacheKey, fsGetDataResponse.Data, cacheDuration)
+	go cache.Update(alistServer.sapaceName, cacheKey, fsGetDataResponse.Data, cacheDuration)
 	return fsGetDataResponse.Data, nil
 }
 
