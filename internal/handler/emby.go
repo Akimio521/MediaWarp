@@ -82,7 +82,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 			if *mediasource.Protocol == emby.HTTP && config.HTTPStrm.Enable {
 				for _, prefix := range config.HTTPStrm.PrefixList {
 					if strings.HasPrefix(*item.Path, prefix) {
-						logger.Debug(item.Path, "匹配 HTTPStrm 路径：", prefix, " 成功")
+						logger.Debug(*item.Path, " 匹配 HTTPStrm 路径：", prefix, " 成功")
 						logger.Info("HTTP 协议Strm 重定向：", *mediasource.Path)
 						ctx.Redirect(http.StatusFound, *mediasource.Path)
 						return
