@@ -1,22 +1,27 @@
 # 版本更新日志
 - 2024-8-21: v0.0.1
-  - 实现MediaWarp基本功能
+  - 实现 MediaWarp 基本功能
 - 2024-8-25: v0.0.2
   - 增加返回自定义静态资源功能
-  - 优化播放直链视频302重定向逻辑
+  - 优化播放直链视频 302 重定向逻辑
   - 增加自定义客户端过滤功能
 - 2024-9-14: v0.0.3
-  - 实现AlistStrm重定向
-  - 适配EmbyServer4.9视频播放逻辑
+  - 实现 AlistStrm 重定向
+  - 适配 EmbyServer 4.9 视频播放逻辑
   - 嵌入实用功能（外部播放器、弹幕、美化等）
   - 支持WebSocket
 - 2024-9-29: v0.0.4
-  - 优化mediaSourceID处理逻辑
-  - 使用httputil.ReverseProxy处理HTTP和WebSocket请求
+  - 优化 mediaSourceID 处理逻辑
+  - 使用 httputil.ReverseProxy 处理 HTTP 和 WebSocket 请求
   - 设置浏览器referer策略，跳转时减少服务器站点泄露
   - 使用正则表达式进行路由匹配
   - 定义缓存接口、实现内存缓存逻辑
   - 修改项目结构
-  - 用户自定义资源设为Custom、从config中读取需要额外添加的HEAD
+  - 用户自定义资源设为 Custom、从 config 中读取需要额外添加的 HEAD
   - 日志允许设置是否输出到终端或文件
   - 日志根据日期分割
+- 2024.11.1：v0.0.5
+  - 扩大 VideosHandler 匹配范围（修复 FileBall 下 Strm 文件播放问题，不完美）
+  - 中间件缓存可选是否开启（避免内存缓存缓存大量图片、css、js 等资源）
+  - 修改 internal/config、internal/logger、internal/cache 这几个包，使其使用方式更加 “golang”
+  - 支持加载多种格式的配置文件（JSON、TOML、YAML、YML、Java properties、Java props）
