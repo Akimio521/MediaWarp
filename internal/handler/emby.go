@@ -2,6 +2,7 @@ package handler
 
 import (
 	"MediaWarp/internal/config"
+	"MediaWarp/internal/logger"
 	"MediaWarp/internal/service"
 	"MediaWarp/internal/service/emby"
 	"MediaWarp/pkg"
@@ -65,11 +66,11 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	// EmbyServer >= 4.9 ====> mediaSourceID = mediasource_31
 	mediaSourceID := ctx.Query("mediasourceid")
 
-	logger.ServiceLogger.Debug("请求 ItemsServiceQueryItem：", mediaSourceID)
+	logger.Debug("请求 ItemsServiceQueryItem：", mediaSourceID)
 	itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询item需要去除前缀仅保留数字部分
 
 	if err != nil {
-		logger.ServiceLogger.Warning("请求 ItemsServiceQueryItem 失败：", err)
+		logger.Warning("请求 ItemsServiceQueryItem 失败：", err)
 		return
 	}
 	item := itemResponse.Items[0]
@@ -81,13 +82,13 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 			if *mediasource.Protocol == emby.HTTP && config.HTTPStrm.Enable {
 				for _, prefix := range config.HTTPStrm.PrefixList {
 					if strings.HasPrefix(*item.Path, prefix) {
-						logger.ServiceLogger.Debug(item.Path, "匹配 HTTPStrm 路径：", prefix, " 成功")
-						logger.ServiceLogger.Info("HTTP 协议Strm 重定向：", *mediasource.Path)
+						logger.Debug(item.Path, "匹配 HTTPStrm 路径：", prefix, " 成功")
+						logger.Info("HTTP 协议Strm 重定向：", *mediasource.Path)
 						ctx.Redirect(http.StatusFound, *mediasource.Path)
 						return
 					}
 				}
-				logger.ServiceLogger.Info("未匹配 HTTPStrm 路径：", *item.Path)
+				logger.Info("未匹配 HTTPStrm 路径：", *item.Path)
 				isRedirect = false // 未匹配到 HTTPStrm 路径，但未启用，不进行后续重定向
 			}
 
@@ -99,20 +100,20 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 							alistServer := service.GetAlistServer(alistStrmConfig.ADDR)
 							fsGetData, err := alistServer.FsGet(*mediasource.Path)
 							if err != nil {
-								logger.ServiceLogger.Warning("请求 FsGet 失败：", err)
+								logger.Warning("请求 FsGet 失败：", err)
 								return
 							}
-							logger.ServiceLogger.Info("AlistStrm 重定向：", fsGetData.RawURL)
+							logger.Info("AlistStrm 重定向：", fsGetData.RawURL)
 							ctx.Redirect(http.StatusFound, fsGetData.RawURL)
 							return
 						}
 					}
 				}
-				logger.ServiceLogger.Info("未匹配 AlistStrm 路径：", *item.Path)
+				logger.Info("未匹配 AlistStrm 路径：", *item.Path)
 				isRedirect = false // 未匹配到 AlistStrm 路径，但未启用，不进行后续重定向
 			}
 
-			logger.ServiceLogger.Info("本地视频：", *mediasource.Path)
+			logger.Info("本地视频：", *mediasource.Path)
 			embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
 			return
 		}
@@ -124,7 +125,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 // 用于修改播放器JS，实现跨域播放Strm
 func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
 	version := ctx.Query("v")
-	logger.ServiceLogger.Debug("请求 basehtmlplayer.js 版本：", version)
+	logger.Debug("请求 basehtmlplayer.js 版本：", version)
 
 	proxy := embyServerHandler.server.GetReverseProxy()
 	proxy.ModifyResponse = func(rw *http.Response) error {
@@ -165,7 +166,7 @@ func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 			} else { // 从本地文件读取index.html
 				htmlContent, err := pkg.GetFileContent(htmlFilePath)
 				if err != nil {
-					logger.ServiceLogger.Warning("读取文件内容出错，错误信息：", err)
+					logger.Warning("读取文件内容出错，错误信息：", err)
 					return err
 				} else {
 					modifiedBodyStr = string(htmlContent)

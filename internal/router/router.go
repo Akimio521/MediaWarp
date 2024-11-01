@@ -5,6 +5,7 @@ import (
 	"MediaWarp/internal/assets"
 	"MediaWarp/internal/config"
 	"MediaWarp/internal/handler"
+	"MediaWarp/internal/logger"
 	"MediaWarp/internal/middleware"
 	"net/http"
 
@@ -19,16 +20,16 @@ func InitRouter() *gin.Engine {
 
 	if config.ClientFilter.Enable {
 		ginR.Use(middleware.ClientFilter())
-		logger.ServiceLogger.Info("客户端过滤中间件已启用")
+		logger.Info("客户端过滤中间件已启用")
 	} else {
-		logger.ServiceLogger.Info("客户端过滤中间件未启用")
+		logger.Info("客户端过滤中间件未启用")
 	}
 
 	if config.Cache.WebCache {
 		ginR.Use(middleware.Cache())
-		logger.ServiceLogger.Info("Web缓存中间件已启用")
+		logger.Info("Web 缓存中间件已启用")
 	} else {
-		logger.ServiceLogger.Info("Web缓存中间件未启用")
+		logger.Info("Web 缓存中间件未启用")
 	}
 
 	mediawarpRouter := ginR.Group("/MediaWarp")

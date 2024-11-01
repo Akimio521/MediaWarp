@@ -1,4 +1,4 @@
-package log
+package logger
 
 import (
 	"MediaWarp/internal/config"

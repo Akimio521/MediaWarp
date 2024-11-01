@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"MediaWarp/internal/log"
 	"flag"
 )
 
 var (
-	logger  = log.GetLogger()
 	isDebug bool
 )
 

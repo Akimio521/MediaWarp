@@ -3,6 +3,7 @@ package middleware
 import (
 	"MediaWarp/constants"
 	"MediaWarp/internal/config"
+	"MediaWarp/internal/logger"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -33,7 +34,7 @@ func ClientFilter() gin.HandlerFunc {
 					}
 				}
 			} else {
-				logger.ServiceLogger.Error("未知的客户端过滤器模式，已关闭客户端过滤器")
+				logger.Error("未知的客户端过滤器模式，已关闭客户端过滤器")
 				config.ClientFilter.Enable = false
 				allowed = true
 			}
@@ -41,10 +42,10 @@ func ClientFilter() gin.HandlerFunc {
 
 		if !allowed {
 			ctx.AbortWithStatus(403) // 禁止访问
-			logger.ServiceLogger.Info("客户端过滤器拦截了请求，User-Agent: ", userAgent)
+			logger.Info("客户端过滤器拦截了请求，User-Agent: ", userAgent)
 			return
 		}
-		logger.ServiceLogger.Debug("客户端过滤器放行了请求，User-Agent: ", userAgent)
+		logger.Debug("客户端过滤器放行了请求，User-Agent: ", userAgent)
 		ctx.Next()
 
 	}
