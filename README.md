@@ -32,18 +32,18 @@ MediaWarp 是**前置于EmbyServer的API服务器**，修改了原版EmbyServer�
 </div>
 
 # 功能
-- Strm文件可以实现302直链播放，流量不经过EmbyServer
-  - **推荐配合[AutoFilm](https://github.com/Akimio521/AutoFilm)使用**
+- Strm 文件可以实现 302 直链播放，流量不经过 EmbyServer
+  - **推荐配合 [AutoFilm](https://github.com/Akimio521/AutoFilm) 使用**
   - 已通过测试客户端（Web、iOS Emby、Infuse、Conflux、Fileball、Vidhub）
   - 支持Strm：
-    - HttpStrm：Strm文件内容是http链接，浏览器访问链接可以直接下载到视频文件（**客户端需要可以访问到该链接，MediaWarp不需要访问到该地址**）
-    - AlistStrm：Strm文件内容是Alist上的路径，需要拼接Alist的地址可以访问到文件（**客户端无需访问到Alist服务器，仅需要MediaWarp可以访问到Alist服务器，但是需要可以访问到Alist服务器上文件的raw_url，如果使用网盘存储则无需在意这一点**）
+    - HttpStrm：Strm 文件内容是 http 链接，浏览器访问链接可以直接下载到视频文件（**客户端需要可以访问到该链接，MediaWarp 不需要访问到该地址**）
+    - AlistStrm：Strm 文件内容是 Alist 上的路径，需要拼接 Alist 的地址可以访问到文件（**客户端无需访问到 Alist 服务器，仅需要 MediaWarp 可以访问到 Alist 服务器，但是需要可以访问到 Alist 服务器上文件的 raw_url 属性，如果使用网盘存储则无需在意这一点**）
 
 - 屏蔽特定客户端访问
   
   <img src="./img/client_filter.png" alt="" width=500px /> 
 
-- 自定义Web前端样式（HTML、CSS、JavaScript）
+- 自定义 Web 前端样式（HTML、CSS、JavaScript）
   - 效果演示：
 
     <img src="./img/index.jpg" alt="首页" width=310px /> 
@@ -53,21 +53,23 @@ MediaWarp 是**前置于EmbyServer的API服务器**，修改了原版EmbyServer�
 - 嵌入功能
   - ExternalPlayerUrl：调用外部播放器
   - ActorPlus：隐藏没有头像的演员和制作人员
-  - FanartShow：显示同人图（fanart图）
-  - Danmaku：Web显示弹幕
-  - BeautifyCSS：Emby美化CSS样式
+  - FanartShow：显示同人图（fanart 图）
+  - Danmaku：Web 显示弹幕
+  - BeautifyCSS：Emby 美化 CSS 样式
 
 # TODO LIST
-- [x] HttpStrm实现302重定向
+- [x] HttpStrm 实现 302 重定向
 - [x] 屏蔽特定客户端访问
-- [x] 提供多种Web前端样式
-- [x] AlistStrm实现302重定向
-- [x] 嵌入一些实用的JavaScript方便使用
+- [x] 提供多种 Web 前端样式
+- [x] AlistStrm 实现 302 重定向
+- [x] 嵌入一些实用的 JavaScript 方便使用
 - [x] 缓存图片、字幕提高性能
-- [ ] 利用Redis做数据缓存
-- [ ] 适配Jellyfin
+- [x] 多格式配置文件（优先级：JSON > TOML > YAML > YML > Java properties > Java props，格式参考[config.yaml.example](./config/config.yaml.example)
+- [ ] 利用 Redis 做数据缓存
+- [ ] 适配 Jellyfin
+- [ ] 适配 Plex
 - [ ] 多服务器转码推流
-- [ ] 利用Mysql/PostgreSQL/Redis优化Infuse媒体库模式下扫库体验
+- [ ] 利用 Mysql / PostgreSQL / Redis 优化 Infuse 媒体库模式下扫库体验
 - [ ] 多服务器负载均衡
 
 # 相关文档
