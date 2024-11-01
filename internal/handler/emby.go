@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"MediaWarp/internal/config"
 	"MediaWarp/internal/service"
 	"MediaWarp/internal/service/emby"
 	"MediaWarp/pkg"
@@ -22,7 +23,7 @@ type EmbyServerHandler struct {
 
 // 初始化
 func (embyServerHandler *EmbyServerHandler) Init() {
-	embyServerHandler.server = emby.New(cfg.MediaServer.ADDR, cfg.MediaServer.AUTH)
+	embyServerHandler.server = emby.New(config.MediaServer.ADDR, config.MediaServer.AUTH)
 }
 
 // 转发请求至上游服务器
@@ -43,8 +44,8 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 		},
 	}
 
-	if cfg.Web.Enable {
-		if cfg.Web.Index || cfg.Web.Head != "" || cfg.Web.ExternalPlayerUrl || cfg.Web.BeautifyCSS {
+	if config.Web.Enable {
+		if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.BeautifyCSS {
 			embyRouterRules = append(embyRouterRules,
 				RegexpRouteRule{
 					Regexp:  regexp.MustCompile(`^/web/index.html$`),
@@ -77,8 +78,8 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 			isRedirect := true
 
 			// HTTPStrm 处理
-			if *mediasource.Protocol == emby.HTTP && cfg.HTTPStrm.Enable {
-				for _, prefix := range cfg.HTTPStrm.PrefixList {
+			if *mediasource.Protocol == emby.HTTP && config.HTTPStrm.Enable {
+				for _, prefix := range config.HTTPStrm.PrefixList {
 					if strings.HasPrefix(*item.Path, prefix) {
 						logger.ServiceLogger.Debug(item.Path, "匹配 HTTPStrm 路径：", prefix, " 成功")
 						logger.ServiceLogger.Info("HTTP 协议Strm 重定向：", *mediasource.Path)
@@ -91,8 +92,8 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 			}
 
 			// AlistStrm 处理
-			if isRedirect && strings.ToUpper(*mediasource.Container) == "STRM" && cfg.AlistStrm.Enable { // 判断是否为Strm文件
-				for _, alistStrmConfig := range cfg.AlistStrm.List {
+			if isRedirect && strings.ToUpper(*mediasource.Container) == "STRM" && config.AlistStrm.Enable { // 判断是否为Strm文件
+				for _, alistStrmConfig := range config.AlistStrm.List {
 					for _, perfix := range alistStrmConfig.PrefixList {
 						if strings.HasPrefix(*item.Path, perfix) {
 							alistServer := service.GetAlistServer(alistStrmConfig.ADDR)
@@ -144,17 +145,17 @@ func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayerHandler(ctx *gin
 // 首页处理方法
 func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 	var (
-		htmlFilePath    string = path.Join(cfg.StaticDir(), "index.html")
+		htmlFilePath    string = path.Join(config.StaticDir(), "index.html")
 		modifiedBodyStr string
 		addHEAD         string
 	)
-	if !cfg.Web.Enable { //直接转发相关请求
+	if !config.Web.Enable { //直接转发相关请求
 		embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
 	} else { // 修改请求
 		proxy := embyServerHandler.server.GetReverseProxy()
 		proxy.ModifyResponse = func(rw *http.Response) error {
 
-			if !cfg.Web.Index { // 从上游获取响应体
+			if !config.Web.Index { // 从上游获取响应体
 				body, err := io.ReadAll(rw.Body)
 				defer rw.Body.Close()
 				if err != nil {
@@ -171,23 +172,23 @@ func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 				}
 			}
 
-			if cfg.Web.Head != "" { // 用户自定义HEAD
-				addHEAD += cfg.Web.Head + "\n"
+			if config.Web.Head != "" { // 用户自定义HEAD
+				addHEAD += config.Web.Head + "\n"
 			}
-			if cfg.Web.ExternalPlayerUrl { // 外部播放器
+			if config.Web.ExternalPlayerUrl { // 外部播放器
 				addHEAD += `<script src="/MediaWarp/static/embedded/js/ExternalPlayerUrl.js"></script>` + "\n"
 			}
-			if cfg.Web.ActorPlus { // 过滤没有头像的演员和制作人员
+			if config.Web.ActorPlus { // 过滤没有头像的演员和制作人员
 				addHEAD += `<script src="/MediaWarp/static/embedded/js/ActorPlus.js"></script>` + "\n"
 			}
-			if cfg.Web.FanartShow { // 显示同人图（fanart图）
+			if config.Web.FanartShow { // 显示同人图（fanart图）
 				addHEAD += `<script src="/MediaWarp/static/embedded/js/FanartShow.js"></script>` + "\n"
 			}
-			if cfg.Web.Danmaku { // 弹幕
+			if config.Web.Danmaku { // 弹幕
 				addHEAD += `<script src="https://cdn.jsdelivr.net/gh/RyoLee/emby-danmaku@gh-pages/ede.user.js" defer></script>` + "\n"
 			}
 
-			if cfg.Web.BeautifyCSS { // 美化CSS
+			if config.Web.BeautifyCSS { // 美化CSS
 				addHEAD += `<link rel="stylesheet" href="/MediaWarp/static/embedded/css/Beautify.css" type="text/css" media="all" />` + "\n"
 			}
 			modifiedBodyStr = strings.Replace(modifiedBodyStr, "</head>", addHEAD+"</head>", 1) // 将添加HEAD

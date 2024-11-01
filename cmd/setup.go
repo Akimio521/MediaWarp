@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"MediaWarp/internal/config"
 	"MediaWarp/internal/router"
 
 	"github.com/gin-gonic/gin"
@@ -16,8 +17,8 @@ func SetUP() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	logger.ServiceLogger.Info("MediaWarp 监听端口：", cfg.Port)
+	logger.ServiceLogger.Info("MediaWarp 监听端口：", config.Port)
 	ginR := router.InitRouter() // 路由初始化
 	logger.ServiceLogger.Info("MediaWarp 启动成功")
-	ginR.Run(cfg.ListenAddr()) // 启动服务
+	ginR.Run(config.ListenAddr()) // 启动服务
 }

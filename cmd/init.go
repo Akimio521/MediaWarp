@@ -1,13 +1,11 @@
 package cmd
 
 import (
-	"MediaWarp/internal/config"
 	"MediaWarp/internal/log"
 	"flag"
 )
 
 var (
-	cfg     = config.GetConfig()
 	logger  = log.GetLogger()
 	isDebug bool
 )

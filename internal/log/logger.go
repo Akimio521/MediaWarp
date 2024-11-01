@@ -1,6 +1,7 @@
 package log
 
 import (
+	"MediaWarp/internal/config"
 	"io"
 
 	"github.com/sirupsen/logrus"
@@ -27,19 +28,19 @@ func (loggerManager *LoggerManager) Init() {
 	loggerManager.AccessLogger.SetFormatter(aLS)
 	loggerManager.ServiceLogger.SetFormatter(sLS)
 
-	if !cfg.Logger.AccessLogger.Console { // 访问日志不输出到终端
+	if !config.Logger.AccessLogger.Console { // 访问日志不输出到终端
 		loggerManager.AccessLogger.Out = io.Discard
 	}
 
-	if !cfg.Logger.ServiceLogger.Console { // 服务日志不输出到终端
+	if !config.Logger.ServiceLogger.Console { // 服务日志不输出到终端
 		loggerManager.ServiceLogger.Out = io.Discard
 	}
 
-	if cfg.Logger.AccessLogger.File {
+	if config.Logger.AccessLogger.File {
 		loggerManager.AccessLogger.AddHook(aLS)
 	}
 
-	if cfg.Logger.ServiceLogger.File {
+	if config.Logger.ServiceLogger.File {
 		loggerManager.ServiceLogger.AddHook(sLS)
 	}
 }

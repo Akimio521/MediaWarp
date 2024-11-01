@@ -10,13 +10,11 @@ import (
 
 var (
 	alistSeverMap sync.Map
-	cfg           *config.ConfigManager
 )
 
 func init() {
-	cfg = config.GetConfig()
-	if cfg.AlistStrm.Enable {
-		for _, alist := range cfg.AlistStrm.List {
+	if config.AlistStrm.Enable {
+		for _, alist := range config.AlistStrm.List {
 			registerAlistServer(alist.ADDR, alist.Username, alist.Password)
 		}
 	}

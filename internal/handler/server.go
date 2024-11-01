@@ -2,6 +2,7 @@ package handler
 
 import (
 	"MediaWarp/constants"
+	"MediaWarp/internal/config"
 	"net/http"
 )
 
@@ -15,7 +16,7 @@ type MediaServerHandler interface {
 var mediaServerHandler MediaServerHandler
 
 func init() {
-	switch cfg.MediaServer.Type {
+	switch config.MediaServer.Type {
 	case constants.EMBY:
 		mediaServerHandler = &EmbyServerHandler{}
 	default:

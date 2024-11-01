@@ -2,6 +2,7 @@ package log
 
 import (
 	"MediaWarp/constants"
+	"MediaWarp/internal/config"
 	"MediaWarp/pkg"
 	"bytes"
 	"fmt"
@@ -60,11 +61,11 @@ func (s *serviceLoggerSetting) Levels() []logrus.Level {
 //
 // 将日志写入文件
 func (s *serviceLoggerSetting) Fire(entry *logrus.Entry) error {
-	if err := os.MkdirAll(cfg.LogDirWithDate(), os.ModePerm); err != nil {
+	if err := os.MkdirAll(config.LogDirWithDate(), os.ModePerm); err != nil {
 		return err
 	}
 
-	serviceLogFile, err := os.OpenFile(cfg.ServiceLogPath(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	serviceLogFile, err := os.OpenFile(config.ServiceLogPath(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}

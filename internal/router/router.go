@@ -3,6 +3,7 @@ package router
 import (
 	"MediaWarp/constants"
 	"MediaWarp/internal/assets"
+	"MediaWarp/internal/config"
 	"MediaWarp/internal/handler"
 	"MediaWarp/internal/middleware"
 	"net/http"
@@ -16,14 +17,14 @@ func InitRouter() *gin.Engine {
 	ginR.Use(middleware.SetRefererPolicy(constants.SAME_ORIGIN))
 	ginR.Use(middleware.Logger())
 
-	if cfg.ClientFilter.Enable {
+	if config.ClientFilter.Enable {
 		ginR.Use(middleware.ClientFilter())
 		logger.ServiceLogger.Info("客户端过滤中间件已启用")
 	} else {
 		logger.ServiceLogger.Info("客户端过滤中间件未启用")
 	}
 
-	if cfg.Cache.WebCache {
+	if config.Cache.WebCache {
 		ginR.Use(middleware.Cache())
 		logger.ServiceLogger.Info("Web缓存中间件已启用")
 	} else {
@@ -34,10 +35,10 @@ func InitRouter() *gin.Engine {
 	{
 		static := mediawarpRouter.Group("/static")
 		{
-			if cfg.Web.Enable {
+			if config.Web.Enable {
 				static.StaticFS("/embedded", http.FS(assets.EmbeddedStaticAssets))
-				if cfg.Web.Custom {
-					static.Static("/custom", cfg.StaticDir())
+				if config.Web.Custom {
+					static.Static("/custom", config.StaticDir())
 				}
 			}
 		}
