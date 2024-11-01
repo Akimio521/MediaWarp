@@ -38,16 +38,13 @@ func (s *serviceLoggerSetting) Format(entry *logrus.Entry) ([]byte, error) {
 		b = entry.Buffer
 	}
 	// 时间格式化
-	formatTime := entry.Time.Format("2006-1-2 15:04:05")
+	formatTime := entry.Time.Format("2006-01-02 15:04:05")
 
-	funcNameList := strings.Split(entry.Caller.Function, ".")
-	// 返回格式化后的日志信息
 	fmt.Fprintf(
 		b,
-		"%-10s %-20s | %-15s|%s"+"\n",
+		"%-18s %s | %s\n", // 长度需要算是上控制字符的长度
 		fmt.Sprintf("\033[3%dm【%s】\033[0m", colorCode, strings.ToUpper(entry.Level.String())),
 		formatTime,
-		funcNameList[len(funcNameList)-1],
 		entry.Message,
 	)
 	return b.Bytes(), nil
