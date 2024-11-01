@@ -97,8 +97,8 @@ func init() {
 
 // 读取并解析配置文件
 func loadConfig() {
-	viper.SetConfigFile(ConfigPath())
-	viper.SetConfigType("yaml")
+	viper.AddConfigPath(ConfigDir())
+	viper.SetConfigName("config")
 
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)
