@@ -1,4 +1,7 @@
 package config
 
-// 版本号
-const APP_VERSION string = "v0.0.5"
+const (
+	appVersion string = "v0.0.5"
+	commitHash string = "Unkown"
+	buildDate  string = "Unkown"
+)

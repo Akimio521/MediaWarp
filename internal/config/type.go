@@ -2,6 +2,16 @@ package config
 
 import "MediaWarp/constants"
 
+// 程序版本信息
+type VersionInfo struct {
+	AppVersion string // 程序版本号
+	CommitHash string // GIt Commit Hash
+	BuildData  string // 编译时间
+	GoVersion  string // 编译 Golang 版本
+	OS         string // 操作系统
+	Arch       string //  架构
+}
+
 // 上游媒体服务器相关设置
 type MediaServerSetting struct {
 	Type constants.MediaServerType // 媒体服务器类型

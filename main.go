@@ -42,7 +42,7 @@ func printLOGO() {
 	fmt.Print(
 		constants.LOGO,
 		pkg.Center(
-			fmt.Sprintf(" MediaWarp %s 启动中 ", config.Version()),
+			fmt.Sprintf(" MediaWarp %s 启动中 ", config.Version().AppVersion),
 			75,
 			"=",
 		),

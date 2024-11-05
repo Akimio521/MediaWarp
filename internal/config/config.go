@@ -5,12 +5,22 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/spf13/viper"
 )
 
 var (
+	version = VersionInfo{
+		AppVersion: appVersion,
+		CommitHash: commitHash,
+		BuildData:  buildDate,
+		GoVersion:  runtime.Version(),
+		OS:         runtime.GOOS,
+		Arch:       runtime.GOARCH,
+	}
+
 	Port         int                 // MediaWarp开放端口
 	MediaServer  MediaServerSetting  // 上游媒体服务器设置
 	Cache        CacheSetting        // 缓存相关设置
@@ -21,9 +31,9 @@ var (
 	AlistStrm    AlistStrmSetting    // AlistStrm设置
 )
 
-// 获取版本号
-func Version() string {
-	return APP_VERSION
+// 获取版本信息
+func Version() *VersionInfo {
+	return &version
 }
 
 // 项目根目录
