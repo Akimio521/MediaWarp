@@ -30,8 +30,8 @@ func Logger() gin.HandlerFunc {
 		statusColor, methodColor := getColor(statusCode, method)
 
 		logger.AccessLog(
-			`【AccessLog】 %s|%s| %s |%s|%s "%s"`,
-			fmt.Sprintf("%-20s", startTime.Format("2006-1-2 15:04:05")),
+			`【Access】 %s |%s| %s |%s| %s "%s"`,
+			startTime.Format("2006-1-2 15:04:05"),
 			fmt.Sprintf("\033[4%dm %d \033[0m", statusColor, statusCode),
 			fmt.Sprintf("%-10s", wasteTime),
 			fmt.Sprintf("\033[4%dm %-7s\033[0m", methodColor, method),
