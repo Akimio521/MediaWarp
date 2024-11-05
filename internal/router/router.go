@@ -34,6 +34,9 @@ func InitRouter() *gin.Engine {
 
 	mediawarpRouter := ginR.Group("/MediaWarp")
 	{
+		mediawarpRouter.Any("/version", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, config.Version())
+		})
 		static := mediawarpRouter.Group("/static")
 		{
 			if config.Web.Enable {
