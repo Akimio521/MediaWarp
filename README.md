@@ -13,7 +13,7 @@
 
 # MediaWarp
 
-MediaWarp 是**前置于EmbyServer的API服务器**，修改了原版EmbyServer的API返回内容以实现特殊功能  
+MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原版 EmbyServer 的 API 返回内容以实现特殊功能  
 
 [![license][license-badge]][license]
 [![prs][prs-badge]][prs]
