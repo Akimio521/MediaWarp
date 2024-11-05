@@ -83,7 +83,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 				for _, prefix := range config.HTTPStrm.PrefixList {
 					if strings.HasPrefix(*item.Path, prefix) {
 						logger.Debug(*item.Path, " 匹配 HTTPStrm 路径：", prefix, " 成功")
-						logger.Info("HTTP 协议Strm 重定向：", *mediasource.Path)
+						logger.Info("HTTPStrm 重定向至：", *mediasource.Path)
 						ctx.Redirect(http.StatusFound, *mediasource.Path)
 						return
 					}
@@ -103,7 +103,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 								logger.Warning("请求 FsGet 失败：", err)
 								return
 							}
-							logger.Info("AlistStrm 重定向：", fsGetData.RawURL)
+							logger.Info("AlistStrm 重定向至：", fsGetData.RawURL)
 							ctx.Redirect(http.StatusFound, fsGetData.RawURL)
 							return
 						}
