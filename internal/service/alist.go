@@ -4,7 +4,7 @@ import (
 	"MediaWarp/internal/config"
 	"MediaWarp/internal/service/alist"
 
-	"MediaWarp/pkg"
+	"MediaWarp/utils"
 	"sync"
 )
 
@@ -34,7 +34,7 @@ func registerAlistServer(addr string, username string, password string) {
 // 从全局Map中获取Alist服务器
 // 若未找到则抛出panic
 func GetAlistServer(addr string) *alist.AlistServer {
-	endpoint := pkg.GetEndpoint(addr)
+	endpoint := utils.GetEndpoint(addr)
 	if server, ok := alistSeverMap.Load(endpoint); ok {
 		return server.(*alist.AlistServer)
 	}

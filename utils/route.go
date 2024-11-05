@@ -1,4 +1,4 @@
-package pkg
+package utils
 
 import (
 	"github.com/gin-gonic/gin"

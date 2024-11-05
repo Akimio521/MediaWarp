@@ -5,7 +5,7 @@ import (
 	"MediaWarp/internal/config"
 	"MediaWarp/internal/logger"
 	"MediaWarp/internal/router"
-	"MediaWarp/pkg"
+	"MediaWarp/utils"
 	"flag"
 	"fmt"
 
@@ -41,7 +41,7 @@ func main() {
 func printLOGO() {
 	fmt.Print(
 		constants.LOGO,
-		pkg.Center(
+		utils.Center(
 			fmt.Sprintf(" MediaWarp %s 启动中 ", config.Version().AppVersion),
 			75,
 			"=",

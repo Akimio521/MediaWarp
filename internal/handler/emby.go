@@ -5,7 +5,7 @@ import (
 	"MediaWarp/internal/logger"
 	"MediaWarp/internal/service"
 	"MediaWarp/internal/service/emby"
-	"MediaWarp/pkg"
+	"MediaWarp/utils"
 	"bytes"
 	"io"
 	"net/http"
@@ -164,7 +164,7 @@ func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 				}
 				modifiedBodyStr = string(body)
 			} else { // 从本地文件读取index.html
-				htmlContent, err := pkg.GetFileContent(htmlFilePath)
+				htmlContent, err := utils.GetFileContent(htmlFilePath)
 				if err != nil {
 					logger.Warning("读取文件内容出错，错误信息：", err)
 					return err

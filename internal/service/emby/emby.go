@@ -2,7 +2,7 @@ package emby
 
 import (
 	"MediaWarp/constants"
-	"MediaWarp/pkg"
+	"MediaWarp/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -111,7 +111,7 @@ func (embyServer *EmbyServer) GetIndexHtml() ([]byte, error) {
 // 获取EmbyServer实例
 func New(addr string, apiKey string) *EmbyServer {
 	emby := &EmbyServer{
-		endpoint: pkg.GetEndpoint(addr),
+		endpoint: utils.GetEndpoint(addr),
 		apiKey:   apiKey,
 	}
 	emby.Init()

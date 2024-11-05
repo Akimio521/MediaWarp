@@ -15,7 +15,7 @@ MEDIAWARP
 ├─img                   # MediaWarp演示图片
 ├─logs                  # MediaWarp输出日志
 ├─middleware            # Gin框架用到的中间件，包括访问日志、客户端过滤
-├─pkg                   # 一些工具集合
+├─utils                   # 一些工具集合
 ├─resources             # 内嵌的一些JavaScript脚本、CSS样式
 │  ├─css
 │  └─js

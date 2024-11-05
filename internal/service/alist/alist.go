@@ -2,7 +2,7 @@ package alist
 
 import (
 	"MediaWarp/internal/cache"
-	"MediaWarp/pkg"
+	"MediaWarp/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -183,7 +183,7 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 // 获得AlistServer实例
 func New(addr string, username string, password string) *AlistServer {
 	return &AlistServer{
-		endpoint: pkg.GetEndpoint(addr),
+		endpoint: utils.GetEndpoint(addr),
 		username: username,
 		password: password,
 	}

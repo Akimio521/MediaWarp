@@ -2,7 +2,7 @@ package logger
 
 import (
 	"MediaWarp/internal/config"
-	"MediaWarp/pkg"
+	"MediaWarp/utils"
 	"bytes"
 	"fmt"
 	"os"
@@ -50,6 +50,6 @@ func (s *accessLoggerSetting) Fire(entry *logrus.Entry) error {
 	if err != nil {
 		return err
 	}
-	accessLogFile.WriteString(pkg.RemoveColorCodes(line))
+	accessLogFile.WriteString(utils.RemoveColorCodes(line))
 	return nil
 }

@@ -3,7 +3,7 @@ package logger
 import (
 	"MediaWarp/constants"
 	"MediaWarp/internal/config"
-	"MediaWarp/pkg"
+	"MediaWarp/utils"
 	"bytes"
 	"fmt"
 	"os"
@@ -72,6 +72,6 @@ func (s *serviceLoggerSetting) Fire(entry *logrus.Entry) error {
 	if err != nil {
 		return err
 	}
-	serviceLogFile.WriteString(pkg.RemoveColorCodes(line))
+	serviceLogFile.WriteString(utils.RemoveColorCodes(line))
 	return nil
 }
