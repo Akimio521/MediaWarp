@@ -58,6 +58,16 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 	return embyRouterRules
 }
 
+func isBrowser(userAgent string) bool {
+	browsers := []string{"Mozilla", "Chrome", "Safari", "Opera", "Edge", "MSIE", "Trident"}
+	for _, browser := range browsers {
+		if strings.Contains(userAgent, browser) {
+			return true
+		}
+	}
+	return false
+}
+
 // 视频流处理器
 //
 // 支持播放本地视频、重定向HttpStrm、AlistStrm
@@ -65,6 +75,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	// EmbyServer <= 4.8 ====> mediaSourceID = 343121
 	// EmbyServer >= 4.9 ====> mediaSourceID = mediasource_31
 	mediaSourceID := ctx.Query("mediasourceid")
+	ua := ctx.Request.Header.Get("User-Agent")
 
 	logger.Debug("请求 ItemsServiceQueryItem：", mediaSourceID)
 	itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询item需要去除前缀仅保留数字部分
@@ -77,9 +88,9 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	for _, mediasource := range item.MediaSources {
 		if *mediasource.ID == mediaSourceID { // EmbyServer >= 4.9 返回的ID带有前缀mediasource_
 			isRedirect := true
-
+			logger.Info("客户端: ", ua)
 			// HTTPStrm 处理
-			if *mediasource.Protocol == emby.HTTP && config.HTTPStrm.Enable {
+			if *mediasource.Protocol == emby.HTTP && config.HTTPStrm.Enable && !isBrowser(ua) {
 				for _, prefix := range config.HTTPStrm.PrefixList {
 					if strings.HasPrefix(*item.Path, prefix) {
 						logger.Debug(*item.Path, " 匹配 HTTPStrm 路径：", prefix, " 成功")
@@ -93,7 +104,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 			}
 
 			// AlistStrm 处理
-			if isRedirect && strings.ToUpper(*mediasource.Container) == "STRM" && config.AlistStrm.Enable { // 判断是否为Strm文件
+			if isRedirect && strings.ToUpper(*mediasource.Container) == "STRM" && config.AlistStrm.Enable && !isBrowser(ua) { // 判断是否为Strm文件
 				for _, alistStrmConfig := range config.AlistStrm.List {
 					for _, perfix := range alistStrmConfig.PrefixList {
 						if strings.HasPrefix(*item.Path, perfix) {
