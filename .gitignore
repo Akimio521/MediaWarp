@@ -1,4 +1,4 @@
-*test*
+test/*
 config/config.yaml
 *.log
 /static/*
