@@ -71,6 +71,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 
 	if err != nil {
 		logging.Warning("请求 ItemsServiceQueryItem 失败：", err)
+		embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
 		return
 	}
 	item := itemResponse.Items[0]
@@ -118,6 +119,8 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 			return
 		}
 	}
+	logging.Debug("非视频流请求，转发至上游服务器") // 可能是字幕文件等
+	embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
 }
 
 // 修改basehtmlplayer.js
