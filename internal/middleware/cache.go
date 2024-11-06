@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"MediaWarp/internal/cache"
-	"MediaWarp/internal/logger"
+	"MediaWarp/internal/logging"
 	"bytes"
 	"fmt"
 	"net/http"
@@ -45,14 +45,14 @@ func Cache() gin.HandlerFunc {
 		// 缓存逻辑
 		cacheKey := getCacheKey(ctx)                      // 计算缓存Key
 		cacheData, ok := cache.Get("GIN-Cache", cacheKey) // 查询缓存记录
-		logger.Debug("GIN-Cache：", "OK:", ok, ",KEY:", cacheKey)
+		logging.Debug("GIN-Cache：", "OK:", ok, ",KEY:", cacheKey)
 
 		if ok { // 缓存存在，直接返回缓存数据
 			responseCacheData = cacheData.(*ResponseCacheData)
-			logger.Debug("GIN-Cache：缓存存在，直接返回缓存数据，HttpStatus:", responseCacheData.StatusCode)
+			logging.Debug("GIN-Cache：缓存存在，直接返回缓存数据，HttpStatus:", responseCacheData.StatusCode)
 			responseWithCache(ctx, responseCacheData)
 		} else { // 缓存不存在，继续处理请求
-			logger.Debug("GIN-Cache：缓存不存在，继续处理请求")
+			logging.Debug("GIN-Cache：缓存不存在，继续处理请求")
 			customWirter := &ResponseWriterWarp{
 				ResponseWriter: ctx.Writer,      // 使用原始的响应器初始化
 				body:           &bytes.Buffer{}, // 初始化响应体缓存
@@ -62,7 +62,7 @@ func Cache() gin.HandlerFunc {
 			ctx.Next() // 处理请求
 			code := ctx.Writer.Status()
 			if code >= http.StatusOK && code < http.StatusMultipleChoices { // 响应是2xx的成功响应，更新缓存记录
-				logger.Debug("GIN-Cache：创建缓存")
+				logging.Debug("GIN-Cache：创建缓存")
 				responseCacheData = &ResponseCacheData{ // 创建缓存数据
 					StatusCode: code, //ctx.Request.Response.StatusCode,
 					Header:     ctx.Writer.Header().Clone(),
@@ -79,12 +79,12 @@ func Cache() gin.HandlerFunc {
 // 根据默认缓存时间为10分钟，无需缓存的请求返回0
 func getCacheTime(ctx *gin.Context) time.Duration {
 	if ctx.Writer.Header().Get("Expired") == "-1" {
-		logger.Debug("Expired=-1 => 不缓存")
+		logging.Debug("Expired=-1 => 不缓存")
 		return 0
 	}
 
 	if ctx.Request.Body != nil && ctx.Request.ContentLength != 0 { // 请求体不为空
-		logger.Debug("请求体不为空 => 不缓存")
+		logging.Debug("请求体不为空 => 不缓存")
 		return 0
 
 	}
@@ -98,7 +98,7 @@ func getCacheTime(ctx *gin.Context) time.Duration {
 	if ctx.Request.Method == http.MethodGet {
 		return 10 * time.Minute // 默认缓存时间为10分钟
 	} else {
-		logger.Debug("请求方法不为GET => 不缓存")
+		logging.Debug("请求方法不为GET => 不缓存")
 		return 0
 	}
 }

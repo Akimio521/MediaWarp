@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"MediaWarp/constants"
-	"MediaWarp/internal/logger"
+	"MediaWarp/internal/logging"
 	"fmt"
 	"net/http"
 	"time"
@@ -29,7 +29,7 @@ func Logger() gin.HandlerFunc {
 
 		statusColor, methodColor := getColor(statusCode, method)
 
-		logger.AccessLog(
+		logging.AccessLog(
 			`【Access】 %s |%s| %s |%s| %s "%s"`,
 			startTime.Format("2006-1-2 15:04:05"),
 			fmt.Sprintf("\033[4%dm %d \033[0m", statusColor, statusCode),
