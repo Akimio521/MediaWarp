@@ -9,7 +9,7 @@ on:
       - 'go.sum'
 
 jobs:
-  release:
+  builder:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
