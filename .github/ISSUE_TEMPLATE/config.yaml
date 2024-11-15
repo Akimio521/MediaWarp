@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 项目讨论
+    url: https://github.com/Akimio521/MediaWarp/discussions/new/choose
+    about: discussion
