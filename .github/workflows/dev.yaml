@@ -5,40 +5,46 @@ on:
   push:
     branches:
       - main
-
-env:
-  APP_NAME: MediaWarp
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
 
 jobs:
-  get-version:
+  release:
     runs-on: ubuntu-latest
-    outputs:
-      app_version: ${{ steps.get-version.outputs.app_version }}
     steps:
-      - name: Clone Repository
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: APP Version
-        id: get-version
-        run: |
-          APP_VERSION=DEV-$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)
-          echo "测试APP版本号：$APP_VERSION"
-          echo "app_version=$APP_VERSION" >> "$GITHUB_OUTPUT"
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod" # 使用 go.mod 文件中的 golang 版本
 
-  docker-builder:
-    name: Docker Image Builder
-    needs: get-version
-    uses: ./.github/workflows/docker-builder.yaml
-    with:
-      APP_VERSION: ${{ needs.get-version.outputs.app_version }}
-      IS_LATEST: false
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-  binary-builder:
-    name: Binary Image Builder
-    needs: get-version
-    uses: ./.github/workflows/binary-builder.yaml
-    with:
-      APP_VERSION: ${{ needs.get-version.outputs.app_version }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaWarp
+          path: ./dist/*
+          compression-level: 9

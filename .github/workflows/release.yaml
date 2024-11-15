@@ -1,74 +1,39 @@
 name: MediaWarp Releaser
-
 on:
   push:
     branches:
       - main
-    paths:
-      - internal/config/version.go
-
-env:
-  APP_NAME: MediaWarp
+    tags:
+      - v*
 
 jobs:
-  app-info:
+  release:
     runs-on: ubuntu-latest
-    outputs:
-      app_version: ${{ steps.get-version.outputs.app_version }}
     steps:
-      - name: Clone Repository
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: APP Version
-        id: get-version
-        run: |
-          APP_VERSION=$(cat internal/config/version.go | sed -ne 's/const\sAPP_VERSION\sstring\s=\s"v\(.*\)"/\1/gp')
-          echo "检测到版本号为 $APP_VERSION"
-          echo "app_version=$APP_VERSION" >> "$GITHUB_OUTPUT"
-
-  docker-builder:
-    name: Docker Image Builder
-    needs: app-info
-    uses: ./.github/workflows/docker-builder.yaml
-    with:
-      APP_VERSION: ${{ needs.app-info.outputs.app_version }}
-      IS_LATEST: true
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  binary-builder:
-    name: Binary Image Builder
-    needs: app-info
-    uses: ./.github/workflows/binary-builder.yaml
-    with:
-      APP_VERSION: ${{ needs.app-info.outputs.app_version }}
-
-  create-release:
-    permissions: write-all
-    runs-on: ubuntu-latest
-    needs: [ app-info, docker-builder, binary-builder ]
-    steps:
-      - name: Clone Repository
-        uses: actions/checkout@v4
-
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
         with:
-          pattern: ${{ env.APP_NAME }}-${{ needs.app-info.outputs.app_version }}-*
-          merge-multiple: true
-          path: ${{ github.workspace }}/bin
+          fetch-depth: 0
 
-      - name: Create Release
-        uses: softprops/action-gh-release@master
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod" # 使用 go.mod 文件中的 golang 版本
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --snapshot  --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: v${{ needs.app-info.outputs.app_version }}
-          tag_name: v${{ needs.app-info.outputs.app_version }}
-          body: ${{ github.event.head_commit.message }}
-          files: |
-            ${{ github.workspace }}/bin/*
-            ${{ github.workspace }}/config/config.yaml.example
-          draft: false
-          prerelease: false

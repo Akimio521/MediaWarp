@@ -1,0 +1,129 @@
+version: 2
+
+project_name: MediaWarp
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-SNAPSHOT-{{ .ShortCommit }}"
+release:
+  name_template: "{{ .Tag }}"
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - GOPROXY=https://goproxy.io,direct
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - 5
+      - 6
+      - 7
+    ignore:
+      - goos: windows
+        goarm: 5
+      - goos: windows
+        goarm: 6
+      - goos: windows
+        goarm: 7
+    binary: "{{ .ProjectName }}"
+    ldflags: 
+      - -s -w
+      - -X MediaWarp/internal/config.appVersion={{ .Version }}
+      - -X MediaWarp/internal/config.commitHash={{ .FullCommit }}
+      - -X MediaWarp/internal/config.buildDate={{ .Date}}
+
+dockers:
+  - dockerfile: docker/Dockerfile-goreleaser
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
+    goos: linux
+    goarch: amd64
+    goamd64: v1
+    image_templates:
+      - "akimio/mediawarp:{{ .Version }}-amd64"
+
+  - dockerfile: docker/Dockerfile-goreleaser
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - "akimio/mediawarp:{{ .Version }}-arm64"
+
+  - dockerfile: docker/Dockerfile-goreleaser
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm/v6"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+    goos: linux
+    goarch: arm
+    goarm: '6'
+    image_templates:
+      - "akimio/mediawarp:{{ .Version }}-armv6"
+
+  - dockerfile: docker/Dockerfile-goreleaser
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+    goos: linux
+    goarch: arm
+    goarm: '7'
+    image_templates:
+      - "akimio/mediawarp:{{ .Version }}-armv7"
+
+docker_manifests:
+  - name_template: "akimio/mediawarp:latest"
+    image_templates:
+      - "akimio/mediawarp:{{ .Version }}-amd64"
+      - "akimio/mediawarp:{{ .Version }}-arm64"
+      - "akimio/mediawarp:{{ .Version }}-armv6"
+      - "akimio/mediawarp:{{ .Version }}-armv7"
+  - name_template: "akimio/mediawarp:{{ .Version }}"
+    image_templates:
+      - "akimio/mediawarp:{{ .Version }}-amd64"
+      - "akimio/mediawarp:{{ .Version }}-arm64"
+      - "akimio/mediawarp:{{ .Version }}-armv6"
+      - "akimio/mediawarp:{{ .Version }}-armv7"
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{- .Os }}_{{ .Arch }}{{- if .Arm}}v{{ .Arm }}{{- end}}"
+    # 对于 Windows 存档使用 zip 格式
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - src: LICENSE
+      - src: README.md
+      - src: config/config.yaml.example
+        dst: config.yaml.example
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^build:"
+      - "^release:"

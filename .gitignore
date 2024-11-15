@@ -5,5 +5,5 @@ config/config.yaml
 !/static/.gitkeep
 
 # 执行文件
-bin/*
+dist/
 MediaWarp*
