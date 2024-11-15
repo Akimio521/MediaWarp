@@ -26,8 +26,25 @@ MEDIAWARP
 └─static                # MediaWarp自定义静态文件存储目录
 ```
 
-# EmbyServer
-## playbackInfo
+# 本地测试
+## 构建所有版本
+```BASH
+goreleaser release --snapshot --clean --skip-publish
+```
+## 流程测试
+```BASH
+goreleaser release --snapshot --clean --skip-publish --rm-dist
+```
+
+## 参数含义
+1. **snapshot**: 这将跳过标签验证，并生成一个快照版本
+2. **clean**: 清除上一次生成的 dist
+3. **skip-publish**: 跳过推送镜像到 Docker Registry
+4. **rm-dist**：删除 dist
+
+# 媒体服务器部分 API 具体响应
+## EmbyServer
+### playbackInfo
 **EmbyServer version 4.8**
 AlistStrm
 
