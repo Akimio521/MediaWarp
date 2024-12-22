@@ -3,6 +3,8 @@ package utils
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 )
@@ -81,4 +83,24 @@ func GetEndpoint(addr string) string {
 		addr = "http://" + addr
 	}
 	return strings.TrimSuffix(addr, "/")
+}
+
+var embyAPIKeys = []string{"api_key", "X-Emby-Token"}
+
+// 从 URL 中查询参数中解析 Emby 的 API 键值对
+//
+// 以 xxx=xxx 的字符串形式返回
+func ResolveEmbyAPIKVPairs(urlString string) (string, error) {
+	url, err := url.Parse(urlString)
+	if err != nil {
+		return "", err
+	}
+	for quryKey, queryValue := range url.Query() {
+		for _, key := range embyAPIKeys {
+			if strings.EqualFold(quryKey, key) {
+				return fmt.Sprintf("%s=%s", quryKey, queryValue[0]), nil
+			}
+		}
+	}
+	return "", nil
 }

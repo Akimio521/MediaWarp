@@ -13,34 +13,12 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"path"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
-
-var EmbyAPIKeys = []string{"api_key", "X-Emby-Token"}
-
-// 从 URL 中查询参数中解析 Emby 的 API 键值对
-//
-// 以 xxx=xxx 的字符串形式返回
-func resolveAPIKVPairs(urlString string) string {
-	url, err := url.Parse(urlString)
-	if err != nil {
-		logging.Warning("解析 URL 出错：", err)
-		return ""
-	}
-	for quryKey, queryValue := range url.Query() {
-		for _, key := range EmbyAPIKeys {
-			if strings.EqualFold(quryKey, key) {
-				return fmt.Sprintf("%s=%s", quryKey, queryValue[0])
-			}
-		}
-	}
-	return ""
-}
 
 // Emby服务器处理器
 type EmbyServerHandler struct {
@@ -151,7 +129,10 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 				strmFileType, _ := embyServerHandler.RecgonizeStrmFileType(*item.Path)
 				if strmFileType == constants.AlistStrm {
 					if mediasource.DirectStreamURL != nil {
-						apikeypair := resolveAPIKVPairs(*mediasource.DirectStreamURL)
+						apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
+						if err != nil {
+							logging.Warning("解析API键值对失败：", err)
+						}
 						directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
 						logging.Debug("设置直链播放链接为: " + directStreamURL + "，容器为: " + container)
 						playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
