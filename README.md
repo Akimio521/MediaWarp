@@ -37,7 +37,7 @@ MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原�
   - 已通过测试客户端（Web、iOS Emby、Infuse、Conflux、Fileball、Vidhub）
   - 支持Strm：
     - HttpStrm：Strm 文件内容是 http 链接，浏览器访问链接可以直接下载到视频文件（**客户端需要可以访问到该链接，MediaWarp 不需要访问到该地址**）
-    - AlistStrm：Strm 文件内容是 Alist 上的路径，需要拼接 Alist 的地址可以访问到文件（**客户端无需访问到 Alist 服务器，仅需要 MediaWarp 可以访问到 Alist 服务器，但是需要可以访问到 Alist 服务器上文件的 raw_url 属性，如果使用网盘存储则无需在意这一点**）
+    - AlistStrm：Strm 文件内容是 Alist 上的路径，需要拼接 Alist 的地址可以访问到文件（**客户端无需访问到 Alist 服务器，仅需要 MediaWarp 可以访问到 Alist 服务器，但是需要可以访问到 Alist 服务器上文件的 raw_url 属性，如果使用网盘存储则无需在意这一点，但目前兼容性较差且不支持转码，通过挂载真实目录可以缓解这一问题**）
 
 - 屏蔽特定客户端访问
   
@@ -65,12 +65,20 @@ MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原�
 - [x] 嵌入一些实用的 JavaScript 方便使用
 - [x] 缓存图片、字幕提高性能
 - [x] 多格式配置文件（优先级：JSON > TOML > YAML > YML > Java properties > Java props，格式参考[config.yaml.example](./config/config.yaml.example)
-- [ ] 利用 Redis 做数据缓存
 - [ ] 适配 Jellyfin
 - [ ] 适配 Plex
-- [ ] 多服务器转码推流
-- [ ] 利用 Mysql / PostgreSQL / Redis 优化 Infuse 媒体库模式下扫库体验
-- [ ] 多服务器负载均衡
+
+~~- [ ] 利用 Redis 做数据缓存~~
+> 需求不大，放弃，有需要可以直接使用 Nginx 或者其他反向代理工具的缓存
+
+~~- [ ] 多服务器转码推流~~
+> 需求不大，放弃
+
+~~- [ ] 利用 Mysql / PostgreSQL / Redis 优化 Infuse 媒体库模式下扫库体验~~
+> 有需要可以参考 [MisakaFxxk/MisakaF_Emby/Infuse](https://github.com/MisakaFxxk/MisakaF_Emby/tree/main/Infuse) 自行实现
+
+~~- [ ] 多服务器负载均衡~~
+> 在服务器前面加一个负载均衡可能更好
 
 # 相关文档
 - [更新日志](./docs/UpdateLog.md)
