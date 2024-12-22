@@ -24,6 +24,12 @@ jobs:
         with:
           go-version-file: "go.mod" # 使用 go.mod 文件中的 golang 版本
 
+      - name: Update Pacakge Dependencies
+        run: go mod tidy
+
+      - name: Run Tests
+        run: go test ./...
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
