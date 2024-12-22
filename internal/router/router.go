@@ -14,9 +14,9 @@ import (
 
 func InitRouter() *gin.Engine {
 	ginR := gin.New()
+	ginR.Use(middleware.Logger())
 	ginR.Use(middleware.QueryCaseInsensitive())
 	ginR.Use(middleware.SetRefererPolicy(constants.SAME_ORIGIN))
-	ginR.Use(middleware.Logger())
 
 	if config.ClientFilter.Enable {
 		ginR.Use(middleware.ClientFilter())
