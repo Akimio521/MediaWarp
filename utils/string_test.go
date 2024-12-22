@@ -20,11 +20,11 @@ func TestResolveEmbyAPIKVPairs(t *testing.T) {
 			"api_KEY=e12acc0815f74e9da6a86c9e8c2d45d8",
 		},
 		"X-Emby-Token": {
-			"/emby/Videos/8/stream.strm?api_key=539c76dc33fc4935857e027698d685c7&authorization=Emby+UserId%3DBE98847F-7598-43F1-998F-35C4A52D28E6%2C+Client%3DConflux+Video+Player%2C+Device%3DiPhone%2C+DeviceId%3D321%2C+Version%3D1.0.0&deviceid=BE98847F-7598-43F1-998F-35C4A52D28E6&mediasourceid=mediasource_31&playsessionid=8b1ce7461411479cbfbf14a9c63b41e6&static=true&X-Emby-Token=539c76dc33fc4935857e027698d685c7",
+			"/emby/Videos/8/stream.strm?mediasourceid=mediasource_31&playsessionid=8b1ce7461411479cbfbf14a9c63b41e6&static=true&X-Emby-Token=539c76dc33fc4935857e027698d685c7",
 			"X-Emby-Token=539c76dc33fc4935857e027698d685c7",
 		},
 		"x-emby-token": {
-			"/emby/Videos/8/stream.strm?api_key=539c76dc33fc4935857e027698d685c7&authorization=Emby+UserId%3DBE98847F-7598-43F1-998F-35C4A52D28E6%2C+Client%3DConflux+Video+Player%2C+Device%3DiPhone%2C+DeviceId%3D321%2C+Version%3D1.0.0&deviceid=BE98847F-7598-43F1-998F-35C4A52D28E6&mediasourceid=mediasource_31&playsessionid=8b1ce7461411479cbfbf14a9c63b41e6&static=true&x-emby-token=539c76dc33fc4935857e027698d685c7",
+			"/emby/Videos/8/stream.strm?mediasourceid=mediasource_31&playsessionid=8b1ce7461411479cbfbf14a9c63b41e6&static=true&x-emby-token=539c76dc33fc4935857e027698d685c7",
 			"x-emby-token=539c76dc33fc4935857e027698d685c7",
 		},
 		"blank": {
