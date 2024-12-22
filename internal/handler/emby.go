@@ -126,8 +126,24 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 				}
 				item := itemResponse.Items[0]
 				strmFileType, _ := embyServerHandler.RecgonizeStrmFileType(*item.Path)
-				if strmFileType == constants.AlistStrm { // AlistStm 设置支持直链播放并且禁止转码
+				switch strmFileType {
+				case constants.HTTPStrm: // HTTPStrm 设置支持直链播放并且支持转码
+					*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
+					*playbackInfoResponse.MediaSources[index].SupportsDirectStream = true
+					if mediasource.DirectStreamURL != nil {
+						apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
+						if err != nil {
+							logging.Warning("解析API键值对失败：", err)
+						}
+						directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
+						logging.Debug("设置直链播放链接为: " + directStreamURL)
+						playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
+					}
+
+				case constants.AlistStrm: // AlistStm 设置支持直链播放并且禁止转码
 					container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
+					*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
+					*playbackInfoResponse.MediaSources[index].SupportsDirectStream = true
 					if mediasource.DirectStreamURL != nil {
 						apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
 						if err != nil {
@@ -137,8 +153,6 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 						logging.Debug("设置直链播放链接为: " + directStreamURL + "，容器为: " + container)
 						playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
 						playbackInfoResponse.MediaSources[index].Container = &container
-						*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
-						*playbackInfoResponse.MediaSources[index].SupportsDirectStream = true
 					}
 					*playbackInfoResponse.MediaSources[index].SupportsTranscoding = false
 					playbackInfoResponse.MediaSources[index].TranscodingURL = nil
