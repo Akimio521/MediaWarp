@@ -8,10 +8,12 @@ import (
 	"MediaWarp/internal/service/emby"
 	"MediaWarp/utils"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"path"
 	"regexp"
 	"strconv"
@@ -24,7 +26,29 @@ var embyRegexp = map[string]*regexp.Regexp{ // Emby 相关的正则表达式
 	"VideosHandler":               regexp.MustCompile(`(?i)^(.*)/videos/(.*)/(stream|original)`),              // 普通视频处理接口匹配
 	"ModifyBaseHtmlPlayerHandler": regexp.MustCompile(`(?i)^/web/modules/htmlvideoplayer/basehtmlplayer.js$`), // 修改 Web 的 basehtmlplayer.js
 	"WebIndex":                    regexp.MustCompile(`^/web/index.html$`),                                    // Web 首页
-	"videoRedirectReg":            regexp.MustCompile(`(?i)^(.*)/videos/(.*)/stream/(.*)$`),                   // 视频重定向匹配，统一视频请求格式
+	"PlaybackInfoHandler":         regexp.MustCompile(`(?i)^(.*)/Items/(.*)/PlaybackInfo`),                    // 播放信息处理接口
+	"VideoRedirectReg":            regexp.MustCompile(`(?i)^(.*)/videos/(.*)/stream/(.*)$`),                   // 视频重定向匹配，统一视频请求格式
+}
+
+var EmbyAPIKeys = []string{"api_key", "X-Emby-Token"}
+
+// 从 URL 中查询参数中解析 Emby 的 API 键值对
+//
+// 以 xxx=xxx 的字符串形式返回
+func resolveAPIKVPairs(urlString string) string {
+	url, err := url.Parse(urlString)
+	if err != nil {
+		logging.Warning("解析 URL 出错：", err)
+		return ""
+	}
+	for quryKey, queryValue := range url.Query() {
+		for _, key := range EmbyAPIKeys {
+			if strings.EqualFold(quryKey, key) {
+				return fmt.Sprintf("%s=%s", quryKey, queryValue[0])
+			}
+		}
+	}
+	return ""
 }
 
 // Emby服务器处理器
@@ -49,6 +73,10 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 		{
 			Regexp:  embyRegexp["VideosHandler"],
 			Handler: embyServerHandler.VideosHandler,
+		},
+		{
+			Regexp:  embyRegexp["PlaybackInfoHandler"],
+			Handler: embyServerHandler.PlaybackInfoHandler,
 		},
 		{
 			Regexp:  embyRegexp["ModifyBaseHtmlPlayerHandler"],
@@ -95,12 +123,79 @@ func (embyServerHandler *EmbyServerHandler) RecgonizeStrmFileType(strmFilePath s
 	return constants.UnknownStrm, nil
 }
 
+// 处理播放信息请求处理接口
+//
+// /Items/:itemId/PlaybackInfo
+func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context) {
+	key := "PlaybackInfoHandler"
+	if embyServerHandler.modifyProxyMap == nil {
+		embyServerHandler.modifyProxyMap = make(map[string]*httputil.ReverseProxy)
+	}
+
+	if _, ok := embyServerHandler.modifyProxyMap[key]; !ok {
+		proxy := embyServerHandler.server.GetReverseProxy()
+		proxy.ModifyResponse = func(rw *http.Response) error {
+			defer rw.Body.Close()
+			body, err := io.ReadAll(rw.Body)
+			if err != nil {
+				logging.Warning("读取 Body 出错：", err)
+				return err
+			}
+
+			var playbackInfoResponse emby.PlaybackInfoResponse
+			err = json.Unmarshal(body, &playbackInfoResponse)
+			if err != nil {
+				logging.Warning("解析 emby.PlaybackInfoResponse Json 错误：", err)
+				return err
+			}
+			for index, mediasource := range playbackInfoResponse.MediaSources {
+				logging.Debug("请求 ItemsServiceQueryItem：" + *mediasource.ID)
+				container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
+				itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(*mediasource.ID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询 item 需要去除前缀仅保留数字部分
+				if err != nil {
+					logging.Warning("请求 ItemsServiceQueryItem 失败：", err)
+					return err
+				}
+				item := itemResponse.Items[0]
+				strmFileType, _ := embyServerHandler.RecgonizeStrmFileType(*item.Path)
+				if strmFileType == constants.AlistStrm {
+					if mediasource.DirectStreamURL != nil {
+						apikeypair := resolveAPIKVPairs(*mediasource.DirectStreamURL)
+						directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
+						logging.Debug("设置直链播放链接为: " + directStreamURL + "，容器为: " + container)
+						playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
+						playbackInfoResponse.MediaSources[index].Container = &container
+					}
+				}
+			}
+
+			body, err = json.Marshal(playbackInfoResponse)
+			if err != nil {
+				logging.Warning("序列化 emby.PlaybackInfoResponse Json 错误：", err)
+				return err
+			}
+
+			rw.Body = io.NopCloser(bytes.NewBuffer(body)) // 重置响应体
+			// 更新 Content-Length 头
+			rw.ContentLength = int64(len(body))
+			rw.Header.Set("Content-Length", strconv.Itoa(len(body)))
+			// 更新 Content-Type 头
+			rw.Header.Set("Content-Type", "application/json")
+
+			return nil
+
+		}
+		embyServerHandler.modifyProxyMap[key] = proxy
+	}
+	embyServerHandler.modifyProxyMap[key].ServeHTTP(ctx.Writer, ctx.Request)
+}
+
 // 视频流处理器
 //
 // 支持播放本地视频、重定向HttpStrm、AlistStrm
 func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	orginalPath := ctx.Request.URL.Path
-	matches := embyRegexp["videoRedirectReg"].FindStringSubmatch(orginalPath)
+	matches := embyRegexp["VideoRedirectReg"].FindStringSubmatch(orginalPath)
 	switch len(matches) {
 	case 3:
 		if strings.ToLower(matches[0]) == "emby" {
