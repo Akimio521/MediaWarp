@@ -3,7 +3,8 @@ version: 2
 project_name: MediaWarp
 
 snapshot:
-  version_template: "{{ incpatch .Version }}-PreRelease-{{ .ShortCommit }}}"
+  version_template: "{{ incpatch .Version }}-PreRelease-{{ .ShortCommit }}"
+
 release:
   name_template: "{{ .Tag }}"
 before:
