@@ -119,7 +119,6 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 			}
 			for index, mediasource := range playbackInfoResponse.MediaSources {
 				logging.Debug("请求 ItemsServiceQueryItem：" + *mediasource.ID)
-				container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 				itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(*mediasource.ID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询 item 需要去除前缀仅保留数字部分
 				if err != nil {
 					logging.Warning("请求 ItemsServiceQueryItem 失败：", err)
@@ -127,7 +126,8 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 				}
 				item := itemResponse.Items[0]
 				strmFileType, _ := embyServerHandler.RecgonizeStrmFileType(*item.Path)
-				if strmFileType == constants.AlistStrm {
+				if strmFileType == constants.AlistStrm { // AlistStm 设置支持直链播放并且禁止转码
+					container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 					if mediasource.DirectStreamURL != nil {
 						apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
 						if err != nil {
@@ -137,7 +137,13 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 						logging.Debug("设置直链播放链接为: " + directStreamURL + "，容器为: " + container)
 						playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
 						playbackInfoResponse.MediaSources[index].Container = &container
+						*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
+						*playbackInfoResponse.MediaSources[index].SupportsDirectStream = true
 					}
+					*playbackInfoResponse.MediaSources[index].SupportsTranscoding = false
+					playbackInfoResponse.MediaSources[index].TranscodingURL = nil
+					playbackInfoResponse.MediaSources[index].TranscodingSubProtocol = nil
+					playbackInfoResponse.MediaSources[index].TranscodingContainer = nil
 				}
 			}
 
