@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"path"
 	"regexp"
 	"strconv"
@@ -21,12 +22,14 @@ import (
 var embyRegexp = map[string]*regexp.Regexp{ // Emby 相关的正则表达式
 	"VideosHandler":               regexp.MustCompile(`(?i)^(.*)/videos/(.*)/(stream|original)`),              // 普通视频处理接口匹配
 	"ModifyBaseHtmlPlayerHandler": regexp.MustCompile(`(?i)^/web/modules/htmlvideoplayer/basehtmlplayer.js$`), // 修改 Web 的 basehtmlplayer.js
+	"WebIndex":                    regexp.MustCompile(`^/web/index.html$`),                                    // Web 首页
 	"videoRedirectReg":            regexp.MustCompile(`(?i)^(.*)/videos/(.*)/stream/(.*)$`),                   // 视频重定向匹配，统一视频请求格式
 }
 
 // Emby服务器处理器
 type EmbyServerHandler struct {
-	server *emby.EmbyServer
+	server         *emby.EmbyServer
+	modifyProxyMap map[string]*httputil.ReverseProxy
 }
 
 // 初始化
@@ -56,7 +59,7 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 		if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.BeautifyCSS {
 			embyRouterRules = append(embyRouterRules,
 				RegexpRouteRule{
-					Regexp:  regexp.MustCompile(`^/web/index.html$`),
+					Regexp:  embyRegexp["WebIndex"],
 					Handler: embyServerHandler.IndexHandler,
 				},
 			)
@@ -156,35 +159,46 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 //
 // 用于修改播放器JS，实现跨域播放Strm
 func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayerHandler(ctx *gin.Context) {
+	key := "ModifyBaseHtmlPlayerHandler"
+
 	version := ctx.Query("v")
 	logging.Debug("请求 basehtmlplayer.js 版本：", version)
 
-	proxy := embyServerHandler.server.GetReverseProxy()
-	proxy.ModifyResponse = func(rw *http.Response) error {
-		defer rw.Body.Close()
-		body, err := io.ReadAll(rw.Body)
-		if err != nil {
-			return err
-		}
-
-		modifiedBodyStr := strings.ReplaceAll(string(body), `mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`, "null") // 修改响应体
-		updateBody(rw, modifiedBodyStr)
-		return nil
+	if embyServerHandler.modifyProxyMap == nil {
+		embyServerHandler.modifyProxyMap = make(map[string]*httputil.ReverseProxy)
 	}
 
-	proxy.ServeHTTP(ctx.Writer, ctx.Request)
+	if _, ok := embyServerHandler.modifyProxyMap[key]; !ok {
+		proxy := embyServerHandler.server.GetReverseProxy()
+		proxy.ModifyResponse = func(rw *http.Response) error {
+			defer rw.Body.Close()
+			body, err := io.ReadAll(rw.Body)
+			if err != nil {
+				return err
+			}
+
+			modifiedBodyStr := strings.ReplaceAll(string(body), `mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`, "null") // 修改响应体
+			updateBody(rw, modifiedBodyStr)
+			return nil
+		}
+		embyServerHandler.modifyProxyMap[key] = proxy
+	}
+	embyServerHandler.modifyProxyMap[key].ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 // 首页处理方法
 func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 	var (
+		key             string = "IndexHandler"
 		htmlFilePath    string = path.Join(config.StaticDir(), "index.html")
 		modifiedBodyStr string
 		addHEAD         string
 	)
-	if !config.Web.Enable { //直接转发相关请求
-		embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
-	} else { // 修改请求
+	if embyServerHandler.modifyProxyMap == nil {
+		embyServerHandler.modifyProxyMap = make(map[string]*httputil.ReverseProxy)
+	}
+
+	if _, ok := embyServerHandler.modifyProxyMap[key]; !ok {
 		proxy := embyServerHandler.server.GetReverseProxy()
 		proxy.ModifyResponse = func(rw *http.Response) error {
 
@@ -228,8 +242,9 @@ func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 			updateBody(rw, modifiedBodyStr)
 			return nil
 		}
-		proxy.ServeHTTP(ctx.Writer, ctx.Request)
+		embyServerHandler.modifyProxyMap[key] = proxy
 	}
+	embyServerHandler.modifyProxyMap[key].ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 // 更新响应体
