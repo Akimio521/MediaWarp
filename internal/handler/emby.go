@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"MediaWarp/constants"
 	"MediaWarp/internal/config"
 	"MediaWarp/internal/logging"
 	"MediaWarp/internal/service"
@@ -68,6 +69,32 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 	return embyRouterRules
 }
 
+// 根据 Strm 文件路径识别 Strm 文件类型
+//
+// 返回 Strm 文件类型和一个可选配置
+func (embyServerHandler *EmbyServerHandler) RecgonizeStrmFileType(strmFilePath string) (constants.StrmFileType, any) {
+	if config.HTTPStrm.Enable {
+		for _, prefix := range config.HTTPStrm.PrefixList {
+			if strings.HasPrefix(strmFilePath, prefix) {
+				logging.Debug(strmFilePath + " 成功匹配路径：" + prefix + "，Strm 类型：" + string(constants.HTTPStrm))
+				return constants.HTTPStrm, nil
+			}
+		}
+	}
+	if config.AlistStrm.Enable {
+		for _, alistStrmConfig := range config.AlistStrm.List {
+			for _, prefix := range alistStrmConfig.PrefixList {
+				if strings.HasPrefix(strmFilePath, prefix) {
+					logging.Debug(strmFilePath + " 成功匹配路径：" + prefix + "，Strm 类型：" + string(constants.AlistStrm) + "，AlistServer 地址：" + alistStrmConfig.ADDR)
+					return constants.AlistStrm, alistStrmConfig.ADDR
+				}
+			}
+		}
+	}
+	logging.Debug(strmFilePath + " 未匹配任何路径，Strm 类型：" + string(constants.UnknownStrm))
+	return constants.UnknownStrm, nil
+}
+
 // 视频流处理器
 //
 // 支持播放本地视频、重定向HttpStrm、AlistStrm
@@ -100,59 +127,44 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 
 	logging.Debug("请求 ItemsServiceQueryItem：", mediaSourceID)
 	itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询item需要去除前缀仅保留数字部分
-
 	if err != nil {
 		logging.Warning("请求 ItemsServiceQueryItem 失败：", err)
 		embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
 		return
 	}
+
 	item := itemResponse.Items[0]
+	strmFileType, opt := embyServerHandler.RecgonizeStrmFileType(*item.Path)
+
 	for _, mediasource := range item.MediaSources {
 		if *mediasource.ID == mediaSourceID { // EmbyServer >= 4.9 返回的ID带有前缀mediasource_
-			isRedirect := true
-
-			// HTTPStrm 处理
-			if *mediasource.Protocol == emby.HTTP && config.HTTPStrm.Enable {
-				for _, prefix := range config.HTTPStrm.PrefixList {
-					if strings.HasPrefix(*item.Path, prefix) {
-						logging.Debug(*item.Path, " 匹配 HTTPStrm 路径：", prefix, " 成功")
-						logging.Info("HTTPStrm 重定向至：", *mediasource.Path)
-						ctx.Redirect(http.StatusFound, *mediasource.Path)
+			switch strmFileType {
+			case constants.HTTPStrm:
+				if *mediasource.Protocol == emby.HTTP {
+					logging.Info("HTTPStrm 重定向至：", *mediasource.Path)
+					ctx.Redirect(http.StatusFound, *mediasource.Path)
+				}
+				return
+			case constants.AlistStrm:
+				if strings.ToUpper(*mediasource.Container) == "STRM" { // 判断是否为Strm文件
+					alistServerAddr := opt.(string)
+					alistServer := service.GetAlistServer(alistServerAddr)
+					fsGetData, err := alistServer.FsGet(*mediasource.Path)
+					if err != nil {
+						logging.Warning("请求 FsGet 失败：", err)
 						return
 					}
+					logging.Info("AlistStrm 重定向至：", fsGetData.RawURL)
+					ctx.Redirect(http.StatusFound, fsGetData.RawURL)
+					return
 				}
-				logging.Info("未匹配 HTTPStrm 路径：", *item.Path)
-				isRedirect = false // 未匹配到 HTTPStrm 路径，但未启用，不进行后续重定向
+				return
+			case constants.UnknownStrm:
+				embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
+				return
 			}
-
-			// AlistStrm 处理
-			if isRedirect && strings.ToUpper(*mediasource.Container) == "STRM" && config.AlistStrm.Enable { // 判断是否为Strm文件
-				for _, alistStrmConfig := range config.AlistStrm.List {
-					for _, perfix := range alistStrmConfig.PrefixList {
-						if strings.HasPrefix(*item.Path, perfix) {
-							alistServer := service.GetAlistServer(alistStrmConfig.ADDR)
-							fsGetData, err := alistServer.FsGet(*mediasource.Path)
-							if err != nil {
-								logging.Warning("请求 FsGet 失败：", err)
-								return
-							}
-							logging.Info("AlistStrm 重定向至：", fsGetData.RawURL)
-							ctx.Redirect(http.StatusFound, fsGetData.RawURL)
-							return
-						}
-					}
-				}
-				logging.Info("未匹配 AlistStrm 路径：", *item.Path)
-				isRedirect = false // 未匹配到 AlistStrm 路径，但未启用，不进行后续重定向
-			}
-
-			logging.Info("本地视频：", *mediasource.Path)
-			embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
-			return
 		}
 	}
-	logging.Debug("非视频流请求，转发至上游服务器") // 可能是字幕文件等
-	embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
 }
 
 // 修改basehtmlplayer.js
