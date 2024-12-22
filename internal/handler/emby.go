@@ -127,7 +127,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	mediaSourceID := ctx.Query("mediasourceid")
 
 	logging.Debug("请求 ItemsServiceQueryItem：", mediaSourceID)
-	itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询item需要去除前缀仅保留数字部分
+	itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询 item 需要去除前缀仅保留数字部分
 	if err != nil {
 		logging.Warning("请求 ItemsServiceQueryItem 失败：", err)
 		embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
@@ -135,8 +135,14 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	}
 
 	item := itemResponse.Items[0]
-	strmFileType, opt := embyServerHandler.RecgonizeStrmFileType(*item.Path)
 
+	if !strings.HasSuffix(strings.ToLower(*item.Path), ".strm") { // 不是 Strm 文件
+		logging.Debug("播放本地视频：" + *item.Path + "，不进行处理")
+		embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
+		return
+	}
+
+	strmFileType, opt := embyServerHandler.RecgonizeStrmFileType(*item.Path)
 	for _, mediasource := range item.MediaSources {
 		if *mediasource.ID == mediaSourceID { // EmbyServer >= 4.9 返回的ID带有前缀mediasource_
 			switch strmFileType {
