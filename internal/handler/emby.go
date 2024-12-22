@@ -23,11 +23,11 @@ import (
 )
 
 var embyRegexp = map[string]*regexp.Regexp{ // Emby 相关的正则表达式
-	"VideosHandler":               regexp.MustCompile(`(?i)^(.*)/videos/(.*)/(stream|original)`),              // 普通视频处理接口匹配
+	"VideosHandler":               regexp.MustCompile(`(?i)^(/emby)?/videos/(.*)/(stream|original)`),          // 普通视频处理接口匹配
 	"ModifyBaseHtmlPlayerHandler": regexp.MustCompile(`(?i)^/web/modules/htmlvideoplayer/basehtmlplayer.js$`), // 修改 Web 的 basehtmlplayer.js
 	"WebIndex":                    regexp.MustCompile(`^/web/index.html$`),                                    // Web 首页
-	"PlaybackInfoHandler":         regexp.MustCompile(`(?i)^(.*)/Items/(.*)/PlaybackInfo`),                    // 播放信息处理接口
-	"VideoRedirectReg":            regexp.MustCompile(`(?i)^(.*)/videos/(.*)/stream/(.*)$`),                   // 视频重定向匹配，统一视频请求格式
+	"PlaybackInfoHandler":         regexp.MustCompile(`(?i)^(/emby)?/Items/(.*)/PlaybackInfo`),                // 播放信息处理接口
+	"VideoRedirectReg":            regexp.MustCompile(`(?i)^(/emby)?/videos/(.*)/stream/(.*)`),                // 视频重定向匹配，统一视频请求格式
 }
 
 var EmbyAPIKeys = []string{"api_key", "X-Emby-Token"}
@@ -196,15 +196,7 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	orginalPath := ctx.Request.URL.Path
 	matches := embyRegexp["VideoRedirectReg"].FindStringSubmatch(orginalPath)
-	switch len(matches) {
-	case 3:
-		if strings.ToLower(matches[0]) == "emby" {
-			redirectPath := fmt.Sprintf("/videos/%s/stream", matches[1])
-			logging.Debug(orginalPath + " 重定向至：" + redirectPath)
-			ctx.Redirect(http.StatusFound, redirectPath)
-			return
-		}
-	case 2:
+	if len(matches) == 2 {
 		redirectPath := fmt.Sprintf("/videos/%s/stream", matches[0])
 		logging.Debug(orginalPath + " 重定向至：" + redirectPath)
 		ctx.Redirect(http.StatusFound, redirectPath)
