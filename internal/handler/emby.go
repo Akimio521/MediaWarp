@@ -15,20 +15,11 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"path"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
-
-var embyRegexp = map[string]*regexp.Regexp{ // Emby 相关的正则表达式
-	"VideosHandler":               regexp.MustCompile(`(?i)^(/emby)?/videos/(.*)/(stream|original)`),          // 普通视频处理接口匹配
-	"ModifyBaseHtmlPlayerHandler": regexp.MustCompile(`(?i)^/web/modules/htmlvideoplayer/basehtmlplayer.js$`), // 修改 Web 的 basehtmlplayer.js
-	"WebIndex":                    regexp.MustCompile(`^/web/index.html$`),                                    // Web 首页
-	"PlaybackInfoHandler":         regexp.MustCompile(`(?i)^(/emby)?/Items/(.*)/PlaybackInfo`),                // 播放信息处理接口
-	"VideoRedirectReg":            regexp.MustCompile(`(?i)^(/emby)?/videos/(.*)/stream/(.*)`),                // 视频重定向匹配，统一视频请求格式
-}
 
 var EmbyAPIKeys = []string{"api_key", "X-Emby-Token"}
 
@@ -71,15 +62,15 @@ func (embyServerHandler *EmbyServerHandler) ReverseProxy(rw http.ResponseWriter,
 func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteRule {
 	embyRouterRules := []RegexpRouteRule{
 		{
-			Regexp:  embyRegexp["VideosHandler"],
+			Regexp:  constants.EmbyRegexp["router"]["VideosHandler"],
 			Handler: embyServerHandler.VideosHandler,
 		},
 		{
-			Regexp:  embyRegexp["PlaybackInfoHandler"],
+			Regexp:  constants.EmbyRegexp["router"]["PlaybackInfoHandler"],
 			Handler: embyServerHandler.PlaybackInfoHandler,
 		},
 		{
-			Regexp:  embyRegexp["ModifyBaseHtmlPlayerHandler"],
+			Regexp:  constants.EmbyRegexp["router"]["ModifyBaseHtmlPlayerHandler"],
 			Handler: embyServerHandler.ModifyBaseHtmlPlayerHandler,
 		},
 	}
@@ -88,7 +79,7 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 		if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.BeautifyCSS {
 			embyRouterRules = append(embyRouterRules,
 				RegexpRouteRule{
-					Regexp:  embyRegexp["WebIndex"],
+					Regexp:  constants.EmbyRegexp["router"]["WebIndex"],
 					Handler: embyServerHandler.IndexHandler,
 				},
 			)
@@ -195,7 +186,7 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 // 支持播放本地视频、重定向HttpStrm、AlistStrm
 func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	orginalPath := ctx.Request.URL.Path
-	matches := embyRegexp["VideoRedirectReg"].FindStringSubmatch(orginalPath)
+	matches := constants.EmbyRegexp["others"]["VideoRedirectReg"].FindStringSubmatch(orginalPath)
 	if len(matches) == 2 {
 		redirectPath := fmt.Sprintf("/videos/%s/stream", matches[0])
 		logging.Debug(orginalPath + " 重定向至：" + redirectPath)
