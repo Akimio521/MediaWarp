@@ -18,6 +18,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var embyRegexp = map[string]*regexp.Regexp{ // Emby 相关的正则表达式
+	"VideosHandler":               regexp.MustCompile(`(?i)^(.*)/videos/(.*)/(stream|original)`),              // 普通视频处理接口匹配
+	"ModifyBaseHtmlPlayerHandler": regexp.MustCompile(`(?i)^/web/modules/htmlvideoplayer/basehtmlplayer.js$`), // 修改 Web 的 basehtmlplayer.js
+	"videoRedirectReg":            regexp.MustCompile(`(?i)^(.*)/videos/(.*)/stream/(.*)$`),                   // 视频重定向匹配，统一视频请求格式
+}
+
 // Emby服务器处理器
 type EmbyServerHandler struct {
 	server *emby.EmbyServer
@@ -37,11 +43,11 @@ func (embyServerHandler *EmbyServerHandler) ReverseProxy(rw http.ResponseWriter,
 func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteRule {
 	embyRouterRules := []RegexpRouteRule{
 		{
-			Regexp:  regexp.MustCompile(`(?i)^(.*)/videos/(.*)/(stream|original)`),
+			Regexp:  embyRegexp["VideosHandler"],
 			Handler: embyServerHandler.VideosHandler,
 		},
 		{
-			Regexp:  regexp.MustCompile(`^/web/modules/htmlvideoplayer/basehtmlplayer.js$`),
+			Regexp:  embyRegexp["ModifyBaseHtmlPlayerHandler"],
 			Handler: embyServerHandler.ModifyBaseHtmlPlayerHandler,
 		},
 	}
@@ -59,14 +65,12 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 	return embyRouterRules
 }
 
-var videoRedirectReg = regexp.MustCompile(`(?i)^(.*)/videos/(.*)/stream/(.*)$`)
-
 // 视频流处理器
 //
 // 支持播放本地视频、重定向HttpStrm、AlistStrm
 func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	orginalPath := ctx.Request.URL.Path
-	matches := videoRedirectReg.FindStringSubmatch(orginalPath)
+	matches := embyRegexp["videoRedirectReg"].FindStringSubmatch(orginalPath)
 	if len(matches) == 3 {
 		if strings.ToLower(matches[0]) == "emby" {
 			redirectPath := fmt.Sprintf("/videos/%s/stream", matches[1])
