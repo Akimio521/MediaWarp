@@ -101,20 +101,21 @@ func (embyServerHandler *EmbyServerHandler) RecgonizeStrmFileType(strmFilePath s
 func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	orginalPath := ctx.Request.URL.Path
 	matches := embyRegexp["videoRedirectReg"].FindStringSubmatch(orginalPath)
-	if len(matches) == 3 {
+	switch len(matches) {
+	case 3:
 		if strings.ToLower(matches[0]) == "emby" {
 			redirectPath := fmt.Sprintf("/videos/%s/stream", matches[1])
 			logging.Debug(orginalPath + " 重定向至：" + redirectPath)
 			ctx.Redirect(http.StatusFound, redirectPath)
 			return
 		}
-	}
-	if len(matches) == 2 {
+	case 2:
 		redirectPath := fmt.Sprintf("/videos/%s/stream", matches[0])
 		logging.Debug(orginalPath + " 重定向至：" + redirectPath)
 		ctx.Redirect(http.StatusFound, redirectPath)
 		return
 	}
+
 	if ctx.Request.Method == http.MethodHead { // 不额外处理 HEAD 请求
 		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
 		logging.Debug("VideosHandler 不处理 HEAD 请求，转发至上游服务器")
