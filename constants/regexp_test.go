@@ -31,6 +31,10 @@ func TestEmbyRoute(t *testing.T) {
 			"/Items/88697/PlaybackInfo?userid=9d882dc8ec514b2ca14652262df0afad",
 			"PlaybackInfoHandler",
 		},
+		"WEB JavaScript": {
+			"/web/videos/videos.js?v=4.8.10.0",
+			"",
+		},
 	}
 	for caseName, testCase := range embyRouteTestCases {
 		t.Run(caseName, func(t *testing.T) {
