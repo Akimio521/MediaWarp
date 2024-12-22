@@ -7,6 +7,7 @@ import (
 	"MediaWarp/internal/service/emby"
 	"MediaWarp/utils"
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"path"
@@ -36,7 +37,7 @@ func (embyServerHandler *EmbyServerHandler) ReverseProxy(rw http.ResponseWriter,
 func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteRule {
 	embyRouterRules := []RegexpRouteRule{
 		{
-			Regexp:  regexp.MustCompile(`(?i)^/.*videos/.*`),
+			Regexp:  regexp.MustCompile(`(?i)^(.*)/videos/(.*)/(stream|original)`),
 			Handler: embyServerHandler.VideosHandler,
 		},
 		{
@@ -58,10 +59,34 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 	return embyRouterRules
 }
 
+var videoRedirectReg = regexp.MustCompile(`(?i)^(.*)/videos/(.*)/stream/(.*)$`)
+
 // 视频流处理器
 //
 // 支持播放本地视频、重定向HttpStrm、AlistStrm
 func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
+	orginalPath := ctx.Request.URL.Path
+	matches := videoRedirectReg.FindStringSubmatch(orginalPath)
+	if len(matches) == 3 {
+		if strings.ToLower(matches[0]) == "emby" {
+			redirectPath := fmt.Sprintf("/videos/%s/stream", matches[1])
+			logging.Debug(orginalPath + " 重定向至：" + redirectPath)
+			ctx.Redirect(http.StatusFound, redirectPath)
+			return
+		}
+	}
+	if len(matches) == 2 {
+		redirectPath := fmt.Sprintf("/videos/%s/stream", matches[0])
+		logging.Debug(orginalPath + " 重定向至：" + redirectPath)
+		ctx.Redirect(http.StatusFound, redirectPath)
+		return
+	}
+	if ctx.Request.Method == http.MethodHead { // 不额外处理 HEAD 请求
+		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
+		logging.Debug("VideosHandler 不处理 HEAD 请求，转发至上游服务器")
+		return
+	}
+
 	// EmbyServer <= 4.8 ====> mediaSourceID = 343121
 	// EmbyServer >= 4.9 ====> mediaSourceID = mediasource_31
 	mediaSourceID := ctx.Query("mediasourceid")
