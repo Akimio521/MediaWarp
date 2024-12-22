@@ -43,6 +43,7 @@ builds:
 dockers:
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
+    skip_push: true
     build_flag_templates:
       - "--platform=linux/amd64"
     goos: linux
@@ -53,6 +54,7 @@ dockers:
 
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
+    skip_push: true
     build_flag_templates:
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{ .Date }}"
@@ -66,6 +68,7 @@ dockers:
 
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
+    skip_push: true
     build_flag_templates:
       - "--platform=linux/arm/v6"
       - "--label=org.opencontainers.image.created={{ .Date }}"
@@ -80,6 +83,7 @@ dockers:
 
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
+    skip_push: true
     build_flag_templates:
       - "--platform=linux/arm/v7"
       - "--label=org.opencontainers.image.created={{ .Date }}"
