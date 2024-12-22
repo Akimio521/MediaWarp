@@ -43,6 +43,8 @@ jobs:
       - name: Upload assets
         uses: actions/upload-artifact@v4
         with:
-          name: MediaWarp
-          path: ./dist/*
-          compression-level: 9
+          path: |
+            ./dist/*.zip
+            ./dist/*.tar.gz
+            ./dist/*.json
+            ./dist/*.yaml
