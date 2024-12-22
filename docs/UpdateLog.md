@@ -25,3 +25,10 @@
   - 中间件缓存可选是否开启（避免内存缓存缓存大量图片、css、js 等资源）
   - 修改 internal/config、internal/logger、internal/cache 这几个包，使其使用方式更加 “golang”
   - 支持加载多种格式的配置文件（JSON、TOML、YAML、YML、Java properties、Java props）
+- 2024.12.22： v0.0.6
+  - 提供 API 接口查看版本具体信息
+  - 小幅度修改项目子包结构
+  - 使用 goreleaser 进行构建
+  - 减小 EmbyServer.VideosHandler 匹配范围
+  - 需要修改响应体时复用之前实例化的 httputil.ReverseProxy
+  - EmbyServerHandler.PlaybackInfoHandler 拦截修改响应修改 AlistStrm 正确播放地址
