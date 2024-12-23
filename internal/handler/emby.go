@@ -24,11 +24,47 @@ import (
 type EmbyServerHandler struct {
 	server         *emby.EmbyServer
 	modifyProxyMap map[string]*httputil.ReverseProxy
+	routerRules    []RegexpRouteRule
 }
 
 // 初始化
 func (embyServerHandler *EmbyServerHandler) Init() {
 	embyServerHandler.server = emby.New(config.MediaServer.ADDR, config.MediaServer.AUTH)
+	{ // 初始化路由规则
+		embyServerHandler.routerRules = []RegexpRouteRule{
+			{
+				Regexp:  constants.EmbyRegexp["router"]["VideosHandler"],
+				Handler: embyServerHandler.VideosHandler,
+			},
+			{
+				Regexp:  constants.EmbyRegexp["router"]["PlaybackInfoHandler"],
+				Handler: embyServerHandler.PlaybackInfoHandler,
+			},
+			{
+				Regexp:  constants.EmbyRegexp["router"]["ModifyBaseHtmlPlayerHandler"],
+				Handler: embyServerHandler.ModifyBaseHtmlPlayerHandler,
+			},
+		}
+
+		if config.Web.Enable {
+			if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.BeautifyCSS {
+				embyServerHandler.routerRules = append(embyServerHandler.routerRules,
+					RegexpRouteRule{
+						Regexp:  constants.EmbyRegexp["router"]["WebIndex"],
+						Handler: embyServerHandler.IndexHandler,
+					},
+				)
+			}
+		}
+		if config.Subtitle.Enable && config.Subtitle.SRT2ASS {
+			embyServerHandler.routerRules = append(embyServerHandler.routerRules,
+				RegexpRouteRule{
+					Regexp:  constants.EmbyRegexp["router"]["SubtitlesHandler"],
+					Handler: embyServerHandler.SubtitlesHandler,
+				},
+			)
+		}
+	}
 }
 
 // 转发请求至上游服务器
@@ -38,40 +74,7 @@ func (embyServerHandler *EmbyServerHandler) ReverseProxy(rw http.ResponseWriter,
 
 // 正则路由表
 func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteRule {
-	embyRouterRules := []RegexpRouteRule{
-		{
-			Regexp:  constants.EmbyRegexp["router"]["VideosHandler"],
-			Handler: embyServerHandler.VideosHandler,
-		},
-		{
-			Regexp:  constants.EmbyRegexp["router"]["PlaybackInfoHandler"],
-			Handler: embyServerHandler.PlaybackInfoHandler,
-		},
-		{
-			Regexp:  constants.EmbyRegexp["router"]["ModifyBaseHtmlPlayerHandler"],
-			Handler: embyServerHandler.ModifyBaseHtmlPlayerHandler,
-		},
-	}
-
-	if config.Web.Enable {
-		if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.BeautifyCSS {
-			embyRouterRules = append(embyRouterRules,
-				RegexpRouteRule{
-					Regexp:  constants.EmbyRegexp["router"]["WebIndex"],
-					Handler: embyServerHandler.IndexHandler,
-				},
-			)
-		}
-	}
-	if config.Subtitle.Enable && config.Subtitle.SRT2ASS {
-		embyRouterRules = append(embyRouterRules,
-			RegexpRouteRule{
-				Regexp:  constants.EmbyRegexp["router"]["SubtitlesHandler"],
-				Handler: embyServerHandler.SubtitlesHandler,
-			},
-		)
-	}
-	return embyRouterRules
+	return embyServerHandler.routerRules
 }
 
 // 根据 Strm 文件路径识别 Strm 文件类型
