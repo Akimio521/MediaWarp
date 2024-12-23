@@ -29,6 +29,7 @@ var (
 	ClientFilter ClientFilterSetting // 客户端过滤设置
 	HTTPStrm     HTTPStrmSetting     // HTTPSTRM设置
 	AlistStrm    AlistStrmSetting    // AlistStrm设置
+	Subtitle     SubtitleSetting     // 字幕设置
 )
 
 // 获取版本信息
@@ -136,6 +137,9 @@ func loadConfig() {
 	}
 	if err := viper.UnmarshalKey("AlistStrm", &AlistStrm); err != nil {
 		panic(fmt.Errorf("AlistStrmSetting  解析失败, %v", err))
+	}
+	if err := viper.UnmarshalKey("Subtitle", &Subtitle); err != nil {
+		panic(fmt.Errorf("SubtitleSetting  解析失败, %v", err))
 	}
 
 }

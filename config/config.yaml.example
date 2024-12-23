@@ -63,3 +63,10 @@ AlistStrm:                                  # AlistStrm相关配置（Strm文件
       Password: adminadmin
       PrefixList: 
         - /media/strm
+
+Subtitle:                                   # 字体相关设置
+  Enable: True                              # 启用
+  SRT2ASS: True                             # SRT 字幕转 ASS 字幕
+  ASSStyle:                                 # SRT 字幕转 ASS 字幕使用的样式
+    - "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding"
+    - "Style: Default,楷体,20,&H03FFFFFF,&H00FFFFFF,&H00000000,&H02000000,-1,0,0,0,100,100,0,0,1,1,0,2,10,10,10,1"

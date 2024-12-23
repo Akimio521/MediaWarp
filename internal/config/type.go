@@ -76,3 +76,10 @@ type AlistStrmSetting struct {
 	Enable bool
 	List   []AlistSetting
 }
+
+// 字幕设置
+type SubtitleSetting struct {
+	Enable   bool
+	SRT2ASS  bool // SRT 字幕转 ASS 字幕
+	ASSStyle []string
+}

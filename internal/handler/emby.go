@@ -63,6 +63,14 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 			)
 		}
 	}
+	if config.Subtitle.Enable && config.Subtitle.SRT2ASS {
+		embyRouterRules = append(embyRouterRules,
+			RegexpRouteRule{
+				Regexp:  constants.EmbyRegexp["router"]["SubtitlesHandler"],
+				Handler: embyServerHandler.SubtitlesHandler,
+			},
+		)
+	}
 	return embyRouterRules
 }
 
@@ -261,6 +269,42 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 			}
 		}
 	}
+}
+
+// 字幕处理接口
+func (embyServerHandler *EmbyServerHandler) SubtitlesHandler(ctx *gin.Context) {
+	key := "SubtitlesHandler"
+	if embyServerHandler.modifyProxyMap == nil {
+		embyServerHandler.modifyProxyMap = make(map[string]*httputil.ReverseProxy)
+	}
+
+	if _, ok := embyServerHandler.modifyProxyMap[key]; !ok {
+		proxy := embyServerHandler.server.GetReverseProxy()
+		proxy.ModifyResponse = func(rw *http.Response) error {
+			defer rw.Body.Close()
+			body, err := io.ReadAll(rw.Body) // 读取字幕文件
+			if err != nil {
+				logging.Warning("读取原始字幕 Body 出错：", err)
+				return err
+			}
+			var msg string
+			sutitile := string(body)
+			if utils.IsSRT(sutitile) { // 判断是否为 SRT 格式
+				msg = "字幕文件为 SRT 格式"
+				if config.Subtitle.SRT2ASS {
+					msg += "，已转为 ASS 格式"
+					assSubtitle := utils.SRT2ASS(sutitile, config.Subtitle.ASSStyle)
+					updateBody(rw, assSubtitle)
+				}
+			}
+			if msg != "" {
+				logging.Info(msg)
+			}
+			return nil
+		}
+		embyServerHandler.modifyProxyMap[key] = proxy
+	}
+	embyServerHandler.modifyProxyMap[key].ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 // 修改basehtmlplayer.js
