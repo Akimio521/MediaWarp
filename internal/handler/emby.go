@@ -125,7 +125,7 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 					return err
 				}
 				item := itemResponse.Items[0]
-				strmFileType, _ := embyServerHandler.RecgonizeStrmFileType(*item.Path)
+				strmFileType, opt := embyServerHandler.RecgonizeStrmFileType(*item.Path)
 				switch strmFileType {
 				case constants.HTTPStrm: // HTTPStrm 设置支持直链播放并且支持转码
 					*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
@@ -136,8 +136,8 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 							logging.Warning("解析API键值对失败：", err)
 						}
 						directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
-						logging.Debug("设置直链播放链接为: " + directStreamURL)
 						playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
+						logging.Debug("设置直链播放链接为: " + directStreamURL)
 					}
 
 				case constants.AlistStrm: // AlistStm 设置支持直链播放并且禁止转码
@@ -157,6 +157,14 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 					container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 					playbackInfoResponse.MediaSources[index].Container = &container
 					logging.Debug("设置直链播放链接为: " + directStreamURL + "，容器为: " + container)
+					alistServer := service.GetAlistServer(opt.(string))
+					fsGetData, err := alistServer.FsGet(*mediasource.Path)
+					if err != nil {
+						logging.Warning("请求 FsGet 失败：", err)
+						continue
+					}
+					playbackInfoResponse.MediaSources[index].Size = &fsGetData.Size
+					logging.Debug("设置文件大小为: " + strconv.FormatInt(fsGetData.Size, 10))
 				}
 			}
 
