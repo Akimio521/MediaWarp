@@ -141,23 +141,22 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 					}
 
 				case constants.AlistStrm: // AlistStm 设置支持直链播放并且禁止转码
-					container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 					*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
 					*playbackInfoResponse.MediaSources[index].SupportsDirectStream = true
-					if mediasource.DirectStreamURL != nil {
-						apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
-						if err != nil {
-							logging.Warning("解析API键值对失败：", err)
-						}
-						directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
-						logging.Debug("设置直链播放链接为: " + directStreamURL + "，容器为: " + container)
-						playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
-						playbackInfoResponse.MediaSources[index].Container = &container
-					}
 					*playbackInfoResponse.MediaSources[index].SupportsTranscoding = false
 					playbackInfoResponse.MediaSources[index].TranscodingURL = nil
 					playbackInfoResponse.MediaSources[index].TranscodingSubProtocol = nil
 					playbackInfoResponse.MediaSources[index].TranscodingContainer = nil
+					apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
+					if err != nil {
+						logging.Warning("解析API键值对失败：", err)
+						continue
+					}
+					directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
+					playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
+					container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
+					playbackInfoResponse.MediaSources[index].Container = &container
+					logging.Debug("设置直链播放链接为: " + directStreamURL + "，容器为: " + container)
 				}
 			}
 
