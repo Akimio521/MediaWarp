@@ -156,15 +156,17 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 					playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
 					container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 					playbackInfoResponse.MediaSources[index].Container = &container
-					logging.Debug("设置直链播放链接为: " + directStreamURL + "，容器为: " + container)
+					msg := fmt.Sprintf("%s 设置直链播放链接为: %s，容器为: %s", *mediasource.Name, directStreamURL, container)
 					alistServer := service.GetAlistServer(opt.(string))
 					fsGetData, err := alistServer.FsGet(*mediasource.Path)
 					if err != nil {
+						logging.Debug(msg)
 						logging.Warning("请求 FsGet 失败：", err)
 						continue
 					}
 					playbackInfoResponse.MediaSources[index].Size = &fsGetData.Size
-					logging.Debug("设置文件大小为: " + strconv.FormatInt(fsGetData.Size, 10))
+					msg += fmt.Sprintf("，设置文件大小为:%d", fsGetData.Size)
+					logging.Debug(msg)
 				}
 			}
 
