@@ -8,6 +8,7 @@ var EmbyRegexp = map[string]map[string]*regexp.Regexp{ // Emby 相关的正则�
 		"ModifyBaseHtmlPlayerHandler": regexp.MustCompile(`(?i)^/web/modules/htmlvideoplayer/basehtmlplayer.js$`), // 修改 Web 的 basehtmlplayer.js
 		"WebIndex":                    regexp.MustCompile(`^/web/index.html$`),                                    // Web 首页
 		"PlaybackInfoHandler":         regexp.MustCompile(`(?i)^(/emby)?/Items/\d+/PlaybackInfo`),                 // 播放信息处理接口
+		"SubtitlesHandler":            regexp.MustCompile(`(?i)^(/emby)?/Videos/\d+/\w+/subtitles`),               // 字幕处理接口
 	},
 	"others": {
 		"VideoRedirectReg": regexp.MustCompile(`(?i)^(/emby)?/videos/(.*)/stream/(.*)`), // 视频重定向匹配，统一视频请求格式

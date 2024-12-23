@@ -13,11 +13,15 @@ func TestEmbyRoute(t *testing.T) {
 	var embyRouteTestCases = map[string]RouteTestCase{
 		"字幕": {
 			"/Videos/88697/21ed6a9972693ffa82571197cb406b64/Subtitles/3/0/Stream",
-			"",
+			"SubtitlesHandler",
 		},
 		"4.9+字幕": {
 			"/emby/Videos/45/mediasource_45/Subtitles/0/0/Stream.subrip?api_key=e12acc0815f74e9da6a86c9e8c2d45d8",
-			"",
+			"SubtitlesHandler",
+		},
+		"4.9+字幕2": {
+			"/emby/Videos/146/mediasource_146/Subtitles/3/0/Stream.srt?api_key=4b988503e747491ca53ff22527a13f08",
+			"SubtitlesHandler",
 		},
 		"视频1": {
 			"/Videos/88697/stream?mediasourceid=21ed6a9972693ffa82571197cb406b64&static=true",
