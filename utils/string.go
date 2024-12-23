@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -103,4 +104,10 @@ func ResolveEmbyAPIKVPairs(urlString string) (string, error) {
 		}
 	}
 	return "", nil
+}
+
+// 判断字符串是否为整型数字
+func isInt(s string) bool {
+	_, err := strconv.Atoi(s)
+	return err == nil
 }
