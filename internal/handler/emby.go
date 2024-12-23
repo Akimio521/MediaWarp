@@ -122,7 +122,7 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 				itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(*mediasource.ID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询 item 需要去除前缀仅保留数字部分
 				if err != nil {
 					logging.Warning("请求 ItemsServiceQueryItem 失败：", err)
-					return err
+					continue
 				}
 				item := itemResponse.Items[0]
 				strmFileType, opt := embyServerHandler.RecgonizeStrmFileType(*item.Path)
@@ -134,6 +134,7 @@ func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context
 						apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
 						if err != nil {
 							logging.Warning("解析API键值对失败：", err)
+							continue
 						}
 						directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
 						playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
