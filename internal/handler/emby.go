@@ -30,6 +30,9 @@ type EmbyServerHandler struct {
 // 初始化
 func (embyServerHandler *EmbyServerHandler) Init() {
 	embyServerHandler.server = emby.New(config.MediaServer.ADDR, config.MediaServer.AUTH)
+	if embyServerHandler.modifyProxyMap == nil {
+		embyServerHandler.modifyProxyMap = make(map[string]*httputil.ReverseProxy)
+	}
 	{ // 初始化路由规则
 		embyServerHandler.routerRules = []RegexpRouteRule{
 			{
@@ -108,9 +111,6 @@ func (embyServerHandler *EmbyServerHandler) RecgonizeStrmFileType(strmFilePath s
 // /Items/:itemId/PlaybackInfo
 func (embyServerHandler *EmbyServerHandler) PlaybackInfoHandler(ctx *gin.Context) {
 	key := "PlaybackInfoHandler"
-	if embyServerHandler.modifyProxyMap == nil {
-		embyServerHandler.modifyProxyMap = make(map[string]*httputil.ReverseProxy)
-	}
 
 	if _, ok := embyServerHandler.modifyProxyMap[key]; !ok {
 		proxy := embyServerHandler.server.GetReverseProxy()
@@ -277,9 +277,6 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 // 字幕处理接口
 func (embyServerHandler *EmbyServerHandler) SubtitlesHandler(ctx *gin.Context) {
 	key := "SubtitlesHandler"
-	if embyServerHandler.modifyProxyMap == nil {
-		embyServerHandler.modifyProxyMap = make(map[string]*httputil.ReverseProxy)
-	}
 
 	if _, ok := embyServerHandler.modifyProxyMap[key]; !ok {
 		proxy := embyServerHandler.server.GetReverseProxy()
@@ -319,10 +316,6 @@ func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayerHandler(ctx *gin
 	version := ctx.Query("v")
 	logging.Debug("请求 basehtmlplayer.js 版本：", version)
 
-	if embyServerHandler.modifyProxyMap == nil {
-		embyServerHandler.modifyProxyMap = make(map[string]*httputil.ReverseProxy)
-	}
-
 	if _, ok := embyServerHandler.modifyProxyMap[key]; !ok {
 		proxy := embyServerHandler.server.GetReverseProxy()
 		proxy.ModifyResponse = func(rw *http.Response) error {
@@ -349,9 +342,6 @@ func (embyServerHandler *EmbyServerHandler) IndexHandler(ctx *gin.Context) {
 		modifiedBodyStr string
 		addHEAD         string
 	)
-	if embyServerHandler.modifyProxyMap == nil {
-		embyServerHandler.modifyProxyMap = make(map[string]*httputil.ReverseProxy)
-	}
 
 	if _, ok := embyServerHandler.modifyProxyMap[key]; !ok {
 		proxy := embyServerHandler.server.GetReverseProxy()
