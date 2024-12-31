@@ -42,6 +42,20 @@ ClientFilter:                               # 客户端过滤器
     - Infuse
 
 # 302重定向相关配置
+AlistHTTPStrm:                              # AlistHTTPStrm 相关配置（Strm文件内容是Alist上文件的alist url，目前仅支持适配Alist V3）
+  Enable: True                              # 是否启用AlistStrm重定向
+  List:                                     # Alist服务关配置列表
+    - ADDR: http://192.168.1.100:5244       # Alist服务器地址（MediaWarp可以正常访问到就可以）
+      Username: admin                       # Alist服务器账号
+      Password: adminadmin                  # Alist服务器密码
+      PrefixList:                           # EmbyServer中Strm文件的前缀（符合该前缀的Strm文件都会路由到该规则下）
+        - /media/strm/MyAlist               # 同一个Alist可以有多个前缀规则
+        - /mnt/cd2/strm
+    - ADDR: https://xiaoya.com              # 可以填写多个配置
+      Username: admin
+      Password: adminadmin
+      PrefixList: 
+        - /media/strm
 
 HTTPStrm: 
   Enable: True                              # 是否开启HttpStrm重定向
