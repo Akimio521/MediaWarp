@@ -184,7 +184,11 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 			container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 			playbackInfoResponse.MediaSources[index].Container = &container
 			msg := fmt.Sprintf("%s 设置直链播放链接为: %s，容器为: %s", *mediasource.Name, directStreamURL, container)
-			alistServer := service.GetAlistServer(opt.(string))
+			alistServer, err := service.GetAlistServer(opt.(string))
+			if err != nil {
+				logging.Warning("获取 AlistServer 失败：", err)
+				return err
+			}
 			fsGetData, err := alistServer.FsGet(*mediasource.Path)
 			if err != nil {
 				logging.Debug(msg)
@@ -265,7 +269,11 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 			case constants.AlistStrm:
 				if strings.ToUpper(*mediasource.Container) == "STRM" { // 判断是否为Strm文件
 					alistServerAddr := opt.(string)
-					alistServer := service.GetAlistServer(alistServerAddr)
+					alistServer, err := service.GetAlistServer(alistServerAddr)
+					if err != nil {
+						logging.Warning("获取 AlistServer 失败：", err)
+						return
+					}
 					fsGetData, err := alistServer.FsGet(*mediasource.Path)
 					if err != nil {
 						logging.Warning("请求 FsGet 失败：", err)

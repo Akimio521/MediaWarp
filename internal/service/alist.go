@@ -3,6 +3,7 @@ package service
 import (
 	"MediaWarp/internal/config"
 	"MediaWarp/internal/service/alist"
+	"fmt"
 
 	"MediaWarp/utils"
 	"sync"
@@ -33,10 +34,10 @@ func registerAlistServer(addr string, username string, password string) {
 //
 // 从全局Map中获取Alist服务器
 // 若未找到则抛出panic
-func GetAlistServer(addr string) *alist.AlistServer {
+func GetAlistServer(addr string) (*alist.AlistServer, error) {
 	endpoint := utils.GetEndpoint(addr)
 	if server, ok := alistSeverMap.Load(endpoint); ok {
-		return server.(*alist.AlistServer)
+		return server.(*alist.AlistServer), nil
 	}
-	panic("Alist服务器：" + endpoint + " 未注册")
+	return nil, fmt.Errorf("Alist服务器：" + endpoint + " 未注册")
 }
