@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -86,4 +88,178 @@ func SRT2ASS(srtText string, style []string) string {
 	subtitleContent = fontColorTagRe.ReplaceAllString(subtitleContent, `{\\c&H$3$2$1&}`) // 替换字体颜色标签
 	subtitleContent = fontCloseTagRe.ReplaceAllString(subtitleContent, "")               // 删除字体结束标签
 	return ASSHeader1 + "\n" + strings.Join(style, "\n") + "\n\n" + ASSHeader2 + "\n\n" + subtitleContent
+}
+
+type ASSFontStyle struct {
+	Name   string // 字体名字
+	Weight uint16 // 字重
+	Italic bool   // 是否为意大利体（斜体）
+}
+
+var weightRegexp = regexp.MustCompile(`b(\d+)`) // 匹配加粗标签
+
+// 分析 ASS 字幕中有哪些“字”，用于字体子集化
+func AnalyseASS(assText string) (map[ASSFontStyle]map[rune]struct{}, error) {
+	var (
+		state              uint8                              = 0 // 文本状态控制字
+		assStyleNameIndex  int8                               = -1
+		assFontNameIndex   int8                               = -1
+		assBodyIndex       int8                               = -1
+		assItalicIndex     int8                               = -1
+		fontStyles         map[string]ASSFontStyle            = make(map[string]ASSFontStyle, 1)
+		allFontStyleName   []string                           = []string{}
+		firstFontStyleName string                             = ""
+		assEventTextIndex  int8                               = -1
+		assEventStyleIndex int8                               = -1
+		subFontSets        map[ASSFontStyle]map[rune]struct{} = make(map[ASSFontStyle]map[rune]struct{}, 1)
+	)
+	assText = strings.ReplaceAll(assText, "\r", "")
+	for _, line := range strings.Split(assText, "\n") {
+		if line == "" {
+			continue
+		} else if state == 0 && strings.HasPrefix(line, "[V4+ Styles]") {
+			state = 1
+		} else if state == 1 { // 这一行是字体格式
+			if !strings.HasPrefix(line, "Format:") {
+				return nil, fmt.Errorf("解析 ASS 字体 Styles 格式失败：%s", line)
+			}
+			stylesFormat := strings.Split(strings.TrimSpace(strings.Replace(line, "Format:", "", 1)), ",")
+			assStyleNameIndex = int8(FindStringIndex(stylesFormat, "Name", true, true))    // ASS 中字体样式的名字
+			assFontNameIndex = int8(FindStringIndex(stylesFormat, "Fontname", true, true)) // ASS 中样式使用字体的名字
+			if assStyleNameIndex == -1 {
+				return nil, fmt.Errorf("未找字体格式中的 Name ：%s", stylesFormat)
+			}
+			if assFontNameIndex == -1 {
+				return nil, fmt.Errorf("未找字体格式中的 Fontname：%s", stylesFormat)
+			}
+			assBodyIndex = int8(FindStringIndex(stylesFormat, "Bold", true, true))
+			assItalicIndex = int8(FindStringIndex(stylesFormat, "Italic", true, true))
+			state = 2
+		} else if state == 2 { // 这一行开始是字体样式
+			if strings.HasPrefix(line, "Style:") {
+				styleData := strings.Split(strings.TrimSpace(strings.Replace(line, "Style:", "", 1)), ",")
+				styleName := strings.ReplaceAll(strings.TrimSpace(styleData[assStyleNameIndex]), "*", "")
+				fontName := strings.ReplaceAll(strings.TrimSpace(styleData[assFontNameIndex]), "@", "")
+				var (
+					fontWeight uint16 = 400
+					italic     bool   = false
+				) // 字重默认 400
+				if assBodyIndex != -1 && strings.TrimSpace(styleData[assBodyIndex]) == "1" { // 当该 ASS 字幕格式存在 Bold 属性且该样式属性设置为 "1" 时，将字重设置为 700
+					fontWeight = 700
+				}
+				if assItalicIndex != -1 && strings.TrimSpace(styleData[assItalicIndex]) == "1" {
+					italic = true
+				}
+				fontStyles[styleName] = ASSFontStyle{fontName, fontWeight, italic} // 将该样式存入 map 中
+				allFontStyleName = append(allFontStyleName, styleName)
+				if firstFontStyleName == "" {
+					firstFontStyleName = styleName
+				}
+			} else if strings.HasPrefix(line, "[Events]") {
+				state = 3 // 字体样式已结束
+			}
+		} else if state == 3 { // 开始解析 Event
+			if !strings.HasPrefix(line, "Format:") {
+				return nil, fmt.Errorf("解析字幕事件格式失败：%s", line)
+			}
+			eventFormat := strings.Split(strings.ReplaceAll(strings.Replace(line, "Format:", "", 1), " ", ""), ",")
+			assEventTextIndex = int8(FindStringIndex(eventFormat, "Text", true, true))
+			assEventStyleIndex = int8(FindStringIndex(eventFormat, "Style", true, true))
+			if assEventTextIndex == -1 || assEventStyleIndex == -1 {
+				return nil, fmt.Errorf("字幕事件格式中未找到 Text 或 Style：%s", line)
+			}
+			if int(assEventTextIndex) != len(eventFormat)-1 {
+				return nil, fmt.Errorf("字幕事件格式中 Text 不是最后一个元素：%s", line)
+			}
+			state = 4
+		} else if state == 4 { // 开始解析字幕具体内容
+			if strings.HasPrefix(line, "Dialogue:") {
+				parts := strings.Split(line, ",")
+				text := strings.Join(parts[assEventTextIndex:], ",")                       // 获取字幕文本，需要考虑字幕中带有英文逗号的可能性
+				defaultStyleName := strings.ReplaceAll(parts[assEventStyleIndex], "*", "") // 当前行默认样式
+				if !Contains(allFontStyleName, defaultStyleName) {
+					defaultStyleName = firstFontStyleName // 未找到对应样式，使用第一个样式
+				}
+				defaultStyle := fontStyles[defaultStyleName] // 当前样式
+				currentStyle := defaultStyle                 // 当前样式
+				parseTag := func(tag []rune) error {
+					length := len(tag)
+					if len(tag) == 0 {
+						return nil
+					}
+					if length == 1 && tag[0] == 'r' {
+						currentStyle = defaultStyle
+					} else if length > 2 && tag[0] == 'f' && tag[1] == 'n' {
+						// fmt.Println("Tag：", string(tag), "字体名：", strings.ReplaceAll(string(tag[2:]), "@", ""))
+						currentStyle.Name = strings.ReplaceAll(string(tag[2:]), "@", "")
+					} else if length == 2 && tag[0] == 'i' {
+						if tag[1] == '1' {
+							currentStyle.Italic = true
+						} else if tag[1] == '0' {
+							currentStyle.Italic = false
+						} else {
+							return fmt.Errorf("未知斜体状态：%s", string(tag))
+						}
+					} else if matches := weightRegexp.FindStringSubmatch(string(tag)); len(matches) == 2 {
+						if length == 2 {
+							if tag[1] == '1' {
+								currentStyle.Weight = 700
+							} else if tag[1] == '0' {
+								currentStyle.Weight = 500
+							} else {
+								return fmt.Errorf("未知加粗状态：%s", string(tag))
+							}
+						} else {
+							weight, err := strconv.Atoi(matches[1])
+							if err != nil {
+								return fmt.Errorf("解析加粗数值失败：%s", string(tag))
+							}
+							currentStyle.Weight = uint16(weight)
+						}
+					}
+					return nil
+				}
+
+				var buffer []rune = make([]rune, 0, len(line))
+				for _, char := range text {
+					if char == '{' { // 可能是特殊样式的开始
+						if subFontSets[currentStyle] == nil {
+							subFontSets[currentStyle] = make(map[rune]struct{}, len(buffer))
+						}
+						for _, c := range buffer {
+							subFontSets[currentStyle][c] = struct{}{}
+						}
+					} else if char == '}' && len(buffer) > 1 && buffer[0] == '{' && buffer[1] == '\\' {
+						var tagStartIndex uint16 = 2
+						for i, c := range buffer[2:] {
+							if c == '\\' {
+								err := parseTag(buffer[tagStartIndex : 2+i])
+								if err != nil {
+									return nil, err
+								}
+								tagStartIndex = uint16(2 + i + 1)
+							}
+						}
+						err := parseTag(buffer[tagStartIndex:])
+						if err != nil {
+							return nil, err
+						}
+					} else {
+						buffer = append(buffer, char)
+					}
+				}
+				if len(buffer) != 0 {
+					if subFontSets[currentStyle] == nil {
+						subFontSets[currentStyle] = make(map[rune]struct{}, len(buffer))
+					}
+					for _, c := range buffer {
+						subFontSets[currentStyle][c] = struct{}{}
+					}
+				}
+
+			}
+		}
+
+	}
+	return subFontSets, nil
 }

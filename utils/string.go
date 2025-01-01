@@ -111,3 +111,31 @@ func isInt(s string) bool {
 	_, err := strconv.Atoi(s)
 	return err == nil
 }
+
+// 在 []string 中找到某个字符串的索引
+// 如果未找到，返回 -1
+//
+// slice: 目标切片
+// target: 目标字符串
+// caseInsensitive: 是否忽略大小写
+// trim: 是否去除空白字符
+func FindStringIndex(slice []string, target string, caseInsensitive bool, trim bool) int {
+	if trim {
+		target = strings.TrimSpace(target)
+	}
+	for i, str := range slice {
+		if trim {
+			str = strings.TrimSpace(str)
+		}
+		if caseInsensitive {
+			if strings.EqualFold(str, target) {
+				return i
+			}
+		} else {
+			if str == target {
+				return i
+			}
+		}
+	}
+	return -1
+}
