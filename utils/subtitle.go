@@ -96,8 +96,6 @@ type ASSFontStyle struct {
 	Italic bool   // 是否为意大利体（斜体）
 }
 
-var weightRegexp = regexp.MustCompile(`b(\d+)`) // 匹配加粗标签
-
 // 分析 ASS 字幕中有哪些“字”，用于字体子集化
 func AnalyseASS(assText string) (map[ASSFontStyle]map[rune]struct{}, error) {
 	var (
@@ -200,21 +198,26 @@ func AnalyseASS(assText string) (map[ASSFontStyle]map[rune]struct{}, error) {
 						} else {
 							return fmt.Errorf("未知斜体状态：%s", string(tag))
 						}
-					} else if matches := weightRegexp.FindStringSubmatch(string(tag)); len(matches) == 2 {
+					} else if tag[0] == 'b' {
 						if length == 2 {
 							if tag[1] == '1' {
 								currentStyle.Weight = 700
 							} else if tag[1] == '0' {
-								currentStyle.Weight = 500
+								currentStyle.Weight = 400
 							} else {
 								return fmt.Errorf("未知加粗状态：%s", string(tag))
 							}
 						} else {
-							weight, err := strconv.Atoi(matches[1])
+							for i := range tag[1:] {
+								if tag[i] < '0' || tag[i] > '9' {
+									return nil // b 后面不全是数字，不是加粗标签，忽略
+								}
+							}
+							num, err := strconv.Atoi(string(tag[1:]))
 							if err != nil {
 								return fmt.Errorf("解析加粗数值失败：%s", string(tag))
 							}
-							currentStyle.Weight = uint16(weight)
+							currentStyle.Weight = uint16(num)
 						}
 					}
 					return nil
