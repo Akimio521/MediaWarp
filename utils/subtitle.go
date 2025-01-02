@@ -97,19 +97,19 @@ type ASSFontStyle struct {
 }
 
 // 分析 ASS 字幕中有哪些“字”，用于字体子集化
-func AnalyseASS(assText string) (map[ASSFontStyle]map[rune]struct{}, error) {
+func AnalyseASS(assText string) (map[ASSFontStyle]SetInterface[rune], error) {
 	var (
-		state              uint8                              = 0 // 文本状态控制字
-		assStyleNameIndex  int8                               = -1
-		assFontNameIndex   int8                               = -1
-		assBodyIndex       int8                               = -1
-		assItalicIndex     int8                               = -1
-		fontStyles         map[string]ASSFontStyle            = make(map[string]ASSFontStyle, 1)
-		allFontStyleName   []string                           = []string{}
-		firstFontStyleName string                             = ""
-		assEventTextIndex  int8                               = -1
-		assEventStyleIndex int8                               = -1
-		subFontSets        map[ASSFontStyle]map[rune]struct{} = make(map[ASSFontStyle]map[rune]struct{}, 1)
+		state              uint8                               = 0 // 文本状态控制字
+		assStyleNameIndex  int8                                = -1
+		assFontNameIndex   int8                                = -1
+		assBodyIndex       int8                                = -1
+		assItalicIndex     int8                                = -1
+		fontStyles         map[string]ASSFontStyle             = make(map[string]ASSFontStyle, 1)
+		allFontStyleName   []string                            = []string{}
+		firstFontStyleName string                              = ""
+		assEventTextIndex  int8                                = -1
+		assEventStyleIndex int8                                = -1
+		subFontSets        map[ASSFontStyle]SetInterface[rune] = make(map[ASSFontStyle]SetInterface[rune], 1)
 	)
 	assText = strings.ReplaceAll(assText, "\r", "")
 	for _, line := range strings.Split(assText, "\n") {
@@ -227,11 +227,9 @@ func AnalyseASS(assText string) (map[ASSFontStyle]map[rune]struct{}, error) {
 				for _, char := range text {
 					if char == '{' { // 可能是特殊样式的开始
 						if subFontSets[currentStyle] == nil {
-							subFontSets[currentStyle] = make(map[rune]struct{}, len(buffer))
+							subFontSets[currentStyle] = NewSet[rune]()
 						}
-						for _, c := range buffer {
-							subFontSets[currentStyle][c] = struct{}{}
-						}
+						subFontSets[currentStyle].Adds(buffer...)
 					} else if char == '}' && len(buffer) > 1 && buffer[0] == '{' && buffer[1] == '\\' {
 						var tagStartIndex uint16 = 2
 						for i, c := range buffer[2:] {
@@ -253,11 +251,9 @@ func AnalyseASS(assText string) (map[ASSFontStyle]map[rune]struct{}, error) {
 				}
 				if len(buffer) != 0 {
 					if subFontSets[currentStyle] == nil {
-						subFontSets[currentStyle] = make(map[rune]struct{}, len(buffer))
+						subFontSets[currentStyle] = NewSet[rune]()
 					}
-					for _, c := range buffer {
-						subFontSets[currentStyle][c] = struct{}{}
-					}
+					subFontSets[currentStyle].Adds(buffer...)
 				}
 
 			}
