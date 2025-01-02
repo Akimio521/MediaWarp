@@ -25,7 +25,16 @@ func (embyServer *EmbyServer) Init() {
 // 初始化proxy
 func (embyServer *EmbyServer) initProxy() {
 	target, _ := url.Parse(embyServer.endpoint)
-	embyServer.proxy = httputil.NewSingleHostReverseProxy(target)
+	baseProxy := httputil.NewSingleHostReverseProxy(target)
+	embyServer.proxy = &httputil.ReverseProxy{
+		Director: func(req *http.Request) {
+			// 确保Host头被设置为目标服务器的地址
+			req.Host = target.Host
+			// 保留原始请求的Host头部信息
+			req.Header.Set("X-Forwarded-Host", req.Header.Get("Host"))
+			baseProxy.Director(req)
+		},
+	}
 }
 
 // 获取媒体服务器类型
