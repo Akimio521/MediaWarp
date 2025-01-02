@@ -13,7 +13,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"path"
 	"reflect"
 	"strconv"
@@ -104,16 +103,6 @@ func (embyServerHandler *EmbyServerHandler) responseModifyCreater(modifyResponse
 //
 // 返回 Strm 文件类型和一个可选配置
 func (embyServerHandler *EmbyServerHandler) RecgonizeStrmFileType(strmFilePath string) (constants.StrmFileType, any) {
-	if config.AlistHTTPStrm.Enable {
-		for _, alistHTTPStrmConfig := range config.AlistHTTPStrm.List {
-			for _, prefix := range alistHTTPStrmConfig.PrefixList {
-				if strings.HasPrefix(strmFilePath, prefix) {
-					logging.Debug(strmFilePath + " 成功匹配路径：" + prefix + "，Strm 类型：" + string(constants.AlistHTTPStrm) + "，AlistServer 地址：" + alistHTTPStrmConfig.ADDR)
-					return constants.AlistHTTPStrm, alistHTTPStrmConfig.ADDR
-				}
-			}
-		}
-	}
 	if config.HTTPStrm.Enable {
 		for _, prefix := range config.HTTPStrm.PrefixList {
 			if strings.HasPrefix(strmFilePath, prefix) {
@@ -164,8 +153,6 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 		item := itemResponse.Items[0]
 		strmFileType, opt := embyServerHandler.RecgonizeStrmFileType(*item.Path)
 		switch strmFileType {
-		case constants.AlistHTTPStrm:
-			fallthrough
 		case constants.HTTPStrm: // HTTPStrm 设置支持直链播放并且支持转码
 			*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
 			*playbackInfoResponse.MediaSources[index].SupportsDirectStream = true
@@ -269,26 +256,6 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	for _, mediasource := range item.MediaSources {
 		if *mediasource.ID == mediaSourceID { // EmbyServer >= 4.9 返回的ID带有前缀mediasource_
 			switch strmFileType {
-			case constants.AlistHTTPStrm:
-				parsed, err := url.Parse(*mediasource.Path)
-				if err != nil {
-					logging.Error(err)
-					return
-				}
-				path := strings.ReplaceAll(parsed.Path, "/d", "")
-				path = strings.ReplaceAll(path, "//", "/")
-				alistServerAddr := opt.(string)
-				alistServer := service.GetAlistServer(alistServerAddr)
-				logging.Info("Path: ", path)
-				fsGetData, err := alistServer.FsGet(path)
-				if err != nil {
-					logging.Warning("请求 FsGet 失败：", err)
-					return
-				}
-				logging.Info("AlistHTTPStrm 重定向至：", fsGetData.RawURL)
-				ctx.Redirect(http.StatusFound, fsGetData.RawURL)
-				return
-
 			case constants.HTTPStrm:
 				if *mediasource.Protocol == emby.HTTP {
 					logging.Info("HTTPStrm 重定向至：", *mediasource.Path)
