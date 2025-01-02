@@ -7,7 +7,7 @@ type EmbyResponse struct {
 
 // /Items/:itemID/PlaybackInfo的响应
 type PlaybackInfoResponse struct {
-	ErrorCode     *PlaybackErrorCode `json:"ErrorCode,omitempty"`
+	// ErrorCode     *PlaybackErrorCode `json:"ErrorCode,omitempty"`
 	MediaSources  []MediaSourceInfo  `json:"MediaSources,omitempty"`
 	PlaySessionID *string            `json:"PlaySessionId,omitempty"`
 }
@@ -226,7 +226,7 @@ type MediaSourceInfo struct {
 	IsRemote                   *bool                     `json:"IsRemote,omitempty"`
 	ItemID                     *string                   `json:"ItemId,omitempty"`
 	LiveStreamID               *string                   `json:"LiveStreamId,omitempty"`
-	MediaStreams               []MediaStream             `json:"MediaStreams,omitempty"`
+	MediaStreams               *[]MediaStream             `json:"MediaStreams,omitempty"`
 	Name                       *string                   `json:"Name,omitempty"`
 	OpenToken                  *string                   `json:"OpenToken,omitempty"`
 	Path                       *string                   `json:"Path,omitempty"` // 本地视频文件则是正常的本地路径，Strm 则是 Strm 文件的内容
