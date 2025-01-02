@@ -21,16 +21,15 @@ var (
 		Arch:       runtime.GOARCH,
 	}
 
-	Port          int                 // MediaWarp开放端口
-	MediaServer   MediaServerSetting  // 上游媒体服务器设置
-	Cache         CacheSetting        // 缓存相关设置
-	Logger        LoggerSetting       // 日志设置
-	Web           WebSetting          // Web服务器设置
-	ClientFilter  ClientFilterSetting // 客户端过滤设置
-	HTTPStrm      HTTPStrmSetting     // HTTPSTRM设置
-	AlistHTTPStrm AlistStrmSetting    // HTTPSTRM设置
-	AlistStrm     AlistStrmSetting    // AlistStrm设置
-	Subtitle      SubtitleSetting     // 字幕设置
+	Port         int                 // MediaWarp开放端口
+	MediaServer  MediaServerSetting  // 上游媒体服务器设置
+	Cache        CacheSetting        // 缓存相关设置
+	Logger       LoggerSetting       // 日志设置
+	Web          WebSetting          // Web服务器设置
+	ClientFilter ClientFilterSetting // 客户端过滤设置
+	HTTPStrm     HTTPStrmSetting     // HTTPSTRM设置
+	AlistStrm    AlistStrmSetting    // AlistStrm设置
+	Subtitle     SubtitleSetting     // 字幕设置
 )
 
 // 获取版本信息
@@ -132,9 +131,6 @@ func loadConfig() {
 	}
 	if err := viper.UnmarshalKey("ClientFilter", &ClientFilter); err != nil {
 		panic(fmt.Errorf("ClientFilterSetting  解析失败, %v", err))
-	}
-	if err := viper.UnmarshalKey("AlistHTTPStrm", &AlistHTTPStrm); err != nil {
-		panic(fmt.Errorf("AlistHTTPStrm  解析失败, %v", err))
 	}
 	if err := viper.UnmarshalKey("HTTPStrm", &HTTPStrm); err != nil {
 		panic(fmt.Errorf("HTTPStrmSetting  解析失败, %v", err))

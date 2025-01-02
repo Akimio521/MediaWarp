@@ -17,13 +17,6 @@ func init() {
 		for _, alist := range config.AlistStrm.List {
 			registerAlistServer(alist.ADDR, alist.Username, alist.Password)
 		}
-
-	}
-	if config.AlistHTTPStrm.Enable {
-
-		for _, alist := range config.AlistHTTPStrm.List {
-			registerAlistServer(alist.ADDR, alist.Username, alist.Password)
-		}
 	}
 }
 
