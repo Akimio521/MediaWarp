@@ -209,13 +209,13 @@ type NameLongIDPair struct {
 // MediaSourceInfo
 type MediaSourceInfo struct {
 	AddAPIKeyToDirectStreamURL *bool                     `json:"AddApiKeyToDirectStreamUrl,omitempty"`
-	AnalyzeDurationMS          *int64                    `json:"AnalyzeDurationMs"`
-	Bitrate                    *int64                    `json:"Bitrate"`
-	BufferMS                   *int64                    `json:"BufferMs"`
-	Container                  *string                   `json:"Container,omitempty"`
-	ContainerStartTimeTicks    *int64                    `json:"ContainerStartTimeTicks"`
-	DefaultAudioStreamIndex    *int64                    `json:"DefaultAudioStreamIndex"`
-	DefaultSubtitleStreamIndex *int64                    `json:"DefaultSubtitleStreamIndex"`
+	AnalyzeDurationMS          *int64                    `json:"AnalyzeDurationMs,omitempty"`
+	Bitrate                    *int64                    `json:"Bitrate,omitempty"`
+	BufferMS                   *int64                    `json:"BufferMs,omitempty"`
+	Container                  *string                   `json:"Container,omitempty"` // AlistStrm 显示 strm，普通视频和 HTTPStrm
+	ContainerStartTimeTicks    *int64                    `json:"ContainerStartTimeTicks,omitempty"`
+	DefaultAudioStreamIndex    *int64                    `json:"DefaultAudioStreamIndex,omitempty"`
+	DefaultSubtitleStreamIndex *int64                    `json:"DefaultSubtitleStreamIndex,omitempty"`
 	DirectStreamURL            *string                   `json:"DirectStreamUrl,omitempty"`
 	EncoderPath                *string                   `json:"EncoderPath,omitempty"`
 	EncoderProtocol            *MediaProtocol            `json:"EncoderProtocol,omitempty"`
@@ -223,7 +223,7 @@ type MediaSourceInfo struct {
 	HasMixedProtocols          *bool                     `json:"HasMixedProtocols,omitempty"`
 	ID                         *string                   `json:"Id,omitempty"` // mediasource_45
 	IsInfiniteStream           *bool                     `json:"IsInfiniteStream,omitempty"`
-	IsRemote                   *bool                     `json:"IsRemote,omitempty"`
+	IsRemote                   *bool                     `json:"IsRemote,omitempty"` // HTTPStrm 会被设置为 true
 	ItemID                     *string                   `json:"ItemId,omitempty"`
 	LiveStreamID               *string                   `json:"LiveStreamId,omitempty"`
 	MediaStreams               []MediaStream             `json:"MediaStreams,omitempty"`
@@ -238,22 +238,22 @@ type MediaSourceInfo struct {
 	RequiresClosing            *bool                     `json:"RequiresClosing,omitempty"`
 	RequiresLooping            *bool                     `json:"RequiresLooping,omitempty"`
 	RequiresOpening            *bool                     `json:"RequiresOpening,omitempty"`
-	RunTimeTicks               *int64                    `json:"RunTimeTicks"`
+	RunTimeTicks               *int64                    `json:"RunTimeTicks,omitempty"`
 	ServerID                   *string                   `json:"ServerId,omitempty"`
-	Size                       *int64                    `json:"Size"`
+	Size                       *int64                    `json:"Size,omitempty"`
 	SortName                   *string                   `json:"SortName,omitempty"`
 	SupportsDirectPlay         *bool                     `json:"SupportsDirectPlay,omitempty"`
 	SupportsDirectStream       *bool                     `json:"SupportsDirectStream,omitempty"`
 	SupportsProbing            *bool                     `json:"SupportsProbing,omitempty"`
 	SupportsTranscoding        *bool                     `json:"SupportsTranscoding,omitempty"`
 	Timestamp                  *TransportStreamTimestamp `json:"Timestamp,omitempty"`
-	TrancodeLiveStartIndex     *int64                    `json:"TrancodeLiveStartIndex"`
+	TrancodeLiveStartIndex     *int64                    `json:"TrancodeLiveStartIndex,omitempty"`
 	TranscodingContainer       *string                   `json:"TranscodingContainer,omitempty"`
 	TranscodingSubProtocol     *string                   `json:"TranscodingSubProtocol,omitempty"`
 	TranscodingURL             *string                   `json:"TranscodingUrl,omitempty"`
 	Type                       *MediaSourceType          `json:"Type,omitempty"`
 	Video3DFormat              *Video3DFormat            `json:"Video3DFormat,omitempty"`
-	WallClockStart             *string                   `json:"WallClockStart"`
+	WallClockStart             *string                   `json:"WallClockStart,omitempty"`
 }
 
 // MediaStream
@@ -507,8 +507,8 @@ const (
 type MediaSourceType string
 
 const (
-	Default     MediaSourceType = "Default"
-	Grouping    MediaSourceType = "Grouping"
+	Default     MediaSourceType = "Default"  // 普通视频和 AlistStrm 显示 Default
+	Grouping    MediaSourceType = "Grouping" // HTTPStrm 显示 Grouping
 	Placeholder MediaSourceType = "Placeholder"
 )
 
