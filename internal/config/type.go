@@ -68,6 +68,7 @@ type AlistSetting struct {
 	ADDR       string
 	Username   string
 	Password   string
+	Token      *string
 	PrefixList []string
 }
 
@@ -82,4 +83,5 @@ type SubtitleSetting struct {
 	Enable   bool
 	SRT2ASS  bool // SRT 字幕转 ASS 字幕
 	ASSStyle []string
+	SubSet   bool // ASS 字幕字体子集化
 }

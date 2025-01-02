@@ -16,7 +16,7 @@ var (
 func init() {
 	if config.AlistStrm.Enable {
 		for _, alist := range config.AlistStrm.List {
-			registerAlistServer(alist.ADDR, alist.Username, alist.Password)
+			registerAlistServer(alist.ADDR, alist.Username, alist.Password, alist.Token)
 		}
 	}
 }
@@ -24,8 +24,8 @@ func init() {
 // 注册Alist服务器
 //
 // 将Alist服务器注册到全局Map中
-func registerAlistServer(addr string, username string, password string) {
-	alistServer := alist.New(addr, username, password)
+func registerAlistServer(addr string, username string, password string, token *string) {
+	alistServer := alist.New(addr, username, password, token)
 	alistServer.Init()
 	alistSeverMap.Store(alistServer.GetEndpoint(), alistServer)
 }
@@ -39,5 +39,5 @@ func GetAlistServer(addr string) (*alist.AlistServer, error) {
 	if server, ok := alistSeverMap.Load(endpoint); ok {
 		return server.(*alist.AlistServer), nil
 	}
-	return nil, fmt.Errorf("Alist服务器：" + endpoint + " 未注册")
+	return nil, fmt.Errorf("%s 未注册到 Alist 服务器列表中", endpoint)
 }

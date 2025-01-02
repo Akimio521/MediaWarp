@@ -59,8 +59,7 @@ AlistStrm:                                  # AlistStrm相关配置（Strm文件
         - /media/strm/MyAlist               # 同一个Alist可以有多个前缀规则
         - /mnt/cd2/strm
     - ADDR: https://xiaoya.com              # 可以填写多个配置
-      Username: admin
-      Password: adminadmin
+      Token: xxxxxxx                        # Token 优先级高于 Username 和 Password
       PrefixList: 
         - /media/strm
 

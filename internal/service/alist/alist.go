@@ -13,15 +13,16 @@ import (
 	"time"
 )
 
+type alistToken struct {
+	value    string       // 令牌 Token
+	expireAt time.Time    // 令牌过期时间
+	mutex    sync.RWMutex // 令牌锁
+}
 type AlistServer struct {
-	endpoint string // 服务器入口 URL
-	username string // 用户名
-	password string // 密码
-	token    struct {
-		value    string       // 令牌 Token
-		expireAt time.Time    // 令牌过期时间
-		mutex    sync.RWMutex // 令牌锁
-	}
+	endpoint   string // 服务器入口 URL
+	username   string // 用户名
+	password   string // 密码
+	token      alistToken
 	sapaceName string // 缓存空间键 key
 }
 
@@ -51,11 +52,10 @@ func (alistServer *AlistServer) getToken() (string, error) {
 	var tokenDuration = 2*24*time.Hour - 5*time.Minute // Token 有效期为 2 天，提前 5 分钟刷新
 
 	alistServer.token.mutex.RLock()
-	if alistServer.token.value != "" {
-		if time.Now().Before(alistServer.token.expireAt) { // Token 未过期
-			defer alistServer.token.mutex.RUnlock()
-			return alistServer.token.value, nil
-		}
+	if alistServer.token.value != "" && (alistServer.token.expireAt.IsZero() || time.Now().Before(alistServer.token.expireAt)) {
+		// 零值表示永不过期
+		defer alistServer.token.mutex.RUnlock()
+		return alistServer.token.value, nil
 	}
 
 	token, err := alistServer.authLogin() // 重新生成一个token
@@ -181,10 +181,17 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 }
 
 // 获得AlistServer实例
-func New(addr string, username string, password string) *AlistServer {
-	return &AlistServer{
+func New(addr string, username string, password string, token *string) *AlistServer {
+	s := AlistServer{
 		endpoint: utils.GetEndpoint(addr),
 		username: username,
 		password: password,
 	}
+	if token != nil {
+		s.token = alistToken{
+			value:    *token,
+			expireAt: time.Time{},
+		}
+	}
+	return &s
 }
