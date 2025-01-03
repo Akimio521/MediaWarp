@@ -226,7 +226,7 @@ type MediaSourceInfo struct {
 	IsRemote                   *bool                     `json:"IsRemote,omitempty"` // HTTPStrm 会被设置为 true
 	ItemID                     *string                   `json:"ItemId,omitempty"`
 	LiveStreamID               *string                   `json:"LiveStreamId,omitempty"`
-	MediaStreams               []MediaStream             `json:"MediaStreams,omitempty"`
+	MediaStreams               []MediaStream             `json:"MediaStreams"` // 避免当 MediaStreams 为空数组的情况移除该字段导致导致部分客户端（目前已知：Yamby）报错
 	Name                       *string                   `json:"Name,omitempty"`
 	OpenToken                  *string                   `json:"OpenToken,omitempty"`
 	Path                       *string                   `json:"Path,omitempty"` // 本地视频文件则是正常的本地路径，Strm 则是 Strm 文件的内容
