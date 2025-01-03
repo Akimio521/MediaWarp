@@ -107,7 +107,7 @@ func (embyServerHandler *EmbyServerHandler) RecgonizeStrmFileType(strmFilePath s
 		for _, prefix := range config.HTTPStrm.PrefixList {
 			if strings.HasPrefix(strmFilePath, prefix) {
 				logging.Debug(strmFilePath + " 成功匹配路径：" + prefix + "，Strm 类型：" + string(constants.HTTPStrm))
-				return constants.HTTPStrm, nil
+				return constants.HTTPStrm, config.HTTPStrm.Replace
 			}
 		}
 	}
@@ -262,6 +262,11 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 			switch strmFileType {
 			case constants.HTTPStrm:
 				if *mediasource.Protocol == emby.HTTP {
+					rules := opt.([]string)
+					for _, rule := range rules {
+						rl := strings.Split(rule, "->")
+						*mediasource.Path = strings.ReplaceAll(*mediasource.Path, strings.Trim(rl[0], ""), strings.Trim(rl[1], ""))
+					}
 					logging.Info("HTTPStrm 重定向至：", *mediasource.Path)
 					ctx.Redirect(http.StatusFound, *mediasource.Path)
 				}

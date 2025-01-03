@@ -61,6 +61,7 @@ type ClientFilterSetting struct {
 type HTTPStrmSetting struct {
 	Enable     bool
 	PrefixList []string
+	Replace    []string
 }
 
 // AlistStrm具体设置
