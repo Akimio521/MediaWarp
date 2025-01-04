@@ -55,32 +55,34 @@ func SRT2ASS(srtText string, style []string) string {
 		}
 	}
 	var (
-		subtitleContent        string = "" // 字幕内容
-		subtitleBuffer         string = "" // 字幕缓存区（某一行字幕未完成先存取到此处）
-		currentSubtitleContent uint8  = 0  // 一个时间下字幕的行数（2表示这一时间有2行字幕）
+		subtitleContent        string                       // 字幕内容
+		subtitleBuffer         []rune = make([]rune, 1, 50) // 字幕缓存区（某一行字幕未完成先存取到此处）
+		currentSubtitleContent uint8  = 0                   // 一个时间下字幕的行数（2表示这一时间有2行字幕）
 	)
 	for index, line := range lines {
-		if isInt(line) && srtTimePattern.Match([]byte(lines[index+1])) { // 这一行是 SRT 字幕的序列数且下一行是时间
-			if subtitleBuffer != "" {
-				subtitleContent += subtitleBuffer + "\n"
-				subtitleBuffer = ""
+		if isInt(line) && srtTimePattern.MatchString(lines[index+1]) { // 这一行是 SRT 字幕的序列数且下一行是时间
+			if len(subtitleBuffer) > 0 {
+				subtitleContent += string(append(subtitleBuffer, '\n'))
+				subtitleBuffer = subtitleBuffer[:0]
 			}
 			currentSubtitleContent = 0
 		} else {
-			if srtTimePattern.Match([]byte(line)) {
-				line = strings.ReplaceAll(line, "-0", "0")
-				subtitleBuffer += "Dialogue: 0," + line + ",Default,,0,0,0,,"
+			if srtTimePattern.MatchString(line) { // 这一行是时间行
+				subtitleBuffer = append(subtitleBuffer, []rune("Dialogue: 0,")...)
+				subtitleBuffer = append(subtitleBuffer, []rune(strings.ReplaceAll(line, "-0", "0"))...)
+				subtitleBuffer = append(subtitleBuffer, []rune(",Default,,0,0,0,,")...)
 			} else {
 				if currentSubtitleContent == 0 {
-					subtitleBuffer += line
+					subtitleBuffer = append(subtitleBuffer, []rune(line)...)
 				} else {
-					subtitleBuffer += "\\n" + line // 同一时间多行字幕需要在一行中使用字面量 \n 表示换行
+					subtitleBuffer = append(subtitleBuffer, []rune(`\n`)...) // 同一时间多行字幕需要在一行中使用字面量 \n 表示换行
+					subtitleBuffer = append(subtitleBuffer, []rune(line)...)
 				}
 				currentSubtitleContent += 1
 			}
 		}
 	}
-	subtitleContent += subtitleBuffer + "\n" // 最后一行字幕
+	subtitleContent += string(append(subtitleBuffer, '\n')) // 最后一行字幕
 
 	subtitleContent = timeFormatPattern.ReplaceAllString(subtitleContent, "$1.$2")                 // 替换时间格式
 	subtitleContent = arrowPattern.ReplaceAllString(subtitleContent, ",")                          // 替换箭头符号

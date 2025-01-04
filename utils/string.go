@@ -107,8 +107,8 @@ func ResolveEmbyAPIKVPairs(urlString string) (string, error) {
 }
 
 // 判断字符串是否为整型数字
-func isInt(s string) bool {
-	_, err := strconv.Atoi(s)
+func isInt[T ~[]byte | ~[]rune | ~string](s T) bool {
+	_, err := strconv.Atoi(string(s))
 	return err == nil
 }
 
