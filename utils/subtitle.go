@@ -7,28 +7,10 @@ import (
 	"strings"
 )
 
-var srtRegexp = regexp.MustCompile(`@\d+@\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}@`)
-
-// 判断字幕是否为 SRT 格式
-func IsSRT(text string) bool {
-	text = strings.ReplaceAll(text, "\r", "")                        // 去除 \r 保证多系统兼容
-	lines := strings.Split(text, "\n")                               // 按行分割
-	matches := srtRegexp.FindAllString(strings.Join(lines, "@"), -1) // 查找所有匹配项
-	return len(matches) > 0
-}
-
-var (
-	srtTimeRegxp    = regexp.MustCompile(`-?\d\d:\d\d:\d\d`)
-	timeFormatRe    = regexp.MustCompile(`\d(\d:\d{2}:\d{2}),(\d{2})\d`)
-	arrowRe         = regexp.MustCompile(`\s+-->\s+`)
-	styleOpenTagRe  = regexp.MustCompile(`<([ubi])>`)
-	styleCloseTagRe = regexp.MustCompile(`</([ubi])>`)
-	fontColorTagRe  = regexp.MustCompile(`<font\s+color="?#[\w]{2}([\w]{2})([\w]{2})([\w]{2})"?\s*>`)
-	fontCloseTagRe  = regexp.MustCompile(`</font>`)
-)
-
 const (
-	ASSHeader1 = `[Script Info]
+	defaultRegularBodyWeight = 400 // 默认正常体字重
+	defaultBoldBodyWeight    = 700 // 默认加粗体字重
+	ASSHeader1               = `[Script Info]
 ; This is an Advanced Sub Station Alpha v4+ script.
 Title:
 ScriptType: v4.00+
@@ -39,6 +21,25 @@ PlayDepth: 0
 	ASSHeader2 = `[Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text`
 )
+
+var (
+	srtSubtitlesPattern      = regexp.MustCompile(`@\d+@\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}@`) // 用于文本是否为 SRT 字幕的正则表达式
+	srtTimePattern           = regexp.MustCompile(`-?\d\d:\d\d:\d\d`)
+	timeFormatPattern        = regexp.MustCompile(`\d(\d:\d{2}:\d{2}),(\d{2})\d`)
+	arrowPattern             = regexp.MustCompile(`\s+-->\s+`)
+	styleTagStartPattern     = regexp.MustCompile(`<([ubi])>`)
+	styleTagEndPattern       = regexp.MustCompile(`</([ubi])>`)
+	fontColorTagStartPattern = regexp.MustCompile(`<font\s+color="?#[\w]{2}([\w]{2})([\w]{2})([\w]{2})"?\s*>`)
+	fontColorTagEndPattern   = regexp.MustCompile(`</font>`)
+)
+
+// 判断字幕是否为 SRT 格式
+func IsSRT(text string) bool {
+	text = strings.ReplaceAll(text, "\r", "")                                  // 去除 \r 保证多系统兼容
+	lines := strings.Split(text, "\n")                                         // 按行分割
+	matches := srtSubtitlesPattern.FindAllString(strings.Join(lines, "@"), -1) // 查找所有匹配项
+	return len(matches) > 0
+}
 
 // 将 SRT 字幕转换成 ASS 字幕
 //
@@ -59,14 +60,14 @@ func SRT2ASS(srtText string, style []string) string {
 		currentSubtitleContent uint8  = 0  // 一个时间下字幕的行数（2表示这一时间有2行字幕）
 	)
 	for index, line := range lines {
-		if isInt(line) && srtTimeRegxp.Match([]byte(lines[index+1])) { // 这一行是 SRT 字幕的序列数且下一行是时间
+		if isInt(line) && srtTimePattern.Match([]byte(lines[index+1])) { // 这一行是 SRT 字幕的序列数且下一行是时间
 			if subtitleBuffer != "" {
 				subtitleContent += subtitleBuffer + "\n"
 				subtitleBuffer = ""
 			}
 			currentSubtitleContent = 0
 		} else {
-			if srtTimeRegxp.Match([]byte(line)) {
+			if srtTimePattern.Match([]byte(line)) {
 				line = strings.ReplaceAll(line, "-0", "0")
 				subtitleBuffer += "Dialogue: 0," + line + ",Default,,0,0,0,,"
 			} else {
@@ -81,12 +82,12 @@ func SRT2ASS(srtText string, style []string) string {
 	}
 	subtitleContent += subtitleBuffer + "\n" // 最后一行字幕
 
-	subtitleContent = timeFormatRe.ReplaceAllString(subtitleContent, "$1.$2")            // 替换时间格式
-	subtitleContent = arrowRe.ReplaceAllString(subtitleContent, ",")                     // 替换箭头符号
-	subtitleContent = styleOpenTagRe.ReplaceAllString(subtitleContent, `{\\$11}`)        // 替换样式标签
-	subtitleContent = styleCloseTagRe.ReplaceAllString(subtitleContent, `{\\$10}`)       // 替换字体颜色标签
-	subtitleContent = fontColorTagRe.ReplaceAllString(subtitleContent, `{\\c&H$3$2$1&}`) // 替换字体颜色标签
-	subtitleContent = fontCloseTagRe.ReplaceAllString(subtitleContent, "")               // 删除字体结束标签
+	subtitleContent = timeFormatPattern.ReplaceAllString(subtitleContent, "$1.$2")                 // 替换时间格式
+	subtitleContent = arrowPattern.ReplaceAllString(subtitleContent, ",")                          // 替换箭头符号
+	subtitleContent = styleTagStartPattern.ReplaceAllString(subtitleContent, `{\\$11}`)            // 替换样式标签
+	subtitleContent = styleTagEndPattern.ReplaceAllString(subtitleContent, `{\\$10}`)              // 替换字体颜色标签
+	subtitleContent = fontColorTagStartPattern.ReplaceAllString(subtitleContent, `{\\c&H$3$2$1&}`) // 替换字体颜色标签
+	subtitleContent = fontColorTagEndPattern.ReplaceAllString(subtitleContent, "")                 // 删除字体结束标签
 	return ASSHeader1 + "\n" + strings.Join(style, "\n") + "\n\n" + ASSHeader2 + "\n\n" + subtitleContent
 }
 
@@ -139,11 +140,11 @@ func AnalyseASS(assText string) (map[ASSFontStyle]SetInterface[rune], error) {
 				styleName := strings.ReplaceAll(strings.TrimSpace(styleData[assStyleNameIndex]), "*", "")
 				fontName := strings.ReplaceAll(strings.TrimSpace(styleData[assFontNameIndex]), "@", "")
 				var (
-					fontWeight uint16 = 400
+					fontWeight uint16 = defaultRegularBodyWeight
 					italic     bool   = false
 				) // 字重默认 400
 				if assBodyIndex != -1 && strings.TrimSpace(styleData[assBodyIndex]) == "1" { // 当该 ASS 字幕格式存在 Bold 属性且该样式属性设置为 "1" 时，将字重设置为 700
-					fontWeight = 700
+					fontWeight = defaultBoldBodyWeight
 				}
 				if assItalicIndex != -1 && strings.TrimSpace(styleData[assItalicIndex]) == "1" {
 					italic = true
@@ -200,10 +201,10 @@ func AnalyseASS(assText string) (map[ASSFontStyle]SetInterface[rune], error) {
 						}
 					} else if tag[0] == 'b' {
 						if length == 2 {
-							if tag[1] == '1' {
-								currentStyle.Weight = 700
-							} else if tag[1] == '0' {
-								currentStyle.Weight = 400
+							if tag[1] == '0' {
+								currentStyle.Weight = defaultRegularBodyWeight
+							} else if tag[1] == '1' {
+								currentStyle.Weight = defaultBoldBodyWeight
 							} else {
 								return fmt.Errorf("未知加粗状态：%s", string(tag))
 							}
