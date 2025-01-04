@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -34,10 +35,9 @@ var (
 )
 
 // 判断字幕是否为 SRT 格式
-func IsSRT(text string) bool {
-	text = strings.ReplaceAll(text, "\r", "")                                  // 去除 \r 保证多系统兼容
-	lines := strings.Split(text, "\n")                                         // 按行分割
-	matches := srtSubtitlesPattern.FindAllString(strings.Join(lines, "@"), -1) // 查找所有匹配项
+func IsSRT(content []byte) bool {
+	content = bytes.ReplaceAll(content, []byte{'\r'}, []byte{}) // 去除 \r 保证多系统兼容
+	matches := srtSubtitlesPattern.FindAll(bytes.ReplaceAll(content, []byte{'\n'}, []byte{'@'}), -1)
 	return len(matches) > 0
 }
 

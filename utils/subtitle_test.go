@@ -387,7 +387,7 @@ func TestIsSrt(t *testing.T) {
 
 	for caseName, testCase := range testCases {
 		t.Run(caseName, func(t *testing.T) {
-			result := utils.IsSRT(testCase.Text)
+			result := utils.IsSRT([]byte(testCase.Text))
 			if testCase.Result != result {
 				t.Errorf("%s 解析错误。期望: %t, 实际: %t", caseName, testCase.Result, result)
 			}
@@ -397,6 +397,8 @@ func TestIsSrt(t *testing.T) {
 
 func BenchmarkIsSrt(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		utils.IsSRT(subtitle1)
+		for _, testCase := range testCases {
+			utils.IsSRT([]byte(testCase.Text))
+		}
 	}
 }

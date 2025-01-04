@@ -297,18 +297,17 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 // 将 SRT 字幕转 ASS
 func (embyServerHandler *EmbyServerHandler) ModifySubtitles(rw *http.Response) error {
 	defer rw.Body.Close()
-	body, err := io.ReadAll(rw.Body) // 读取字幕文件
+	sutitile, err := io.ReadAll(rw.Body) // 读取字幕文件
 	if err != nil {
 		logging.Warning("读取原始字幕 Body 出错：", err)
 		return err
 	}
 	var msg string
-	sutitile := string(body)
 	if utils.IsSRT(sutitile) { // 判断是否为 SRT 格式
 		msg = "字幕文件为 SRT 格式"
 		if config.Subtitle.SRT2ASS {
 			msg += "，已转为 ASS 格式"
-			assSubtitle := utils.SRT2ASS(sutitile, config.Subtitle.ASSStyle)
+			assSubtitle := utils.SRT2ASS(string(sutitile), config.Subtitle.ASSStyle)
 			updateBody(rw, assSubtitle)
 		}
 	}
