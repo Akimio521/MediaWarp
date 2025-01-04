@@ -3,9 +3,8 @@ package service
 import (
 	"MediaWarp/internal/config"
 	"MediaWarp/internal/service/alist"
-	"fmt"
-
 	"MediaWarp/utils"
+	"fmt"
 	"sync"
 )
 
