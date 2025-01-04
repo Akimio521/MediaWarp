@@ -36,9 +36,9 @@ var (
 
 // 判断字幕是否为 SRT 格式
 func IsSRT(content []byte) bool {
-	content = bytes.ReplaceAll(content, []byte{'\r'}, []byte{}) // 去除 \r 保证多系统兼容
-	matches := srtSubtitlesPattern.FindAll(bytes.ReplaceAll(content, []byte{'\n'}, []byte{'@'}), -1)
-	return len(matches) > 0
+	content = bytes.ReplaceAll(content, []byte{'\r'}, []byte{})    // 去除 \r 保证多系统兼容
+	content = bytes.ReplaceAll(content, []byte{'\n'}, []byte{'@'}) // 将 \n 替换为 @
+	return srtSubtitlesPattern.Match(content)                      // 查找第一个匹配项
 }
 
 // 将 SRT 字幕转换成 ASS 字幕
