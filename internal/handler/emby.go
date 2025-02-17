@@ -51,7 +51,7 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 		}
 
 		if config.Web.Enable {
-			if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.BeautifyCSS {
+			if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.VideoTogether || config.Web.BeautifyCSS {
 				embyServerHandler.routerRules = append(embyServerHandler.routerRules,
 					RegexpRouteRule{
 						Regexp:  constants.EmbyRegexp["router"]["ModifyIndex"],
@@ -372,6 +372,9 @@ func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error
 	}
 	if config.Web.Danmaku { // 弹幕
 		addHEAD += `<script src="https://cdn.jsdelivr.net/gh/RyoLee/emby-danmaku@gh-pages/ede.user.js" defer></script>` + "\n"
+	}
+	if config.Web.VideoTogether { // VideoTogether
+		addHEAD += `<script src="https://2gether.video/release/extension.website.user.js"></script>` + "\n"
 	}
 
 	if config.Web.BeautifyCSS { // 美化CSS

@@ -47,6 +47,7 @@ type WebSetting struct {
 	ActorPlus         bool   // 过滤没有头像的演员和制作人员
 	FanartShow        bool   // 显示同人图（fanart图）
 	Danmaku           bool   // Web显示弹幕
+	VideoTogether     bool   // VideoTogether
 	BeautifyCSS       bool   // Emby美化CSS样式
 }
 

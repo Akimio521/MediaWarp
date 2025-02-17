@@ -32,6 +32,7 @@ Web:                                        # Web页面修改相关设置
   ActorPlus: True                           # 过滤没有头像的演员和制作人员
   FanartShow: False                         # 显示同人图（fanart图）
   Danmaku: True                             # Web显示弹幕
+  VideoTogether: True                       # 共同观影，详情见 https://videotogether.github.io/
   BeautifyCSS: True                         # Emby美化CSS样式
 
 ClientFilter:                               # 客户端过滤器
