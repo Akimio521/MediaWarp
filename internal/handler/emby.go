@@ -184,19 +184,21 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 			container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 			playbackInfoResponse.MediaSources[index].Container = &container
 			msg := fmt.Sprintf("%s 设置直链播放链接为: %s，容器为: %s", *mediasource.Name, directStreamURL, container)
-			alistServer, err := service.GetAlistServer(opt.(string))
-			if err != nil {
-				logging.Warning("获取 AlistServer 失败：", err)
-				return err
+			if playbackInfoResponse.MediaSources[index].Size == nil {
+				alistServer, err := service.GetAlistServer(opt.(string))
+				if err != nil {
+					logging.Warning("获取 AlistServer 失败：", err)
+					continue
+				}
+				fsGetData, err := alistServer.FsGet(*mediasource.Path)
+				if err != nil {
+					logging.Debug(msg)
+					logging.Warning("请求 FsGet 失败：", err)
+					continue
+				}
+				playbackInfoResponse.MediaSources[index].Size = &fsGetData.Size
+				msg += fmt.Sprintf("，设置文件大小为:%d", fsGetData.Size)
 			}
-			fsGetData, err := alistServer.FsGet(*mediasource.Path)
-			if err != nil {
-				logging.Debug(msg)
-				logging.Warning("请求 FsGet 失败：", err)
-				continue
-			}
-			playbackInfoResponse.MediaSources[index].Size = &fsGetData.Size
-			msg += fmt.Sprintf("，设置文件大小为:%d", fsGetData.Size)
 			logging.Debug(msg)
 		}
 	}
