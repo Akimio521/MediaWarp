@@ -221,18 +221,18 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 //
 // 支持播放本地视频、重定向 HttpStrm、AlistStrm
 func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
+	if ctx.Request.Method == http.MethodHead { // 不额外处理 HEAD 请求
+		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
+		logging.Debug("VideosHandler 不处理 HEAD 请求，转发至上游服务器")
+		return
+	}
+
 	orginalPath := ctx.Request.URL.Path
 	matches := constants.EmbyRegexp["others"]["VideoRedirectReg"].FindStringSubmatch(orginalPath)
 	if len(matches) == 2 {
 		redirectPath := fmt.Sprintf("/videos/%s/stream", matches[0])
 		logging.Debug(orginalPath + " 重定向至：" + redirectPath)
 		ctx.Redirect(http.StatusFound, redirectPath)
-		return
-	}
-
-	if ctx.Request.Method == http.MethodHead { // 不额外处理 HEAD 请求
-		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
-		logging.Debug("VideosHandler 不处理 HEAD 请求，转发至上游服务器")
 		return
 	}
 
