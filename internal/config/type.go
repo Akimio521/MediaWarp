@@ -61,6 +61,7 @@ type ClientFilterSetting struct {
 // HTTPStrm播放设置
 type HTTPStrmSetting struct {
 	Enable     bool
+	TransCode  bool // false->强制关闭转码 true->保持原有转码设置
 	PrefixList []string
 }
 
@@ -75,8 +76,9 @@ type AlistSetting struct {
 
 // AlistStrm播放设置
 type AlistStrmSetting struct {
-	Enable bool
-	List   []AlistSetting
+	Enable    bool
+	TransCode bool // false->强制关闭转码 true->保持原有转码设置
+	List      []AlistSetting
 }
 
 // 字幕设置

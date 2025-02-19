@@ -152,11 +152,35 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 		}
 		item := itemResponse.Items[0]
 		strmFileType, opt := embyServerHandler.RecgonizeStrmFileType(*item.Path)
+		var msg string
 		switch strmFileType {
 		case constants.HTTPStrm: // HTTPStrm 设置支持直链播放并且支持转码
-			*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
-			*playbackInfoResponse.MediaSources[index].SupportsDirectStream = true
-			if mediasource.DirectStreamURL != nil {
+			if !config.HTTPStrm.TransCode {
+				*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
+				*playbackInfoResponse.MediaSources[index].SupportsDirectStream = true
+				playbackInfoResponse.MediaSources[index].TranscodingURL = nil
+				playbackInfoResponse.MediaSources[index].TranscodingSubProtocol = nil
+				playbackInfoResponse.MediaSources[index].TranscodingContainer = nil
+				if mediasource.DirectStreamURL != nil {
+					apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
+					if err != nil {
+						logging.Warning("解析API键值对失败：", err)
+						continue
+					}
+					directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
+					playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
+					msg = fmt.Sprintf("%s 强制禁止转码，直链播放链接为: %s，", *mediasource.Name, directStreamURL)
+				}
+			}
+
+		case constants.AlistStrm: // AlistStm 设置支持直链播放并且禁止转码
+			if !config.AlistStrm.TransCode {
+				*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
+				*playbackInfoResponse.MediaSources[index].SupportsDirectStream = true
+				*playbackInfoResponse.MediaSources[index].SupportsTranscoding = false
+				playbackInfoResponse.MediaSources[index].TranscodingURL = nil
+				playbackInfoResponse.MediaSources[index].TranscodingSubProtocol = nil
+				playbackInfoResponse.MediaSources[index].TranscodingContainer = nil
 				apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
 				if err != nil {
 					logging.Warning("解析API键值对失败：", err)
@@ -164,26 +188,13 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 				}
 				directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
 				playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
-				logging.Debug("设置直链播放链接为: " + directStreamURL)
+				container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
+				playbackInfoResponse.MediaSources[index].Container = &container
+				msg = fmt.Sprintf("%s 强制禁止转码，直链播放链接为: %s，容器为: %s", *mediasource.Name, directStreamURL, container)
+			} else {
+				msg = fmt.Sprintf("%s 保持原有转码设置", *mediasource.Name)
 			}
 
-		case constants.AlistStrm: // AlistStm 设置支持直链播放并且禁止转码
-			*playbackInfoResponse.MediaSources[index].SupportsDirectPlay = true
-			*playbackInfoResponse.MediaSources[index].SupportsDirectStream = true
-			*playbackInfoResponse.MediaSources[index].SupportsTranscoding = false
-			playbackInfoResponse.MediaSources[index].TranscodingURL = nil
-			playbackInfoResponse.MediaSources[index].TranscodingSubProtocol = nil
-			playbackInfoResponse.MediaSources[index].TranscodingContainer = nil
-			apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
-			if err != nil {
-				logging.Warning("解析API键值对失败：", err)
-				continue
-			}
-			directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
-			playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
-			container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
-			playbackInfoResponse.MediaSources[index].Container = &container
-			msg := fmt.Sprintf("%s 设置直链播放链接为: %s，容器为: %s", *mediasource.Name, directStreamURL, container)
 			if playbackInfoResponse.MediaSources[index].Size == nil {
 				alistServer, err := service.GetAlistServer(opt.(string))
 				if err != nil {
@@ -199,8 +210,9 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 				playbackInfoResponse.MediaSources[index].Size = &fsGetData.Size
 				msg += fmt.Sprintf("，设置文件大小为:%d", fsGetData.Size)
 			}
-			logging.Debug(msg)
+
 		}
+		logging.Debug(msg)
 	}
 
 	body, err = json.Marshal(playbackInfoResponse)
