@@ -78,6 +78,7 @@ type AlistSetting struct {
 type AlistStrmSetting struct {
 	Enable    bool
 	TransCode bool // false->强制关闭转码 true->保持原有转码设置
+	RawURL    bool // 是否使用原始 URL
 	List      []AlistSetting
 }
 

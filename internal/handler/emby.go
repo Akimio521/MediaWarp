@@ -292,8 +292,14 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 					logging.Warning("请求 FsGet 失败：", err)
 					return
 				}
-				logging.Info("AlistStrm 重定向至：", fsGetData.RawURL)
-				ctx.Redirect(http.StatusFound, fsGetData.RawURL)
+				var redirectURL string
+				if config.AlistStrm.RawURL {
+					redirectURL = fsGetData.RawURL
+				} else {
+					redirectURL = fmt.Sprintf("%s/d%s?sign=%s", alistServerAddr, *mediasource.Path, fsGetData.Sign)
+				}
+				logging.Info("AlistStrm 重定向至：", redirectURL)
+				ctx.Redirect(http.StatusFound, redirectURL)
 				return
 			case constants.UnknownStrm:
 				embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)

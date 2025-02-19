@@ -54,8 +54,9 @@ HTTPStrm:
 AlistStrm:                                  # AlistStrm相关配置（Strm文件内容是Alist上文件的路径，目前仅支持适配Alist V3）
   Enable: True                              # 是否启用AlistStrm重定向
   TransCode: True                           # False：强制关闭转码 True：保持原有转码设置
+  RawURL: False                             # Fasle：直接响应 Alist 上游的真实链接 True：响应 Alist 服务器的直链（要求客户端可以访问到 Alist）
   List:                                     # Alist服务关配置列表
-    - ADDR: http://192.168.1.100:5244       # Alist服务器地址（MediaWarp可以正常访问到就可以）
+    - ADDR: http://192.168.1.100:5244       # Alist服务器地址
       Username: admin                       # Alist服务器账号
       Password: adminadmin                  # Alist服务器密码
       PrefixList:                           # EmbyServer中Strm文件的前缀（符合该前缀的Strm文件都会路由到该规则下）
