@@ -266,23 +266,20 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 					ctx.Redirect(http.StatusFound, *mediasource.Path)
 				}
 				return
-			case constants.AlistStrm:
-				if strings.ToUpper(*mediasource.Container) == "STRM" { // 判断是否为Strm文件
-					alistServerAddr := opt.(string)
-					alistServer, err := service.GetAlistServer(alistServerAddr)
-					if err != nil {
-						logging.Warning("获取 AlistServer 失败：", err)
-						return
-					}
-					fsGetData, err := alistServer.FsGet(*mediasource.Path)
-					if err != nil {
-						logging.Warning("请求 FsGet 失败：", err)
-						return
-					}
-					logging.Info("AlistStrm 重定向至：", fsGetData.RawURL)
-					ctx.Redirect(http.StatusFound, fsGetData.RawURL)
+			case constants.AlistStrm: // 无需判断 *mediasource.Container 是否以Strm结尾，当 AlistStrm 存储的位置有对应的文件时，*mediasource.Container 会被设置为文件后缀
+				alistServerAddr := opt.(string)
+				alistServer, err := service.GetAlistServer(alistServerAddr)
+				if err != nil {
+					logging.Warning("获取 AlistServer 失败：", err)
 					return
 				}
+				fsGetData, err := alistServer.FsGet(*mediasource.Path)
+				if err != nil {
+					logging.Warning("请求 FsGet 失败：", err)
+					return
+				}
+				logging.Info("AlistStrm 重定向至：", fsGetData.RawURL)
+				ctx.Redirect(http.StatusFound, fsGetData.RawURL)
 				return
 			case constants.UnknownStrm:
 				embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
