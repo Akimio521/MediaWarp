@@ -9,7 +9,7 @@ release:
   name_template: "{{ .Tag }}"
 before:
   hooks:
-    - go mod tidy
+    - go mod download
 
 builds:
   - env:
@@ -35,7 +35,7 @@ builds:
       - goos: windows
         goarm: 7
     binary: "{{ .ProjectName }}"
-    ldflags: 
+    ldflags:
       - -s -w
       - -X MediaWarp/internal/config.appVersion={{ .Version }}
       - -X MediaWarp/internal/config.commitHash={{ .FullCommit }}
@@ -44,9 +44,13 @@ builds:
 dockers:
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
-    skip_push: true
+    skip_push: false
     build_flag_templates:
       - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
     goos: linux
     goarch: amd64
     goamd64: v1
@@ -55,7 +59,7 @@ dockers:
 
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
-    skip_push: true
+    skip_push: false
     build_flag_templates:
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{ .Date }}"
@@ -69,7 +73,7 @@ dockers:
 
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
-    skip_push: true
+    skip_push: false
     build_flag_templates:
       - "--platform=linux/arm/v6"
       - "--label=org.opencontainers.image.created={{ .Date }}"
@@ -78,13 +82,13 @@ dockers:
       - "--label=org.opencontainers.image.version={{ .Version }}"
     goos: linux
     goarch: arm
-    goarm: '6'
+    goarm: "6"
     image_templates:
       - "akimio/mediawarp:{{ .Version }}-armv6"
 
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
-    skip_push: true
+    skip_push: false
     build_flag_templates:
       - "--platform=linux/arm/v7"
       - "--label=org.opencontainers.image.created={{ .Date }}"
@@ -93,7 +97,7 @@ dockers:
       - "--label=org.opencontainers.image.version={{ .Version }}"
     goos: linux
     goarch: arm
-    goarm: '7'
+    goarm: "7"
     image_templates:
       - "akimio/mediawarp:{{ .Version }}-armv7"
 
