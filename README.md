@@ -25,7 +25,7 @@ MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原�
 
 [功能](#功能) •
 [TODO LIST](#todo-list) •
-[相关文档](#相关文档) •
+[教程文档](https://blog.akimio.top/posts/1041/) •
 [鸣谢](#鸣谢) •
 [Star History](#star-history)
 
@@ -64,7 +64,7 @@ MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原�
 - [x] AlistStrm 实现 302 重定向
 - [x] 嵌入一些实用的 JavaScript 方便使用
 - [x] 缓存图片、字幕提高性能
-- [x] 多格式配置文件（优先级：JSON > TOML > YAML > YML > Java properties > Java props，格式参考[config.yaml.example](./config/config.yaml.example)
+- [x] 多格式配置文件（优先级：JSON > TOML > YAML > YML > Java properties > Java props，格式参考[config.yaml.example](./config/config.yaml.example)）
 - [x] ART 字幕转 ASS 字幕
 - [ ] ASS 字幕字体子集化并嵌入字体
 - [ ] 适配 Jellyfin

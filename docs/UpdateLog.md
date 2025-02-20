@@ -20,15 +20,22 @@
   - 用户自定义资源设为 Custom、从 config 中读取需要额外添加的 HEAD
   - 日志允许设置是否输出到终端或文件
   - 日志根据日期分割
-- 2024.11.1：v0.0.5
+- 2024.11.1: v0.0.5
   - 扩大 VideosHandler 匹配范围（修复 FileBall 下 Strm 文件播放问题，不完美）
   - 中间件缓存可选是否开启（避免内存缓存缓存大量图片、css、js 等资源）
   - 修改 internal/config、internal/logger、internal/cache 这几个包，使其使用方式更加 “golang”
   - 支持加载多种格式的配置文件（JSON、TOML、YAML、YML、Java properties、Java props）
-- 2024.12.22： v0.0.6
+- 2024.12.22: v0.0.6
   - 提供 API 接口查看版本具体信息
   - 小幅度修改项目子包结构
   - 使用 goreleaser 进行构建
   - 减小 EmbyServer.VideosHandler 匹配范围
   - 需要修改响应体时复用之前实例化的 httputil.ReverseProxy
   - EmbyServerHandler.PlaybackInfoHandler 拦截修改响应修改 AlistStrm 正确播放地址
+- 2025.2.20: v0.0.7
+  - 提供字幕接口相关正则，新增 SRT 字幕转 ASS 字幕功能
+  - 修复当 MediaStreams 为空数组的情况移除该字段导致导致部分客户端报错问题
+  - 优化 VideosHandler 函数中优先判断是否为 HEAD 请求
+  - 优化 ModifyPlaybackInfo 函数，减少无意义请求数，降低响应延迟
+  - 新增转码设置选项以支持 HTTPStrm 和 AlistStrm  是否返回 PlaybackInfo 通告客户端禁止转码
+  - f新增 RawURL 配置选项以控制 AlistStrm 的重定向链接
