@@ -414,3 +414,5 @@ func updateBody(rw *http.Response, s string) {
 	rw.Header.Set("Content-Length", strconv.Itoa(len(s)))
 
 }
+
+var _ MediaServerHandler = (*EmbyServerHandler)(nil) // 确保 EmbyServerHandler 实现 MediaServerHandler 接口
