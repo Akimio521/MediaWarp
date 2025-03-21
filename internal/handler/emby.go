@@ -296,7 +296,10 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 				if config.AlistStrm.RawURL {
 					redirectURL = fsGetData.RawURL
 				} else {
-					redirectURL = fmt.Sprintf("%s/d%s?sign=%s", alistServerAddr, *mediasource.Path, fsGetData.Sign)
+					redirectURL = fmt.Sprintf("%s/d%s", alistServerAddr, *mediasource.Path)
+					if fsGetData.Sign != "" {
+						redirectURL += "?sign=" + fsGetData.Sign
+					}
 				}
 				logging.Info("AlistStrm 重定向至：", redirectURL)
 				ctx.Redirect(http.StatusFound, redirectURL)
