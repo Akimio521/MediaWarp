@@ -131,12 +131,12 @@ func (embyServerHandler *EmbyServerHandler) RecgonizeStrmFileType(strmFilePath s
 // /Items/:itemId/PlaybackInfo
 // 强制将 HTTPStrm 设置为支持直链播放和转码、AlistStrm 设置为支持直链播放并且禁止转码
 func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response) error {
-	defer rw.Body.Close()
 	body, err := io.ReadAll(rw.Body)
 	if err != nil {
 		logging.Warning("读取 Body 出错：", err)
 		return err
 	}
+	defer rw.Body.Close()
 
 	var playbackInfoResponse emby.PlaybackInfoResponse
 	err = json.Unmarshal(body, &playbackInfoResponse)
