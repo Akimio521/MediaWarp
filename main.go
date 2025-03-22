@@ -9,21 +9,32 @@ import (
 	"flag"
 	"fmt"
 
+	"encoding/json"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 var (
-	isDebug bool
+	isDebug     bool
+	showVersion bool
 )
 
 func init() {
 	printLOGO()
 	flag.BoolVar(&isDebug, "debug", false, "是否启用调试模式")
-	flag.Parse()
+	flag.BoolVar(&showVersion, "version", false, "显示版本信息")
 }
 
 func main() {
+	flag.Parse()
+
+	if showVersion {
+		ver, _ := json.MarshalIndent(config.Version(), "", "  ")
+		fmt.Println(string(ver))
+		return
+	}
+
 	if isDebug {
 		logging.SetLevel(logrus.DebugLevel)
 		logging.Warning("已启用调试模式")
