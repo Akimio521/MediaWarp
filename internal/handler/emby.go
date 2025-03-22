@@ -357,54 +357,49 @@ func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayer(rw *http.Respon
 // 修改首页函数
 func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error {
 	var (
-		htmlFilePath    string = path.Join(config.StaticDir(), "index.html")
-		modifiedBodyStr string
-		addHEAD         string
+		htmlFilePath string = path.Join(config.StaticDir(), "index.html")
+		htmlContent  []byte
+		addHEAD      []byte
+		err          error
 	)
 
+	defer rw.Body.Close()  // 无论哪种情况，最终都要确保原 Body 被关闭，避免内存泄漏
 	if !config.Web.Index { // 从上游获取响应体
-		body, err := io.ReadAll(rw.Body)
-		defer rw.Body.Close()
-		if err != nil {
+		if htmlContent, err = io.ReadAll(rw.Body); err != nil {
 			return err
 		}
-		modifiedBodyStr = string(body)
 	} else { // 从本地文件读取index.html
-		htmlContent, err := utils.GetFileContent(htmlFilePath)
-		if err != nil {
+		if htmlContent, err = utils.GetFileContent(htmlFilePath); err != nil {
 			logging.Warning("读取文件内容出错，错误信息：", err)
 			return err
-		} else {
-			modifiedBodyStr = string(htmlContent)
 		}
 	}
 
 	if config.Web.Head != "" { // 用户自定义HEAD
-		addHEAD += config.Web.Head + "\n"
+		addHEAD = append(addHEAD, []byte(config.Web.Head+"\n")...)
 	}
 	if config.Web.ExternalPlayerUrl { // 外部播放器
-		addHEAD += `<script src="/MediaWarp/static/embedded/js/ExternalPlayerUrl.js"></script>` + "\n"
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/embedded/js/ExternalPlayerUrl.js"></script>`+"\n")...)
 	}
 	if config.Web.ActorPlus { // 过滤没有头像的演员和制作人员
-		addHEAD += `<script src="/MediaWarp/static/embedded/js/ActorPlus.js"></script>` + "\n"
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/embedded/js/ActorPlus.js"></script>`+"\n")...)
 	}
 	if config.Web.FanartShow { // 显示同人图（fanart图）
-		addHEAD += `<script src="/MediaWarp/static/embedded/js/FanartShow.js"></script>` + "\n"
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/embedded/js/FanartShow.js"></script>`+"\n")...)
 	}
 	if config.Web.Danmaku { // 弹幕
-		addHEAD += `<script src="https://cdn.jsdelivr.net/gh/RyoLee/emby-danmaku@gh-pages/ede.user.js" defer></script>` + "\n"
+		addHEAD = append(addHEAD, []byte(`<script src="https://cdn.jsdelivr.net/gh/RyoLee/emby-danmaku@gh-pages/ede.user.js" defer></script>`+"\n")...)
 	}
 	if config.Web.VideoTogether { // VideoTogether
-		addHEAD += `<script src="https://2gether.video/release/extension.website.user.js"></script>` + "\n"
+		addHEAD = append(addHEAD, []byte(`<script src="https://2gether.video/release/extension.website.user.js"></script>`+"\n")...)
 	}
 
 	if config.Web.BeautifyCSS { // 美化CSS
-		addHEAD += `<link rel="stylesheet" href="/MediaWarp/static/embedded/css/Beautify.css" type="text/css" media="all" />` + "\n"
+		addHEAD = append(addHEAD, []byte(`<link rel="stylesheet" href="/MediaWarp/static/embedded/css/Beautify.css" type="text/css" media="all" />`+"\n")...)
 	}
-	modifiedBodyStr = strings.Replace(modifiedBodyStr, "</head>", addHEAD+"</head>", 1) // 将添加HEAD
-	updateBody(rw, modifiedBodyStr)
+	htmlContent = bytes.Replace(htmlContent, []byte("</head>"), append(addHEAD, []byte("</head>")...), 1) // 将添加HEAD
+	updateBody(rw, string(htmlContent))
 	return nil
-
 }
 
 // 更新响应体
