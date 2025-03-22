@@ -329,7 +329,7 @@ func (embyServerHandler *EmbyServerHandler) ModifySubtitles(rw *http.Response) e
 		if config.Subtitle.SRT2ASS {
 			msg += "，已转为 ASS 格式"
 			assSubtitle := utils.SRT2ASS(string(sutitile), config.Subtitle.ASSStyle)
-			updateBody(rw, assSubtitle)
+			updateBody(rw, []byte(assSubtitle))
 		}
 	}
 	if msg != "" {
@@ -348,8 +348,8 @@ func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayer(rw *http.Respon
 		return err
 	}
 
-	modifiedBodyStr := strings.ReplaceAll(string(body), `mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`, "null") // 修改响应体
-	updateBody(rw, modifiedBodyStr)
+	body = bytes.ReplaceAll(body, []byte(`mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`), []byte("null")) // 修改响应体
+	updateBody(rw, body)
 	return nil
 
 }
@@ -398,19 +398,19 @@ func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error
 		addHEAD = append(addHEAD, []byte(`<link rel="stylesheet" href="/MediaWarp/static/embedded/css/Beautify.css" type="text/css" media="all" />`+"\n")...)
 	}
 	htmlContent = bytes.Replace(htmlContent, []byte("</head>"), append(addHEAD, []byte("</head>")...), 1) // 将添加HEAD
-	updateBody(rw, string(htmlContent))
+	updateBody(rw, htmlContent)
 	return nil
 }
 
 // 更新响应体
 //
 // 修改响应体、更新Content-Length
-func updateBody(rw *http.Response, s string) {
-	rw.Body = io.NopCloser(bytes.NewBuffer([]byte(s))) // 重置响应体
+func updateBody(rw *http.Response, content []byte) {
+	rw.Body = io.NopCloser(bytes.NewBuffer(content)) // 重置响应体
 
 	// 更新 Content-Length 头
-	rw.ContentLength = int64(len(s))
-	rw.Header.Set("Content-Length", strconv.Itoa(len(s)))
+	rw.ContentLength = int64(len(content))
+	rw.Header.Set("Content-Length", strconv.Itoa(len(content)))
 
 }
 
