@@ -2,6 +2,7 @@ package utils_test
 
 import (
 	"MediaWarp/utils"
+	"bytes"
 	"strings"
 	"testing"
 )
@@ -91,4 +92,44 @@ func BenchmarkStringBuilder(b *testing.B) {
 		sb.WriteByte('a')
 	}
 	_ = sb.String()
+}
+
+// goos: darwin
+// goarch: arm64
+// pkg: MediaWarp/utils
+// cpu: Apple M1
+// BenchmarkMethod1
+// BenchmarkMethod1-8   	11925727	        86.93 ns/op	      80 B/op	       2 allocs/op
+func BenchmarkMethod1(b *testing.B) {
+	header := "Header"
+	style := []string{"Style1", "Style2"}
+	for i := 0; i < b.N; i++ {
+		var buf bytes.Buffer
+		buf.WriteString(header + "\n")
+		buf.WriteString(strings.Join(style, "\n") + "\n\n")
+		buf.WriteString("Footer\n\n")
+	}
+}
+
+// goos: darwin
+// goarch: arm64
+// pkg: MediaWarp/utils
+// cpu: Apple M1
+// BenchmarkMethod2
+// BenchmarkMethod2-8   	14530182	        82.06 ns/op	      80 B/op	       2 allocs/op
+func BenchmarkMethod2(b *testing.B) {
+	header := "Header"
+	style := []string{"Style1", "Style2"}
+	newLine := []byte{'\n'}
+	for i := 0; i < b.N; i++ {
+		var buf bytes.Buffer
+		buf.WriteString(header)
+		buf.Write(newLine)
+		buf.WriteString(strings.Join(style, "\n"))
+		buf.Write(newLine)
+		buf.Write(newLine)
+		buf.WriteString("Footer")
+		buf.Write(newLine)
+		buf.Write(newLine)
+	}
 }

@@ -107,8 +107,13 @@ func SRT2ASS(srtText []byte, style []string) []byte {
 	content = fontColorTagEndPattern.ReplaceAll(content, []byte(""))                 // 删除字体结束标签
 
 	result.WriteString(ASSHeader1 + "\n")
-	result.WriteString(strings.Join(style, "\n") + "\n\n")
-	result.WriteString(ASSHeader2 + "\n\n")
+	result.Write(newLine)
+	result.WriteString(strings.Join(style, "\n"))
+	result.Write(newLine)
+	result.Write(newLine)
+	result.WriteString(ASSHeader2)
+	result.Write(newLine)
+	result.Write(newLine)
 	result.Write(content)
 	return result.Bytes()
 }
