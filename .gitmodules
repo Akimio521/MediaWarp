@@ -1,0 +1,15 @@
+[submodule "static/embyExternalUrl"]
+	path = static/embyExternalUrl
+	url = https://github.com/bpking1/embyExternalUrl.git
+[submodule "static/dd-danmaku"]
+	path = static/dd-danmaku
+	url = https://github.com/9channel/dd-danmaku.git
+[submodule "static/emby-web-mod"]
+	path = static/emby-web-mod
+	url = https://github.com/newday-life/emby-web-mod.git
+[submodule "static/jellyfin-crx"]
+	path = static/jellyfin-crx
+	url = https://github.com/newday-life/jellyfin-crx.git
+[submodule "static/emby-crx"]
+	path = static/emby-crx
+	url = https://github.com/Nolovenodie/emby-crx.git

@@ -52,7 +52,7 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 		}
 
 		if config.Web.Enable {
-			if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.VideoTogether || config.Web.BeautifyCSS {
+			if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.VideoTogether {
 				embyServerHandler.routerRules = append(embyServerHandler.routerRules,
 					RegexpRouteRule{
 						Regexp:  constants.EmbyRegexp.Router.ModifyIndex,
@@ -380,23 +380,19 @@ func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error
 		addHEAD = append(addHEAD, []byte(config.Web.Head+"\n")...)
 	}
 	if config.Web.ExternalPlayerUrl { // 外部播放器
-		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/embedded/js/ExternalPlayerUrl.js"></script>`+"\n")...)
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/embyExternalUrl/embyWebAddExternalUrl/embyLaunchPotplayer.js"></script>`+"\n")...)
 	}
 	if config.Web.ActorPlus { // 过滤没有头像的演员和制作人员
-		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/embedded/js/ActorPlus.js"></script>`+"\n")...)
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/emby-web-mod/actorPlus/actorPlus.js"></script>`+"\n")...)
 	}
 	if config.Web.FanartShow { // 显示同人图（fanart图）
-		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/embedded/js/FanartShow.js"></script>`+"\n")...)
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/emby-web-mod/fanart_show/fanart_show.js"></script>`+"\n")...)
 	}
 	if config.Web.Danmaku { // 弹幕
-		addHEAD = append(addHEAD, []byte(`<script src="https://cdn.jsdelivr.net/gh/RyoLee/emby-danmaku@gh-pages/ede.user.js" defer></script>`+"\n")...)
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/emby-web-mod/dd-danmaku/ede.js" defer></script>`+"\n")...)
 	}
 	if config.Web.VideoTogether { // VideoTogether
 		addHEAD = append(addHEAD, []byte(`<script src="https://2gether.video/release/extension.website.user.js"></script>`+"\n")...)
-	}
-
-	if config.Web.BeautifyCSS { // 美化CSS
-		addHEAD = append(addHEAD, []byte(`<link rel="stylesheet" href="/MediaWarp/embedded/css/Beautify.css" type="text/css" media="all" />`+"\n")...)
 	}
 	htmlContent = bytes.Replace(htmlContent, []byte("</head>"), append(addHEAD, []byte("</head>")...), 1) // 将添加HEAD
 	updateBody(rw, htmlContent)

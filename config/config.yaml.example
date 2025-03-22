@@ -33,7 +33,6 @@ Web:                                        # Web页面修改相关设置
   FanartShow: False                         # 显示同人图（fanart图）
   Danmaku: True                             # Web显示弹幕
   VideoTogether: True                       # 共同观影，详情见 https://videotogether.github.io/
-  BeautifyCSS: True                         # Emby美化CSS样式
 
 ClientFilter:                               # 客户端过滤器
   Enable: False                             # 是否启用客户端过滤器

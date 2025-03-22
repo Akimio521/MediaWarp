@@ -48,7 +48,6 @@ type WebSetting struct {
 	FanartShow        bool   // 显示同人图（fanart图）
 	Danmaku           bool   // Web显示弹幕
 	VideoTogether     bool   // VideoTogether
-	BeautifyCSS       bool   // Emby美化CSS样式
 }
 
 // 客户端User-Agent过滤设置

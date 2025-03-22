@@ -2,11 +2,11 @@ package router
 
 import (
 	"MediaWarp/constants"
-	"MediaWarp/internal/assets"
 	"MediaWarp/internal/config"
 	"MediaWarp/internal/handler"
 	"MediaWarp/internal/logging"
 	"MediaWarp/internal/middleware"
+	"MediaWarp/static"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -38,7 +38,7 @@ func InitRouter() *gin.Engine {
 			ctx.JSON(http.StatusOK, config.Version())
 		})
 		if config.Web.Enable { // 启用 Web 页面修改相关设置
-			mediawarpRouter.StaticFS("/embedded", http.FS(assets.EmbeddedStaticAssets))
+			mediawarpRouter.StaticFS("/static", http.FS(static.EmbeddedStaticAssets))
 			if config.Web.Custom { // 用户自定义静态资源目录
 				custom := mediawarpRouter.Group("/custom")
 				custom.Static("/custom", config.StaticDir())
