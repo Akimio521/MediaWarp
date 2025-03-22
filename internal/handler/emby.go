@@ -37,15 +37,15 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 	{ // 初始化路由规则
 		embyServerHandler.routerRules = []RegexpRouteRule{
 			{
-				Regexp:  constants.EmbyRegexp["router"]["VideosHandler"],
+				Regexp:  constants.EmbyRegexp.Router.VideosHandler,
 				Handler: embyServerHandler.VideosHandler,
 			},
 			{
-				Regexp:  constants.EmbyRegexp["router"]["ModifyPlaybackInfo"],
+				Regexp:  constants.EmbyRegexp.Router.ModifyPlaybackInfo,
 				Handler: embyServerHandler.responseModifyCreater(embyServerHandler.ModifyPlaybackInfo),
 			},
 			{
-				Regexp:  constants.EmbyRegexp["router"]["ModifyBaseHtmlPlayer"],
+				Regexp:  constants.EmbyRegexp.Router.ModifyBaseHtmlPlayer,
 				Handler: embyServerHandler.responseModifyCreater(embyServerHandler.ModifyBaseHtmlPlayer),
 			},
 		}
@@ -54,7 +54,7 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 			if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.VideoTogether || config.Web.BeautifyCSS {
 				embyServerHandler.routerRules = append(embyServerHandler.routerRules,
 					RegexpRouteRule{
-						Regexp:  constants.EmbyRegexp["router"]["ModifyIndex"],
+						Regexp:  constants.EmbyRegexp.Router.ModifyIndex,
 						Handler: embyServerHandler.responseModifyCreater(embyServerHandler.ModifyIndex),
 					},
 				)
@@ -63,7 +63,7 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 		if config.Subtitle.Enable && config.Subtitle.SRT2ASS {
 			embyServerHandler.routerRules = append(embyServerHandler.routerRules,
 				RegexpRouteRule{
-					Regexp:  constants.EmbyRegexp["router"]["ModifySubtitles"],
+					Regexp:  constants.EmbyRegexp.Router.ModifySubtitles,
 					Handler: embyServerHandler.responseModifyCreater(embyServerHandler.ModifySubtitles),
 				},
 			)
@@ -242,7 +242,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	}
 
 	orginalPath := ctx.Request.URL.Path
-	matches := constants.EmbyRegexp["others"]["VideoRedirectReg"].FindStringSubmatch(orginalPath)
+	matches := constants.EmbyRegexp.Others.VideoRedirectReg.FindStringSubmatch(orginalPath)
 	if len(matches) == 2 {
 		redirectPath := fmt.Sprintf("/videos/%s/stream", matches[0])
 		logging.Debug(orginalPath + " 重定向至：" + redirectPath)
