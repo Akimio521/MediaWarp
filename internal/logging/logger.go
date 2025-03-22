@@ -20,7 +20,7 @@ func init() {
 	accessLogger = logrus.New()
 	serviceLogger = logrus.New()
 
-	serviceLogger.SetReportCaller(true) // 设置报告调用方
+	serviceLogger.SetReportCaller(false) // 关闭报告调用方
 
 	// 设置样式
 	accessLogger.SetFormatter(aLS)
@@ -47,50 +47,52 @@ func init() {
 // 访问日志
 //
 // 默认日志级别为 Info
-func AccessLog(format string, args ...interface{}) {
+func AccessLog(format string, args ...any) {
 	accessLogger.Infof(format, args...)
 }
 
 // 服务日志
 //
 // Debug 级别日志
-func Debug(args ...interface{}) {
+func Debug(args ...any) {
 	serviceLogger.Debug(args...)
+}
+
+func Debugf(format string, args ...any) {
+	serviceLogger.Debugf(format, args...)
 }
 
 // 服务日志
 //
 // Info 级别日志
-func Info(args ...interface{}) {
+func Info(args ...any) {
 	serviceLogger.Info(args...)
+}
+
+func Infof(format string, args ...any) {
+	serviceLogger.Infof(format, args...)
 }
 
 // 服务日志
 //
 // Warning 级别日志
-func Warning(args ...interface{}) {
+func Warning(args ...any) {
 	serviceLogger.Warning(args...)
+}
+
+func Warningf(format string, args ...any) {
+	serviceLogger.Warningf(format, args...)
 }
 
 // 服务日志
 //
 // Error 级别日志
-func Error(args ...interface{}) {
+func Error(args ...any) {
 	serviceLogger.Error(args...)
 }
 
-// 服务日志
-//
-// Fatal 级别日志
-func Fatal(args ...interface{}) {
-	serviceLogger.Fatal(args...)
-}
-
-// 服务日志
-//
-// Panic 级别日志
-func Panic(args ...interface{}) {
-	serviceLogger.Panic(args...)
+func Errorf(format string, args ...any) {
+	serviceLogger.Errorf(format, args...)
 }
 
 // 服务日志
