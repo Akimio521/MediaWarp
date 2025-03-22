@@ -316,12 +316,13 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 //
 // 将 SRT 字幕转 ASS
 func (embyServerHandler *EmbyServerHandler) ModifySubtitles(rw *http.Response) error {
-	defer rw.Body.Close()
 	sutitile, err := io.ReadAll(rw.Body) // 读取字幕文件
 	if err != nil {
 		logging.Warning("读取原始字幕 Body 出错：", err)
 		return err
 	}
+	defer rw.Body.Close()
+
 	var msg string
 	if utils.IsSRT(sutitile) { // 判断是否为 SRT 格式
 		msg = "字幕文件为 SRT 格式"
