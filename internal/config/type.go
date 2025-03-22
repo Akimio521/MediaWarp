@@ -19,12 +19,6 @@ type MediaServerSetting struct {
 	AUTH string                    // 认证授权KEY
 }
 
-// 缓存相关设置
-type CacheSetting struct {
-	Type     constants.CacheType // 缓存类型
-	WebCache bool                // 是否启用Web缓存中间件
-}
-
 // 日志设置
 type LoggerSetting struct {
 	AccessLogger  BaseLoggerSetting // 访问日志相关配置

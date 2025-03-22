@@ -25,13 +25,6 @@ func InitRouter() *gin.Engine {
 		logging.Info("客户端过滤中间件未启用")
 	}
 
-	if config.Cache.WebCache {
-		ginR.Use(middleware.Cache())
-		logging.Info("Web 缓存中间件已启用")
-	} else {
-		logging.Info("Web 缓存中间件未启用")
-	}
-
 	mediawarpRouter := ginR.Group("/MediaWarp")
 	{
 		mediawarpRouter.Any("/version", func(ctx *gin.Context) {

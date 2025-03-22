@@ -25,7 +25,6 @@ func init() {
 // 将Alist服务器注册到全局Map中
 func registerAlistServer(addr string, username string, password string, token *string) {
 	alistServer := alist.New(addr, username, password, token)
-	alistServer.Init()
 	alistSeverMap.Store(alistServer.GetEndpoint(), alistServer)
 }
 

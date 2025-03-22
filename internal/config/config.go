@@ -23,7 +23,6 @@ var (
 
 	Port         int                 // MediaWarp开放端口
 	MediaServer  MediaServerSetting  // 上游媒体服务器设置
-	Cache        CacheSetting        // 缓存相关设置
 	Logger       LoggerSetting       // 日志设置
 	Web          WebSetting          // Web服务器设置
 	ClientFilter ClientFilterSetting // 客户端过滤设置
@@ -119,9 +118,6 @@ func loadConfig() {
 	MediaServer.Type = constants.MediaServerType(viper.GetString("MediaServer.Type"))
 	MediaServer.ADDR = viper.GetString("MediaServer.ADDR")
 	MediaServer.AUTH = viper.GetString("MediaServer.AUTH")
-
-	Cache.Type = constants.CacheType(viper.GetString("Cache.Type"))
-	Cache.WebCache = viper.GetBool("Cache.WebCache")
 
 	if err := viper.UnmarshalKey("Logger", &Logger); err != nil {
 		panic(fmt.Errorf("LoggerSetting 解析失败, %v", err))

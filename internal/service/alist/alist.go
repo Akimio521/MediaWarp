@@ -1,7 +1,6 @@
 package alist
 
 import (
-	"MediaWarp/internal/cache"
 	"MediaWarp/utils"
 	"encoding/json"
 	"errors"
@@ -19,16 +18,10 @@ type alistToken struct {
 	mutex    sync.RWMutex // 令牌锁
 }
 type AlistServer struct {
-	endpoint   string // 服务器入口 URL
-	username   string // 用户名
-	password   string // 密码
-	token      alistToken
-	sapaceName string // 缓存空间键 key
-}
-
-// 得到缓存SpaceName
-func (alistServer *AlistServer) Init() {
-	alistServer.sapaceName = alistServer.GetEndpoint() + alistServer.GetUsername() + alistServer.password
+	endpoint string // 服务器入口 URL
+	username string // 用户名
+	password string // 密码
+	token    alistToken
 }
 
 // 得到服务器入口
@@ -123,19 +116,11 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 	var (
 		fsGetDataResponse AlistResponse[FsGetData]
 		token             string
-		cacheKey          = fmt.Sprintf("API_FsGet_%s", path)
-		cacheDuration     = 30 * time.Minute // 缓存时间为30分钟
 		funcInfo          = "Alist获取某个文件/目录信息"
 		url               = alistServer.GetEndpoint() + "/api/fs/get"
 		method            = "POST"
 		payload           = strings.NewReader(fmt.Sprintf(`{"path": "%s","password": "","page": 1,"per_page": 0,"refresh": false}`, path))
 	)
-
-	cacheData, found := cache.Get(alistServer.sapaceName, cacheKey)
-	if found { // 在缓存中查询到数据
-		fsGetData := cacheData.(FsGetData)
-		return fsGetData, nil
-	}
 
 	// 未从缓存池中读取到数据
 	token, err := alistServer.getToken()
@@ -176,7 +161,6 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 		return fsGetDataResponse.Data, err
 	}
 
-	go cache.Update(alistServer.sapaceName, cacheKey, fsGetDataResponse.Data, cacheDuration)
 	return fsGetDataResponse.Data, nil
 }
 
