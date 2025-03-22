@@ -62,42 +62,56 @@ func SRT2ASS(srtText []byte, style []string) []byte {
 		}
 	}
 	var (
-		subtitleContent        []byte = make([]byte, 4*1024, 16*1024) // 字幕内容（预分配 16K 大小）
-		subtitleBuffer         []byte = make([]byte, 100, 200)        // 字幕缓存区（某一行字幕未完成先存取到此处）
-		currentSubtitleContent uint8  = 0                             // 一个时间下字幕的行数（2表示这一时间有2行字幕）
+		subtitleBuffer         bytes.Buffer     // 字幕缓存区（某一行字幕未完成先存取到此处）
+		currentSubtitleContent uint8        = 0 // 一个时间下字幕的行数（2表示这一时间有2行字幕）
+		subtitleContent        bytes.Buffer     // 字幕内容（预分配 16K 大小）
+		result                 bytes.Buffer
 	)
+	subtitleBuffer.Grow(1024)
+	subtitleContent.Grow(16 * 1024)
+	result.Grow(16 * 1024)
+
 	for index, line := range lines {
 		if isInt(line) && srtTimePattern.Match(lines[index+1]) { // 这一行是 SRT 字幕的序列数且下一行是时间
-			if len(subtitleBuffer) > 0 {
-				subtitleContent = append(subtitleContent, append(subtitleBuffer, newLine...)...)
-				subtitleBuffer = subtitleBuffer[:0] // 清空缓存区
+			if subtitleBuffer.Len() > 0 {
+				subtitleContent.Write(subtitleBuffer.Bytes())
+				subtitleContent.Write(newLine)
+				subtitleBuffer.Reset() // 清空缓存区
 			}
 			currentSubtitleContent = 0
 		} else {
 			if srtTimePattern.Match(line) { // 这一行是时间行
-				subtitleBuffer = append(subtitleBuffer, dialogueStart...)
-				subtitleBuffer = append(subtitleBuffer, bytes.ReplaceAll(line, []byte("-0"), []byte("0"))...)
-				subtitleBuffer = append(subtitleBuffer, dialogueSuffix...)
+				subtitleBuffer.Write(dialogueStart)
+				subtitleBuffer.Write(bytes.ReplaceAll(line, []byte("-0"), []byte("0"))) // 替换时间中的负号
+				subtitleBuffer.Write(dialogueSuffix)
 			} else {
 				if currentSubtitleContent == 0 {
-					subtitleBuffer = append(subtitleBuffer, line...)
+					subtitleBuffer.Write(line)
 				} else {
-					subtitleBuffer = append(subtitleBuffer, newLine...) // 同一时间多行字幕需要在一行中使用字面量 \n 表示换行
-					subtitleBuffer = append(subtitleBuffer, line...)
+					subtitleBuffer.Write(newLine) // 同一时间多行字幕需要在一行中使用字面量 \n 表示换行
+					subtitleBuffer.Write(line)
 				}
 				currentSubtitleContent += 1
 			}
 		}
 	}
-	subtitleContent = append(subtitleContent, append(subtitleBuffer, newLine...)...) // 最后一行字幕
+	// 最后一行字幕
+	subtitleContent.Write(subtitleBuffer.Bytes())
+	subtitleContent.Write(newLine)
 
-	subtitleContent = timeFormatPattern.ReplaceAll(subtitleContent, []byte("$1.$2"))                 // 替换时间格式
-	subtitleContent = arrowPattern.ReplaceAll(subtitleContent, []byte(","))                          // 替换箭头符号
-	subtitleContent = styleTagStartPattern.ReplaceAll(subtitleContent, []byte(`{\\$11}`))            // 替换样式标签
-	subtitleContent = styleTagEndPattern.ReplaceAll(subtitleContent, []byte(`{\\$10}`))              // 替换字体颜色标签
-	subtitleContent = fontColorTagStartPattern.ReplaceAll(subtitleContent, []byte(`{\\c&H$3$2$1&}`)) // 替换字体颜色标签
-	subtitleContent = fontColorTagEndPattern.ReplaceAll(subtitleContent, []byte(""))                 // 删除字体结束标签
-	return append(append(append([]byte(ASSHeader1+"\n"), []byte(strings.Join(style, "\n"))...), []byte("\n\n"+ASSHeader2+"\n\n")...), subtitleContent...)
+	content := subtitleContent.Bytes()
+	content = timeFormatPattern.ReplaceAll(content, []byte("$1.$2"))                 // 替换时间格式
+	content = arrowPattern.ReplaceAll(content, []byte(","))                          // 替换箭头符号
+	content = styleTagStartPattern.ReplaceAll(content, []byte(`{\\$11}`))            // 替换样式标签
+	content = styleTagEndPattern.ReplaceAll(content, []byte(`{\\$10}`))              // 替换字体颜色标签
+	content = fontColorTagStartPattern.ReplaceAll(content, []byte(`{\\c&H$3$2$1&}`)) // 替换字体颜色标签
+	content = fontColorTagEndPattern.ReplaceAll(content, []byte(""))                 // 删除字体结束标签
+
+	result.WriteString(ASSHeader1 + "\n")
+	result.WriteString(strings.Join(style, "\n") + "\n\n")
+	result.WriteString(ASSHeader2 + "\n\n")
+	result.Write(content)
+	return result.Bytes()
 }
 
 type ASSFontStyle struct {
