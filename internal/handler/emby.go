@@ -217,14 +217,8 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 		logging.Warning("序列化 emby.PlaybackInfoResponse Json 错误：", err)
 		return err
 	}
-
-	rw.Body = io.NopCloser(bytes.NewBuffer(body)) // 重置响应体
-	// 更新 Content-Length 头
-	rw.ContentLength = int64(len(body))
-	rw.Header.Set("Content-Length", strconv.Itoa(len(body)))
-	// 更新 Content-Type 头
-	rw.Header.Set("Content-Type", "application/json")
-
+	updateBody(rw, body)
+	rw.Header.Set("Content-Type", "application/json") // 更新 Content-Type 头
 	return nil
 }
 
