@@ -37,13 +37,11 @@ func InitRouter() *gin.Engine {
 		mediawarpRouter.Any("/version", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, config.Version())
 		})
-		static := mediawarpRouter.Group("/static")
-		{
-			if config.Web.Enable {
-				static.StaticFS("/embedded", http.FS(assets.EmbeddedStaticAssets))
-				if config.Web.Custom {
-					static.Static("/custom", config.StaticDir())
-				}
+		if config.Web.Enable { // 启用 Web 页面修改相关设置
+			mediawarpRouter.StaticFS("/embedded", http.FS(assets.EmbeddedStaticAssets))
+			if config.Web.Custom { // 用户自定义静态资源目录
+				custom := mediawarpRouter.Group("/custom")
+				custom.Static("/custom", config.StaticDir())
 			}
 		}
 	}

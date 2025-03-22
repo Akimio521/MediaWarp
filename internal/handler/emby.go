@@ -380,13 +380,13 @@ func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error
 		addHEAD = append(addHEAD, []byte(config.Web.Head+"\n")...)
 	}
 	if config.Web.ExternalPlayerUrl { // 外部播放器
-		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/embedded/js/ExternalPlayerUrl.js"></script>`+"\n")...)
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/embedded/js/ExternalPlayerUrl.js"></script>`+"\n")...)
 	}
 	if config.Web.ActorPlus { // 过滤没有头像的演员和制作人员
-		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/embedded/js/ActorPlus.js"></script>`+"\n")...)
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/embedded/js/ActorPlus.js"></script>`+"\n")...)
 	}
 	if config.Web.FanartShow { // 显示同人图（fanart图）
-		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/embedded/js/FanartShow.js"></script>`+"\n")...)
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/embedded/js/FanartShow.js"></script>`+"\n")...)
 	}
 	if config.Web.Danmaku { // 弹幕
 		addHEAD = append(addHEAD, []byte(`<script src="https://cdn.jsdelivr.net/gh/RyoLee/emby-danmaku@gh-pages/ede.user.js" defer></script>`+"\n")...)
@@ -396,7 +396,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error
 	}
 
 	if config.Web.BeautifyCSS { // 美化CSS
-		addHEAD = append(addHEAD, []byte(`<link rel="stylesheet" href="/MediaWarp/static/embedded/css/Beautify.css" type="text/css" media="all" />`+"\n")...)
+		addHEAD = append(addHEAD, []byte(`<link rel="stylesheet" href="/MediaWarp/embedded/css/Beautify.css" type="text/css" media="all" />`+"\n")...)
 	}
 	htmlContent = bytes.Replace(htmlContent, []byte("</head>"), append(addHEAD, []byte("</head>")...), 1) // 将添加HEAD
 	updateBody(rw, htmlContent)

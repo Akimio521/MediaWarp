@@ -1,8 +1,8 @@
 test/*
 config/config.yaml
 *.log
-/static/*
-!/static/.gitkeep
+/custom/*
+!/custom/.gitkeep
 
 # 执行文件
 dist/
