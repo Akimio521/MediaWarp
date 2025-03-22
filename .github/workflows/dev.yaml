@@ -6,9 +6,9 @@ on:
     branches:
       - main
     paths:
-      - '**.go'
-      - 'go.mod'
-      - 'go.sum'
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
 
 jobs:
   builder:
@@ -17,6 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          submodules: true
           fetch-depth: 0
 
       - name: Set up Go
@@ -32,12 +33,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-        
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: '~> v2'
+          version: "~> v2"
           args: release --snapshot --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

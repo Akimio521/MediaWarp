@@ -32,6 +32,9 @@ jobs:
 
       - name: Clone Repository
         uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
 
       - name: Docker Meta
         id: meta
@@ -39,8 +42,8 @@ jobs:
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/mediawarp
           tags: |
-              type=raw,value=latest,enable=${{ env.IS_LATEST }}
-              type=raw,value=${{ env.APP_VERSION }},enable=true
+            type=raw,value=latest,enable=${{ env.IS_LATEST }}
+            type=raw,value=${{ env.APP_VERSION }},enable=true
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -53,7 +56,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-        
+
       - name: Build Image
         uses: docker/build-push-action@v5
         with:
