@@ -131,19 +131,19 @@ func (embyServerHandler *EmbyServerHandler) RecgonizeStrmFileType(strmFilePath s
 // /Items/:itemId/PlaybackInfo
 // 强制将 HTTPStrm 设置为支持直链播放和转码、AlistStrm 设置为支持直链播放并且禁止转码
 func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response) error {
+	defer rw.Body.Close()
 	body, err := io.ReadAll(rw.Body)
 	if err != nil {
 		logging.Warning("读取 Body 出错：", err)
 		return err
 	}
-	defer rw.Body.Close()
 
 	var playbackInfoResponse emby.PlaybackInfoResponse
-	err = json.Unmarshal(body, &playbackInfoResponse)
-	if err != nil {
+	if err = json.Unmarshal(body, &playbackInfoResponse); err != nil {
 		logging.Warning("解析 emby.PlaybackInfoResponse Json 错误：", err)
 		return err
 	}
+
 	for index, mediasource := range playbackInfoResponse.MediaSources {
 		logging.Debug("请求 ItemsServiceQueryItem：" + *mediasource.ID)
 		itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(*mediasource.ID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询 item 需要去除前缀仅保留数字部分
@@ -307,23 +307,20 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 //
 // 将 SRT 字幕转 ASS
 func (embyServerHandler *EmbyServerHandler) ModifySubtitles(rw *http.Response) error {
-	sutitile, err := io.ReadAll(rw.Body) // 读取字幕文件
+	defer rw.Body.Close()
+	subtitile, err := io.ReadAll(rw.Body) // 读取字幕文件
 	if err != nil {
 		logging.Warning("读取原始字幕 Body 出错：", err)
 		return err
 	}
-	defer rw.Body.Close()
 
-	var msg string
-	if utils.IsSRT(sutitile) { // 判断是否为 SRT 格式
-		msg = "字幕文件为 SRT 格式"
+	if utils.IsSRT(subtitile) { // 判断是否为 SRT 格式
+		msg := "字幕文件为 SRT 格式"
 		if config.Subtitle.SRT2ASS {
 			msg += "，已转为 ASS 格式"
-			assSubtitle := utils.SRT2ASS(sutitile, config.Subtitle.ASSStyle)
+			assSubtitle := utils.SRT2ASS(subtitile, config.Subtitle.ASSStyle)
 			updateBody(rw, assSubtitle)
 		}
-	}
-	if msg != "" {
 		logging.Info(msg)
 	}
 	return nil
