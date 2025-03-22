@@ -79,20 +79,19 @@ func SRT2ASS(srtText []byte, style []string) []byte {
 				subtitleBuffer.Reset() // 清空缓存区
 			}
 			currentSubtitleContent = 0
+			continue
+		}
+
+		if srtTimePattern.Match(line) { // 这一行是时间行
+			subtitleBuffer.Write(dialogueStart)
+			subtitleBuffer.Write(bytes.ReplaceAll(line, []byte("-0"), []byte("0"))) // 替换时间中的负号
+			subtitleBuffer.Write(dialogueSuffix)
 		} else {
-			if srtTimePattern.Match(line) { // 这一行是时间行
-				subtitleBuffer.Write(dialogueStart)
-				subtitleBuffer.Write(bytes.ReplaceAll(line, []byte("-0"), []byte("0"))) // 替换时间中的负号
-				subtitleBuffer.Write(dialogueSuffix)
-			} else {
-				if currentSubtitleContent == 0 {
-					subtitleBuffer.Write(line)
-				} else {
-					subtitleBuffer.Write(newLine) // 同一时间多行字幕需要在一行中使用字面量 \n 表示换行
-					subtitleBuffer.Write(line)
-				}
-				currentSubtitleContent += 1
+			if currentSubtitleContent == 0 {
+				subtitleBuffer.Write(newLine) // 同一时间多行字幕需要在一行中使用字面量 \n 表示换行
 			}
+			subtitleBuffer.Write(line)
+			currentSubtitleContent += 1
 		}
 	}
 	// 最后一行字幕
