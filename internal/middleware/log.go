@@ -3,7 +3,6 @@ package middleware
 import (
 	"MediaWarp/constants"
 	"MediaWarp/internal/logging"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -13,7 +12,6 @@ import (
 // 记录访问日志
 func Logger() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		startTime := time.Now()
 		method := ctx.Request.Method
 		path := ctx.Request.URL.Path
 		query := ctx.Request.URL.RawQuery
@@ -21,20 +19,21 @@ func Logger() gin.HandlerFunc {
 			path = path + "?" + query
 		}
 
+		startTime := time.Now()
 		ctx.Next()
-
 		wasteTime := time.Since(startTime)
+
 		clientIP := ctx.ClientIP()
 		statusCode := ctx.Writer.Status()
 
 		statusColor, methodColor := getColor(statusCode, method)
 
 		logging.AccessLog(
-			`【Access】 %s |%s| %s |%s| %s "%s"`,
-			startTime.Format("2006-1-2 15:04:05"),
-			fmt.Sprintf("\033[4%dm %d \033[0m", statusColor, statusCode),
-			fmt.Sprintf("%-10s", wasteTime),
-			fmt.Sprintf("\033[4%dm %-7s\033[0m", methodColor, method),
+			`【Access】 %s |\033[4%dm %d \033[0m| %-10s |\033[4%dm %-7s\033[0m| %s "%s"`,
+			startTime.Format(constants.FORMATE_TIME),
+			statusColor, statusCode,
+			wasteTime,
+			methodColor, method,
 			clientIP,
 			path,
 		)
