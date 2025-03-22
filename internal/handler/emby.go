@@ -153,7 +153,6 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 		}
 		item := itemResponse.Items[0]
 		strmFileType, opt := embyServerHandler.RecgonizeStrmFileType(*item.Path)
-		var msg string
 		switch strmFileType {
 		case constants.HTTPStrm: // HTTPStrm 设置支持直链播放并且支持转码
 			if !config.HTTPStrm.TransCode {
@@ -170,7 +169,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 					}
 					directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
 					playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
-					msg = fmt.Sprintf("%s 强制禁止转码，直链播放链接为: %s，", *mediasource.Name, directStreamURL)
+					logging.Info(*mediasource.Name, "强制禁止转码，直链播放链接为:", directStreamURL)
 				}
 			}
 
@@ -191,9 +190,9 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 				playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
 				container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 				playbackInfoResponse.MediaSources[index].Container = &container
-				msg = fmt.Sprintf("%s 强制禁止转码，直链播放链接为: %s，容器为: %s", *mediasource.Name, directStreamURL, container)
+				logging.Info(*mediasource.Name, "强制禁止转码，直链播放链接为:", directStreamURL, "，容器为: %s", container)
 			} else {
-				msg = fmt.Sprintf("%s 保持原有转码设置", *mediasource.Name)
+				logging.Info(*mediasource.Name, "保持原有转码设置")
 			}
 
 			if playbackInfoResponse.MediaSources[index].Size == nil {
@@ -204,16 +203,13 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 				}
 				fsGetData, err := alistServer.FsGet(*mediasource.Path)
 				if err != nil {
-					logging.Debug(msg)
 					logging.Warning("请求 FsGet 失败：", err)
 					continue
 				}
 				playbackInfoResponse.MediaSources[index].Size = &fsGetData.Size
-				msg += fmt.Sprintf("，设置文件大小为:%d", fsGetData.Size)
+				logging.Info(*mediasource.Name, "设置文件大小为:", fsGetData.Size)
 			}
-
 		}
-		logging.Debug(msg)
 	}
 
 	body, err = json.Marshal(playbackInfoResponse)
