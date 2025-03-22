@@ -38,7 +38,7 @@ func (s *serviceLoggerSetting) Format(entry *logrus.Entry) ([]byte, error) {
 		b = entry.Buffer
 	}
 	// 时间格式化
-	formatTime := entry.Time.Format("2006-01-02 15:04:05")
+	formatTime := entry.Time.Format(constants.FORMATE_TIME)
 
 	fmt.Fprintf(
 		b,
