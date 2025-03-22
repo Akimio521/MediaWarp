@@ -54,7 +54,7 @@ HTTPStrm:
 AlistStrm:                                  # AlistStrm相关配置（Strm文件内容是Alist上文件的路径，目前仅支持适配Alist V3）
   Enable: True                              # 是否启用AlistStrm重定向
   TransCode: True                           # False：强制关闭转码 True：保持原有转码设置
-  RawURL: False                             # Fasle：直接响应 Alist 上游的真实链接 True：响应 Alist 服务器的直链（要求客户端可以访问到 Alist）
+  RawURL: False                             # Fasle：响应 Alist 服务器的直链（要求客户端可以访问到 Alist） True：直接响应 Alist 上游的真实链接（alist api 中的 raw_url 属性）
   List:                                     # Alist服务关配置列表
     - ADDR: http://192.168.1.100:5244       # Alist服务器地址
       Username: admin                       # Alist服务器账号
