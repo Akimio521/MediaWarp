@@ -12,10 +12,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"path"
-	"reflect"
 	"strconv"
 	"strings"
 
@@ -24,17 +22,13 @@ import (
 
 // Emby服务器处理器
 type EmbyServerHandler struct {
-	server         *emby.EmbyServer                   // Emby 服务器
-	modifyProxyMap map[uintptr]*httputil.ReverseProxy // 修改响应的代理存取映射
-	routerRules    []RegexpRouteRule                  // 正则路由规则
+	server      *emby.EmbyServer  // Emby 服务器
+	routerRules []RegexpRouteRule // 正则路由规则
 }
 
 // 初始化
 func (embyServerHandler *EmbyServerHandler) Init() {
 	embyServerHandler.server = emby.New(config.MediaServer.ADDR, config.MediaServer.AUTH)
-	if embyServerHandler.modifyProxyMap == nil {
-		embyServerHandler.modifyProxyMap = make(map[uintptr]*httputil.ReverseProxy)
-	}
 	{ // 初始化路由规则
 		embyServerHandler.routerRules = []RegexpRouteRule{
 			{
@@ -85,18 +79,11 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 // 响应修改创建器
 //
 // 将需要修改上游响应的处理器包装成一个 gin.HandlerFunc 处理器
-func (embyServerHandler *EmbyServerHandler) responseModifyCreater(modifyResponse func(rw *http.Response) error) gin.HandlerFunc {
-	key := reflect.ValueOf(modifyResponse).Pointer()
-	if _, ok := embyServerHandler.modifyProxyMap[key]; !ok {
-		proxy := embyServerHandler.server.GetReverseProxy()
-		proxy.ModifyResponse = modifyResponse
-		embyServerHandler.modifyProxyMap[key] = proxy
-	} else {
-		logging.Error("重复创建响应修改处理器：", key)
-	}
-
+func (embyServerHandler *EmbyServerHandler) responseModifyCreater(modifyResponseFN func(rw *http.Response) error) gin.HandlerFunc {
+	proxy := embyServerHandler.server.GetReverseProxy()
+	proxy.ModifyResponse = modifyResponseFN
 	return func(ctx *gin.Context) {
-		embyServerHandler.modifyProxyMap[key].ServeHTTP(ctx.Writer, ctx.Request)
+		proxy.ServeHTTP(ctx.Writer, ctx.Request)
 	}
 }
 
