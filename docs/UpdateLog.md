@@ -39,3 +39,10 @@
   - 优化 ModifyPlaybackInfo 函数，减少无意义请求数，降低响应延迟
   - 新增转码设置选项以支持 HTTPStrm 和 AlistStrm  是否返回 PlaybackInfo 通告客户端禁止转码
   - f新增 RawURL 配置选项以控制 AlistStrm 的重定向链接
+- 2025.3.22: v0.0.8
+  - 优化 AlistStrm 重定向连接
+  - 重构 EmbyRegexp 结构，优化正则表达式管理 
+  - 优化 EmbyServerHandler.ModifySubtitles 和 EmbyServerHandler.ModifyBaseHtmlPlayer 性能
+  - 优化 SRT2ASS 性能
+  - 修改正则路由处理，使用不带查询参数的 URL 路径（Path）进行路由匹配
+  - 添加版本信息标志，支持显示当前版本信息

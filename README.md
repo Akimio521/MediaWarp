@@ -25,7 +25,7 @@ MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原�
 
 [功能](#功能) •
 [TODO LIST](#todo-list) •
-[教程文档](https://blog.akimio.top/posts/1041/) •
+[文档](#相关文档) •
 [鸣谢](#鸣谢) •
 [Star History](#star-history)
 
@@ -83,6 +83,7 @@ MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原�
   > 在服务器前面加一个负载均衡可能更好
 
 # 相关文档
+- [教程文档](https://blog.akimio.top/posts/1041/)
 - [更新日志](./docs/UpdateLog.md)
 - [开发文档](./docs/DEV.md)
 - [User-Agent参考](./docs/UA.md)
