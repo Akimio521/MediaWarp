@@ -328,8 +328,8 @@ func (embyServerHandler *EmbyServerHandler) ModifySubtitles(rw *http.Response) e
 		msg = "字幕文件为 SRT 格式"
 		if config.Subtitle.SRT2ASS {
 			msg += "，已转为 ASS 格式"
-			assSubtitle := utils.SRT2ASS(string(sutitile), config.Subtitle.ASSStyle)
-			updateBody(rw, []byte(assSubtitle))
+			assSubtitle := utils.SRT2ASS(sutitile, config.Subtitle.ASSStyle)
+			updateBody(rw, assSubtitle)
 		}
 	}
 	if msg != "" {

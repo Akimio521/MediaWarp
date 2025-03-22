@@ -2,6 +2,7 @@ package utils_test
 
 import (
 	"MediaWarp/utils"
+	"bytes"
 	"strings"
 	"testing"
 )
@@ -2592,9 +2593,9 @@ Dialogue: 0,0:23:36.41,0:23:39.95,Default,,0,0,0,,(下集 魔法劍)
 `
 	)
 	var ass_lines []string
-	for _, line := range strings.Split(utils.SRT2ASS(srt, []string{}), "\n") {
-		if line != "" {
-			ass_lines = append(ass_lines, line)
+	for _, line := range bytes.Split(utils.SRT2ASS([]byte(srt), []string{}), []byte("\n")) {
+		if len(line) != 0 {
+			ass_lines = append(ass_lines, string(line))
 		}
 	}
 	var python_ass_line []string

@@ -45,52 +45,52 @@ func IsSRT(content []byte) bool {
 //
 // srtText: SRT 格式字幕文本
 // style: ASS 字幕样式
-func SRT2ASS(srtText string, style []string) string {
-	srtText = strings.ReplaceAll(srtText, "\r", "")
-	var lines []string
-	for _, line := range strings.Split(srtText, "\n") {
-		line = strings.TrimSpace(line)
-		if line != "" {
+func SRT2ASS(srtText []byte, style []string) []byte {
+	srtText = bytes.ReplaceAll(srtText, []byte("\r"), []byte(""))
+	var lines [][]byte
+	for _, line := range bytes.Split(srtText, []byte("\n")) {
+		line = bytes.TrimSpace(line)
+		if len(line) != 0 {
 			lines = append(lines, line)
 		}
 	}
 	var (
-		subtitleContent        string                       // 字幕内容
-		subtitleBuffer         []rune = make([]rune, 1, 50) // 字幕缓存区（某一行字幕未完成先存取到此处）
-		currentSubtitleContent uint8  = 0                   // 一个时间下字幕的行数（2表示这一时间有2行字幕）
+		subtitleContent        []byte = make([]byte, 4*1024, 16*1024) // 字幕内容（预分配 16K 大小）
+		subtitleBuffer         []byte = make([]byte, 100, 200)        // 字幕缓存区（某一行字幕未完成先存取到此处）
+		currentSubtitleContent uint8  = 0                             // 一个时间下字幕的行数（2表示这一时间有2行字幕）
 	)
 	for index, line := range lines {
-		if isInt(line) && srtTimePattern.MatchString(lines[index+1]) { // 这一行是 SRT 字幕的序列数且下一行是时间
+		if isInt(line) && srtTimePattern.Match(lines[index+1]) { // 这一行是 SRT 字幕的序列数且下一行是时间
 			if len(subtitleBuffer) > 0 {
-				subtitleContent += string(append(subtitleBuffer, '\n'))
-				subtitleBuffer = subtitleBuffer[:0]
+				subtitleContent = append(subtitleContent, append(subtitleBuffer, []byte("\n")...)...)
+				subtitleBuffer = subtitleBuffer[:0] // 清空缓存区
 			}
 			currentSubtitleContent = 0
 		} else {
-			if srtTimePattern.MatchString(line) { // 这一行是时间行
-				subtitleBuffer = append(subtitleBuffer, []rune("Dialogue: 0,")...)
-				subtitleBuffer = append(subtitleBuffer, []rune(strings.ReplaceAll(line, "-0", "0"))...)
-				subtitleBuffer = append(subtitleBuffer, []rune(",Default,,0,0,0,,")...)
+			if srtTimePattern.Match(line) { // 这一行是时间行
+				subtitleBuffer = append(subtitleBuffer, []byte("Dialogue: 0,")...)
+				subtitleBuffer = append(subtitleBuffer, bytes.ReplaceAll(line, []byte("-0"), []byte("0"))...)
+				subtitleBuffer = append(subtitleBuffer, []byte(",Default,,0,0,0,,")...)
 			} else {
 				if currentSubtitleContent == 0 {
-					subtitleBuffer = append(subtitleBuffer, []rune(line)...)
+					subtitleBuffer = append(subtitleBuffer, line...)
 				} else {
-					subtitleBuffer = append(subtitleBuffer, []rune(`\n`)...) // 同一时间多行字幕需要在一行中使用字面量 \n 表示换行
-					subtitleBuffer = append(subtitleBuffer, []rune(line)...)
+					subtitleBuffer = append(subtitleBuffer, []byte(`\n`)...) // 同一时间多行字幕需要在一行中使用字面量 \n 表示换行
+					subtitleBuffer = append(subtitleBuffer, line...)
 				}
 				currentSubtitleContent += 1
 			}
 		}
 	}
-	subtitleContent += string(append(subtitleBuffer, '\n')) // 最后一行字幕
+	subtitleContent = append(subtitleContent, append(subtitleBuffer, []byte("\n")...)...) // 最后一行字幕
 
-	subtitleContent = timeFormatPattern.ReplaceAllString(subtitleContent, "$1.$2")                 // 替换时间格式
-	subtitleContent = arrowPattern.ReplaceAllString(subtitleContent, ",")                          // 替换箭头符号
-	subtitleContent = styleTagStartPattern.ReplaceAllString(subtitleContent, `{\\$11}`)            // 替换样式标签
-	subtitleContent = styleTagEndPattern.ReplaceAllString(subtitleContent, `{\\$10}`)              // 替换字体颜色标签
-	subtitleContent = fontColorTagStartPattern.ReplaceAllString(subtitleContent, `{\\c&H$3$2$1&}`) // 替换字体颜色标签
-	subtitleContent = fontColorTagEndPattern.ReplaceAllString(subtitleContent, "")                 // 删除字体结束标签
-	return ASSHeader1 + "\n" + strings.Join(style, "\n") + "\n\n" + ASSHeader2 + "\n\n" + subtitleContent
+	subtitleContent = timeFormatPattern.ReplaceAll(subtitleContent, []byte("$1.$2"))                 // 替换时间格式
+	subtitleContent = arrowPattern.ReplaceAll(subtitleContent, []byte(","))                          // 替换箭头符号
+	subtitleContent = styleTagStartPattern.ReplaceAll(subtitleContent, []byte(`{\\$11}`))            // 替换样式标签
+	subtitleContent = styleTagEndPattern.ReplaceAll(subtitleContent, []byte(`{\\$10}`))              // 替换字体颜色标签
+	subtitleContent = fontColorTagStartPattern.ReplaceAll(subtitleContent, []byte(`{\\c&H$3$2$1&}`)) // 替换字体颜色标签
+	subtitleContent = fontColorTagEndPattern.ReplaceAll(subtitleContent, []byte(""))                 // 删除字体结束标签
+	return append(append(append([]byte(ASSHeader1+"\n"), []byte(strings.Join(style, "\n"))...), []byte("\n\n"+ASSHeader2+"\n\n")...), subtitleContent...)
 }
 
 type ASSFontStyle struct {

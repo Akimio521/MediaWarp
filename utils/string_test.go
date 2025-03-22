@@ -2,6 +2,7 @@ package utils_test
 
 import (
 	"MediaWarp/utils"
+	"strings"
 	"testing"
 )
 
@@ -44,4 +45,50 @@ func TestResolveEmbyAPIKVPairs(t *testing.T) {
 			}
 		})
 	}
+}
+
+// goos: darwin
+// goarch: arm64
+// pkg: MediaWarp/utils
+// cpu: Apple M1
+// BenchmarkStringConcat
+// BenchmarkStringConcat-8   	  542830	     25741 ns/op	  275330 B/op	       1 allocs/op
+// 测试字符串拼接
+func BenchmarkStringConcat(b *testing.B) {
+	s := ""
+	for i := 0; i < b.N; i++ {
+		s += "a"
+	}
+}
+
+// goos: darwin
+// goarch: arm64
+// pkg: MediaWarp/utils
+// cpu: Apple M1
+// BenchmarkByteAppend
+// BenchmarkByteAppend-8   	819340761	         1.597 ns/op	       6 B/op	       0 allocs/op
+// 测试 []byte 的 append
+func BenchmarkByteAppend(b *testing.B) {
+	buf := make([]byte, 0)
+	for i := 0; i < b.N; i++ {
+		buf = append(buf, 'a')
+	}
+	_ = string(buf)
+}
+
+// goos: darwin
+// goarch: arm64
+// pkg: MediaWarp/utils
+// cpu: Apple M1
+// BenchmarkStringBuilder
+// BenchmarkStringBuilder-8   	430995778	         2.531 ns/op	       5 B/op	       0 allocs/op
+// PASS
+// ok  	MediaWarp/utils	1.829s
+// // 测试 strings.Builder
+func BenchmarkStringBuilder(b *testing.B) {
+	var sb strings.Builder
+	for i := 0; i < b.N; i++ {
+		sb.WriteByte('a')
+	}
+	_ = sb.String()
 }
