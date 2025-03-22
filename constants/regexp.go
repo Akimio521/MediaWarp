@@ -21,11 +21,11 @@ type OthersRegexps struct {
 
 var EmbyRegexp = &EmbyRegexps{
 	Router: RouterRegexps{
-		VideosHandler:        regexp.MustCompile(`(?i)^(/emby)?/videos/\d+/(stream|original)`),
+		VideosHandler:        regexp.MustCompile(`(?i)^(/emby)?/videos/\d+/(stream|original)$`),
 		ModifyBaseHtmlPlayer: regexp.MustCompile(`(?i)^/web/modules/htmlvideoplayer/basehtmlplayer.js$`),
 		ModifyIndex:          regexp.MustCompile(`^/web/index.html$`),
-		ModifyPlaybackInfo:   regexp.MustCompile(`(?i)^(/emby)?/Items/\d+/PlaybackInfo`),
-		ModifySubtitles:      regexp.MustCompile(`(?i)^(/emby)?/Videos/\d+/\w+/subtitles`),
+		ModifyPlaybackInfo:   regexp.MustCompile(`(?i)^(/emby)?/Items/\d+/PlaybackInfo$`),
+		ModifySubtitles:      regexp.MustCompile(`(?i)^(/emby)?/Videos/\d+/\w+/subtitles$`),
 	},
 	Others: OthersRegexps{
 		VideoRedirectReg: regexp.MustCompile(`(?i)^(/emby)?/videos/(.*)/stream/(.*)`),
