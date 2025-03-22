@@ -46,6 +46,13 @@ func IsSRT(content []byte) bool {
 // srtText: SRT 格式字幕文本
 // style: ASS 字幕样式
 func SRT2ASS(srtText []byte, style []string) []byte {
+	// 预定义常量
+	var (
+		newLine        = []byte("\n")
+		dialogueStart  = []byte("Dialogue: 0,")
+		dialogueSuffix = []byte(",Default,,0,0,0,,")
+	)
+
 	srtText = bytes.ReplaceAll(srtText, []byte("\r"), []byte(""))
 	var lines [][]byte
 	for _, line := range bytes.Split(srtText, []byte("\n")) {
@@ -62,27 +69,27 @@ func SRT2ASS(srtText []byte, style []string) []byte {
 	for index, line := range lines {
 		if isInt(line) && srtTimePattern.Match(lines[index+1]) { // 这一行是 SRT 字幕的序列数且下一行是时间
 			if len(subtitleBuffer) > 0 {
-				subtitleContent = append(subtitleContent, append(subtitleBuffer, []byte("\n")...)...)
+				subtitleContent = append(subtitleContent, append(subtitleBuffer, newLine...)...)
 				subtitleBuffer = subtitleBuffer[:0] // 清空缓存区
 			}
 			currentSubtitleContent = 0
 		} else {
 			if srtTimePattern.Match(line) { // 这一行是时间行
-				subtitleBuffer = append(subtitleBuffer, []byte("Dialogue: 0,")...)
+				subtitleBuffer = append(subtitleBuffer, dialogueStart...)
 				subtitleBuffer = append(subtitleBuffer, bytes.ReplaceAll(line, []byte("-0"), []byte("0"))...)
-				subtitleBuffer = append(subtitleBuffer, []byte(",Default,,0,0,0,,")...)
+				subtitleBuffer = append(subtitleBuffer, dialogueSuffix...)
 			} else {
 				if currentSubtitleContent == 0 {
 					subtitleBuffer = append(subtitleBuffer, line...)
 				} else {
-					subtitleBuffer = append(subtitleBuffer, []byte(`\n`)...) // 同一时间多行字幕需要在一行中使用字面量 \n 表示换行
+					subtitleBuffer = append(subtitleBuffer, newLine...) // 同一时间多行字幕需要在一行中使用字面量 \n 表示换行
 					subtitleBuffer = append(subtitleBuffer, line...)
 				}
 				currentSubtitleContent += 1
 			}
 		}
 	}
-	subtitleContent = append(subtitleContent, append(subtitleBuffer, []byte("\n")...)...) // 最后一行字幕
+	subtitleContent = append(subtitleContent, append(subtitleBuffer, newLine...)...) // 最后一行字幕
 
 	subtitleContent = timeFormatPattern.ReplaceAll(subtitleContent, []byte("$1.$2"))                 // 替换时间格式
 	subtitleContent = arrowPattern.ReplaceAll(subtitleContent, []byte(","))                          // 替换箭头符号
