@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"os"
 	"path"
 	"reflect"
 	"strconv"
@@ -369,7 +370,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error
 			return err
 		}
 	} else { // 从本地文件读取index.html
-		if htmlContent, err = utils.GetFileContent(htmlFilePath); err != nil {
+		if htmlContent, err = os.ReadFile(htmlFilePath); err != nil {
 			logging.Warning("读取文件内容出错，错误信息：", err)
 			return err
 		}
