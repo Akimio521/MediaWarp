@@ -5,5 +5,5 @@ COPY MediaWarp ./MediaWarp
 RUN chmod +x ./MediaWarp
 
 EXPOSE 9000
-VOLUME ["/config", "/logs", "/static"]
+VOLUME ["/etc/localtime", "/etc/timezone", "/config", "/logs", "/custom"]
 ENTRYPOINT ["/MediaWarp"]
