@@ -15,7 +15,7 @@ var (
 	version = VersionInfo{
 		AppVersion: appVersion,
 		CommitHash: commitHash,
-		BuildData:  buildDate,
+		BuildData:  parseBuildTime(buildDate),
 		GoVersion:  runtime.Version(),
 		OS:         runtime.GOOS,
 		Arch:       runtime.GOARCH,
