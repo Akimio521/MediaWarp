@@ -36,9 +36,7 @@ func Version() *VersionInfo {
 	return &version
 }
 
-// 项目根目录
-//
-// 二进制可执行文件存放地址
+// 二进制文件目录
 func RootDir() string {
 	executablePath, err := os.Executable()
 	if err != nil {
@@ -86,7 +84,7 @@ func ServiceLogPath() string {
 // 静态资源文件目录
 //
 // 用户自定义静态文件存放地址
-func StaticDir() string {
+func CostomDir() string {
 	return filepath.Join(RootDir(), "static")
 }
 
@@ -100,18 +98,23 @@ func ListenAddr() string {
 // ====================== 私有函数 ======================
 
 // 初始化configManager
-func init() {
-	loadConfig()
-	createDir()
+func Init() error {
+	if err := loadConfig(); err != nil {
+		return err
+	}
+	if err := createDir(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // 读取并解析配置文件
-func loadConfig() {
+func loadConfig() error {
 	viper.AddConfigPath(ConfigDir())
 	viper.SetConfigName("config")
 
 	if err := viper.ReadInConfig(); err != nil {
-		panic(err)
+		return fmt.Errorf("读取配置文件失败: %v", err)
 	}
 
 	Port = viper.GetInt("Port")
@@ -120,35 +123,36 @@ func loadConfig() {
 	MediaServer.AUTH = viper.GetString("MediaServer.AUTH")
 
 	if err := viper.UnmarshalKey("Logger", &Logger); err != nil {
-		panic(fmt.Errorf("LoggerSetting 解析失败, %v", err))
+		return fmt.Errorf("LoggerSetting 解析失败, %v", err)
 	}
 	if err := viper.UnmarshalKey("Web", &Web); err != nil {
-		panic(fmt.Errorf("WebSetting  解析失败, %v", err))
+		return fmt.Errorf("WebSetting  解析失败, %v", err)
 	}
 	if err := viper.UnmarshalKey("ClientFilter", &ClientFilter); err != nil {
-		panic(fmt.Errorf("ClientFilterSetting  解析失败, %v", err))
+		return fmt.Errorf("ClientFilterSetting  解析失败, %v", err)
 	}
 	if err := viper.UnmarshalKey("HTTPStrm", &HTTPStrm); err != nil {
-		panic(fmt.Errorf("HTTPStrmSetting  解析失败, %v", err))
+		return fmt.Errorf("HTTPStrmSetting  解析失败, %v", err)
 	}
 	if err := viper.UnmarshalKey("AlistStrm", &AlistStrm); err != nil {
-		panic(fmt.Errorf("AlistStrmSetting  解析失败, %v", err))
+		return fmt.Errorf("AlistStrmSetting  解析失败, %v", err)
 	}
 	if err := viper.UnmarshalKey("Subtitle", &Subtitle); err != nil {
-		panic(fmt.Errorf("SubtitleSetting  解析失败, %v", err))
+		return fmt.Errorf("SubtitleSetting  解析失败, %v", err)
 	}
-
+	return nil
 }
 
 // 创建文件夹
-func createDir() {
+func createDir() error {
 	if err := os.MkdirAll(ConfigDir(), os.ModePerm); err != nil {
-		panic(err)
+		return fmt.Errorf("创建配置文件夹失败: %v", err)
 	}
 	if err := os.MkdirAll(LogDir(), os.ModePerm); err != nil {
+		return fmt.Errorf("创建日志文件夹失败: %v", err)
+	}
+	if err := os.MkdirAll(CostomDir(), os.ModePerm); err != nil {
 		panic(err)
 	}
-	if err := os.MkdirAll(StaticDir(), os.ModePerm); err != nil {
-		panic(err)
-	}
+	return nil
 }

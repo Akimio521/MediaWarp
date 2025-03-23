@@ -12,7 +12,8 @@ var (
 	alistSeverMap sync.Map
 )
 
-func init() {
+// 初始化 Alist 服务器
+func InitAlistSerer() {
 	if config.AlistStrm.Enable {
 		for _, alist := range config.AlistStrm.List {
 			registerAlistServer(alist.ADDR, alist.Username, alist.Password, alist.Token)

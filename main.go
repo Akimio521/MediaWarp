@@ -3,8 +3,10 @@ package main
 import (
 	"MediaWarp/constants"
 	"MediaWarp/internal/config"
+	"MediaWarp/internal/handler"
 	"MediaWarp/internal/logging"
 	"MediaWarp/internal/router"
+	"MediaWarp/internal/service"
 	"MediaWarp/utils"
 	"flag"
 	"fmt"
@@ -21,9 +23,10 @@ var (
 )
 
 func init() {
-	printLOGO()
-	flag.BoolVar(&isDebug, "debug", false, "是否启用调试模式")
+	fmt.Print(constants.LOGO)
+	fmt.Println(utils.Center(fmt.Sprintf(" MediaWarp %s ", config.Version().AppVersion), 71, "="))
 	flag.BoolVar(&showVersion, "version", false, "显示版本信息")
+	flag.BoolVar(&isDebug, "debug", false, "是否启用调试模式")
 }
 
 func main() {
@@ -34,6 +37,14 @@ func main() {
 		fmt.Println(string(ver))
 		return
 	}
+
+	if err := config.Init(); err != nil { // 初始化配置
+		logging.Error("配置初始化失败：", err)
+		return
+	}
+	logging.Init()           // 初始化日志
+	service.InitAlistSerer() // 初始化Alist服务器
+	handler.Init()           // 初始化媒体服务器处理器
 
 	if isDebug {
 		logging.SetLevel(logrus.DebugLevel)
@@ -46,17 +57,4 @@ func main() {
 	ginR := router.InitRouter() // 路由初始化
 	logging.Info("MediaWarp 启动成功")
 	ginR.Run(config.ListenAddr()) // 启动服务
-}
-
-// 打印LOGO
-func printLOGO() {
-	fmt.Print(
-		constants.LOGO,
-		utils.Center(
-			fmt.Sprintf(" MediaWarp %s 启动中 ", config.Version().AppVersion),
-			75,
-			"=",
-		),
-		"\n\n",
-	)
 }

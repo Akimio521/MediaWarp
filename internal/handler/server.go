@@ -15,7 +15,8 @@ type MediaServerHandler interface {
 
 var mediaServerHandler MediaServerHandler
 
-func init() {
+// 初始化媒体服务器处理器
+func Init() {
 	switch config.MediaServer.Type {
 	case constants.EMBY:
 		mediaServerHandler = &EmbyServerHandler{}

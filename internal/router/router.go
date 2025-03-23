@@ -37,7 +37,7 @@ func InitRouter() *gin.Engine {
 			mediawarpRouter.StaticFS("/static", http.FS(static.EmbeddedStaticAssets))
 			if config.Web.Custom { // 用户自定义静态资源目录
 				custom := mediawarpRouter.Group("/custom")
-				custom.Static("/custom", config.StaticDir())
+				custom.Static("/custom", config.CostomDir())
 			}
 		}
 	}

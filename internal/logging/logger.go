@@ -12,7 +12,7 @@ var (
 	serviceLogger *logrus.Logger // 服务日志
 )
 
-func init() {
+func Init() {
 	var (
 		aLS = &accessLoggerSetting{}  // 访问日志logrus相关设置
 		sLS = &serviceLoggerSetting{} // 服务日志logrus相关设置

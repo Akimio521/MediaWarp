@@ -332,7 +332,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayer(rw *http.Respon
 // 修改首页函数
 func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error {
 	var (
-		htmlFilePath string = path.Join(config.StaticDir(), "index.html")
+		htmlFilePath string = path.Join(config.CostomDir(), "index.html")
 		htmlContent  []byte
 		addHEAD      []byte
 		err          error
