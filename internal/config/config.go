@@ -152,7 +152,7 @@ func createDir() error {
 		return fmt.Errorf("创建日志文件夹失败: %v", err)
 	}
 	if err := os.MkdirAll(CostomDir(), os.ModePerm); err != nil {
-		panic(err)
+		return fmt.Errorf("创建自定义静态资源文件夹失败: %v", err)
 	}
 	return nil
 }
