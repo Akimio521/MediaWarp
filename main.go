@@ -10,6 +10,9 @@ import (
 	"MediaWarp/utils"
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"encoding/json"
 
@@ -18,8 +21,8 @@ import (
 )
 
 var (
-	isDebug     bool
-	showVersion bool
+	isDebug     bool // 开启调试模式
+	showVersion bool // 显示版本信息
 )
 
 func init() {
@@ -37,6 +40,13 @@ func main() {
 		fmt.Println(string(ver))
 		return
 	}
+
+	signChan := make(chan os.Signal, 1)
+	errChan := make(chan error, 1)
+	signal.Notify(signChan, syscall.SIGINT, syscall.SIGTERM)
+	defer func() {
+		fmt.Println("MediaWarp 已退出")
+	}()
 
 	if err := config.Init(); err != nil { // 初始化配置
 		logging.Error("配置初始化失败：", err)
@@ -56,5 +66,16 @@ func main() {
 	logging.Info("MediaWarp 监听端口：", config.Port)
 	ginR := router.InitRouter() // 路由初始化
 	logging.Info("MediaWarp 启动成功")
-	ginR.Run(config.ListenAddr()) // 启动服务
+	go func() {
+		if err := ginR.Run(config.ListenAddr()); err != nil {
+			errChan <- err
+		}
+	}()
+
+	select {
+	case sig := <-signChan:
+		logging.Info("MediaWarp 正在退出，信号：", sig)
+	case err := <-errChan:
+		logging.Error("MediaWarp 运行出错：", err)
+	}
 }
