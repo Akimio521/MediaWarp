@@ -49,7 +49,7 @@ func main() {
 	}()
 
 	if err := config.Init(); err != nil { // 初始化配置
-		logging.Error("配置初始化失败：", err)
+		fmt.Println("配置初始化失败：", err)
 		return
 	}
 	logging.Init()           // 初始化日志
