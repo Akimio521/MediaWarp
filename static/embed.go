@@ -17,8 +17,10 @@ import (
 //go:embed emby-crx/static/js/common-utils.js
 //go:embed emby-crx/static/js/jquery-3.6.0.min.js
 //go:embed emby-crx/static/js/md5.min.js
+//go:embed emby-crx/content/main.js
 //go:embed jellyfin-crx/static/css/style.css
 //go:embed jellyfin-crx/static/js/common-utils.js
 //go:embed jellyfin-crx/static/js/jquery-3.6.0.min.js
 //go:embed jellyfin-crx/static/js/md5.min.js
+//go:embed jellyfin-crx/content/main.js
 var EmbeddedStaticAssets embed.FS
