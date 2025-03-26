@@ -95,7 +95,7 @@ body:
       description: 问题出现时，程序运行日志请复制到这里。
       render: bash
   - type: textarea
-    id: logs
+    id: config
     attributes:
       label: 发生问题时配置文件
       description: 问题出现时，程序配置文件请复制到这里。
