@@ -46,3 +46,14 @@
   - 优化 SRT2ASS 性能
   - 修改正则路由处理，使用不带查询参数的 URL 路径（Path）进行路由匹配
   - 添加版本信息标志，支持显示当前版本信息
+- 2025.3.26: v0.0.9
+  -  调整静态资源、自定义目录
+  -  使用 git 子模块的方式引入 js、css 等文件，移除 emby css 美化功能
+  -  移除内存缓存相关设计，以避免内存泄漏
+  -  修复 ModifyPlaybackInfo 和 ModifySubtitles 函数中的响应体关闭顺序，确保正确读取 HTTP 响应
+  -  优化 EmbyServerHandler.responseModifyCreater 闭包逻辑
+  -  使用 switch 语句重构客户端过滤器逻辑，移除未知模式处理
+  -  使用 gin.Recovery() 捕获 panic，避免 MediaWarp 出现意外错误后软件崩溃
+  -  优化程序启动逻辑，改进错误处理
+  -  解析构建时间格式，改进构建日期处理逻辑
+  -  更新 go-lang 版本及第三方依赖
