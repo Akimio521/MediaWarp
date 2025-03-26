@@ -36,7 +36,7 @@ body:
     id: version-info
     attributes:
       label: 当前程序版本的详细信息
-      description: 访问 /MediaWarp/version 获取
+      description: 访问 `http://<MediaWarp ip>:<port>/MediaWarp/version` 或通过 `./MediaWarp --version` 获取
     validations:
       required: true
   - type: dropdown
@@ -58,13 +58,14 @@ body:
       description: 上游媒体服务器类型
       options:
         - Emby
+        - Jellyfin
     validations:
       required: true
   - type: input
     id: mediaserver-version
     attributes:
       label: 媒体服务器版本
-      description: 上游媒体服务器版本（如果使用 docker 需要提供详细 tag）
+      description: 上游媒体服务器版本（如果使用 docker 最好可以提供详细标签信息，例如`linuxserver/emby:4.9.0-beta`）
     validations:
       required: true
   - type: dropdown
@@ -74,7 +75,7 @@ body:
       description: 你在以下哪个部分碰到了问题
       options:
         - Strm 文件播放问题
-        - Web 美化问题
+        - Web 美化/额外功能问题
         - 配置文件读取问题
         - 其他问题
     validations:
@@ -90,6 +91,12 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: 发生问题时系统日志和配置文件
+      label: 发生问题时相关日志
       description: 问题出现时，程序运行日志请复制到这里。
       render: bash
+  - type: textarea
+    id: logs
+    attributes:
+      label: 发生问题时配置文件
+      description: 问题出现时，程序配置文件请复制到这里。
+      render: yaml

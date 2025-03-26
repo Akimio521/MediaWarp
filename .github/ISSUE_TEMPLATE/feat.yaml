@@ -18,7 +18,7 @@ body:
     id: version-info
     attributes:
       label: 当前程序版本的详细信息
-      description: 访问 /MediaWarp/version 获取
+      description: 访问 `http://<MediaWarp ip>:<port>/MediaWarp/version` 或通过 `./MediaWarp --version` 获取
     validations:
       required: false
   - type: textarea
