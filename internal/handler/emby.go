@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -37,11 +36,11 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 			},
 			{
 				Regexp:  constants.EmbyRegexp.Router.ModifyPlaybackInfo,
-				Handler: embyServerHandler.responseModifyCreater(embyServerHandler.ModifyPlaybackInfo),
+				Handler: responseModifyCreater(embyServerHandler.server.GetReverseProxy(), embyServerHandler.ModifyPlaybackInfo),
 			},
 			{
 				Regexp:  constants.EmbyRegexp.Router.ModifyBaseHtmlPlayer,
-				Handler: embyServerHandler.responseModifyCreater(embyServerHandler.ModifyBaseHtmlPlayer),
+				Handler: responseModifyCreater(embyServerHandler.server.GetReverseProxy(), embyServerHandler.ModifyBaseHtmlPlayer),
 			},
 		}
 
@@ -50,7 +49,7 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 				embyServerHandler.routerRules = append(embyServerHandler.routerRules,
 					RegexpRouteRule{
 						Regexp:  constants.EmbyRegexp.Router.ModifyIndex,
-						Handler: embyServerHandler.responseModifyCreater(embyServerHandler.ModifyIndex),
+						Handler: responseModifyCreater(embyServerHandler.server.GetReverseProxy(), embyServerHandler.ModifyIndex),
 					},
 				)
 			}
@@ -59,7 +58,7 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 			embyServerHandler.routerRules = append(embyServerHandler.routerRules,
 				RegexpRouteRule{
 					Regexp:  constants.EmbyRegexp.Router.ModifySubtitles,
-					Handler: embyServerHandler.responseModifyCreater(embyServerHandler.ModifySubtitles),
+					Handler: responseModifyCreater(embyServerHandler.server.GetReverseProxy(), embyServerHandler.ModifySubtitles),
 				},
 			)
 		}
@@ -74,43 +73,6 @@ func (embyServerHandler *EmbyServerHandler) ReverseProxy(rw http.ResponseWriter,
 // 正则路由表
 func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteRule {
 	return embyServerHandler.routerRules
-}
-
-// 响应修改创建器
-//
-// 将需要修改上游响应的处理器包装成一个 gin.HandlerFunc 处理器
-func (embyServerHandler *EmbyServerHandler) responseModifyCreater(modifyResponseFN func(rw *http.Response) error) gin.HandlerFunc {
-	proxy := embyServerHandler.server.GetReverseProxy()
-	proxy.ModifyResponse = modifyResponseFN
-	return func(ctx *gin.Context) {
-		proxy.ServeHTTP(ctx.Writer, ctx.Request)
-	}
-}
-
-// 根据 Strm 文件路径识别 Strm 文件类型
-//
-// 返回 Strm 文件类型和一个可选配置
-func (embyServerHandler *EmbyServerHandler) RecgonizeStrmFileType(strmFilePath string) (constants.StrmFileType, any) {
-	if config.HTTPStrm.Enable {
-		for _, prefix := range config.HTTPStrm.PrefixList {
-			if strings.HasPrefix(strmFilePath, prefix) {
-				logging.Debug(strmFilePath + " 成功匹配路径：" + prefix + "，Strm 类型：" + string(constants.HTTPStrm))
-				return constants.HTTPStrm, nil
-			}
-		}
-	}
-	if config.AlistStrm.Enable {
-		for _, alistStrmConfig := range config.AlistStrm.List {
-			for _, prefix := range alistStrmConfig.PrefixList {
-				if strings.HasPrefix(strmFilePath, prefix) {
-					logging.Debug(strmFilePath + " 成功匹配路径：" + prefix + "，Strm 类型：" + string(constants.AlistStrm) + "，AlistServer 地址：" + alistStrmConfig.ADDR)
-					return constants.AlistStrm, alistStrmConfig.ADDR
-				}
-			}
-		}
-	}
-	logging.Debug(strmFilePath + " 未匹配任何路径，Strm 类型：" + string(constants.UnknownStrm))
-	return constants.UnknownStrm, nil
 }
 
 // 修改播放信息请求
@@ -139,7 +101,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 			continue
 		}
 		item := itemResponse.Items[0]
-		strmFileType, opt := embyServerHandler.RecgonizeStrmFileType(*item.Path)
+		strmFileType, opt := recgonizeStrmFileType(*item.Path)
 		switch strmFileType {
 		case constants.HTTPStrm: // HTTPStrm 设置支持直链播放并且支持转码
 			if !config.HTTPStrm.TransCode {
@@ -248,7 +210,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 		return
 	}
 
-	strmFileType, opt := embyServerHandler.RecgonizeStrmFileType(*item.Path)
+	strmFileType, opt := recgonizeStrmFileType(*item.Path)
 	for _, mediasource := range item.MediaSources {
 		if *mediasource.ID == mediaSourceID { // EmbyServer >= 4.9 返回的ID带有前缀mediasource_
 			switch strmFileType {
@@ -371,18 +333,6 @@ func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error
 	htmlContent = bytes.Replace(htmlContent, []byte("</head>"), append(addHEAD, []byte("</head>")...), 1) // 将添加HEAD
 	updateBody(rw, htmlContent)
 	return nil
-}
-
-// 更新响应体
-//
-// 修改响应体、更新Content-Length
-func updateBody(rw *http.Response, content []byte) {
-	rw.Body = io.NopCloser(bytes.NewBuffer(content)) // 重置响应体
-
-	// 更新 Content-Length 头
-	rw.ContentLength = int64(len(content))
-	rw.Header.Set("Content-Length", strconv.Itoa(len(content)))
-
 }
 
 var _ MediaServerHandler = (*EmbyServerHandler)(nil) // 确保 EmbyServerHandler 实现 MediaServerHandler 接口
