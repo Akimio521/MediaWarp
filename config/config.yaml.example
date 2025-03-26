@@ -13,7 +13,7 @@ Logger:                                     # 日志设定
     Console: True                           # 是否将服务日志文件输出到终端中
     File: True                              # 是否将服务日志文件记录到文件中
 
-Web:                                        # Web页面修改相关设置
+Web:                                        # Web 页面修改相关设置
   Enable: True                              # 总开关
   Custom: True                              # 是否加载自定义静态资源
   Index: True                               # 是否从 custom 目录读取 index.html 文件 
@@ -24,10 +24,10 @@ Web:                                        # Web页面修改相关设置
     <script src="/MediaWarp/custom/emby-front-end-mod/fanart-show.js"></script>
     <script src="/MediaWarp/custom/emby-front-end-mod/playbackRate.js"></script>
 
-  ExternalPlayerUrl: True                   # 是否开启外置播放器
   ActorPlus: True                           # 过滤没有头像的演员和制作人员
   FanartShow: False                         # 显示同人图（fanart 图）
-  Danmaku: True                             # Web显示弹幕
+  ExternalPlayerUrl: True                   # 是否开启外置播放器
+  Danmaku: True                             # Web 显示弹幕
   VideoTogether: True                       # 共同观影，详情见 https://videotogether.github.io/
 
 ClientFilter:                               # 客户端过滤器
@@ -45,14 +45,14 @@ HTTPStrm:                                   # HTTPStrm 相关配置（Strm 文�
     - /media/strm/https
 
 AlistStrm:                                  # AlistStrm 相关配置（Strm 文件内容是 Alist 上文件的路径，目前仅支持适配 Alist V3）
-  Enable: True                              # 是否启用AlistStrm重定向
+  Enable: True                              # 是否启用 AlistStrm 重定向
   TransCode: True                           # False：强制关闭转码 True：保持原有转码设置
   RawURL: False                             # Fasle：响应 Alist 服务器的直链（要求客户端可以访问到 Alist） True：直接响应 Alist 上游的真实链接（alist api 中的 raw_url 属性）
-  List:                                     # Alist服务关配置列表
-    - ADDR: http://192.168.1.100:5244       # Alist服务器地址
-      Username: admin                       # Alist服务器账号
-      Password: adminadmin                  # Alist服务器密码
-      PrefixList:                           # EmbyServer 中 Strm 文件的前缀（符合该前缀的Strm文件都会路由到该规则下）
+  List:                                     # Alist 服务关配置列表
+    - ADDR: http://192.168.1.100:5244       # Alist 服务器地址
+      Username: admin                       # Alist 服务器账号
+      Password: adminadmin                  # Alist 服务器密码
+      PrefixList:                           # EmbyServer 中 Strm 文件的前缀（符合该前缀的 Strm 文件都会路由到该规则下）
         - /media/strm/MyAlist               # 同一个 Alist 可以有多个前缀规则
         - /mnt/cd2/strm
     - ADDR: https://xiaoya.com              # 可以填写多个配置

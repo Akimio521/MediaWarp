@@ -95,8 +95,6 @@ func ListenAddr() string {
 	return fmt.Sprintf(":%d", Port)
 }
 
-// ====================== 私有函数 ======================
-
 // 初始化configManager
 func Init() error {
 	if err := loadConfig(); err != nil {
