@@ -29,7 +29,7 @@ func Logger() gin.HandlerFunc {
 		statusColor, methodColor := getColor(statusCode, method)
 
 		logging.AccessLog(
-			`【Access】 %s |\033[4%dm %d \033[0m| %-10s |\033[4%dm %-7s\033[0m| %s "%s"`,
+			"【Access】 %s |\033[4%dm %d \033[0m| %-10s |\033[4%dm %-7s \033[0m| %s \"%s\"",
 			startTime.Format(constants.FORMATE_TIME),
 			statusColor, statusCode,
 			wasteTime,
