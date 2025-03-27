@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -21,13 +23,17 @@ import (
 
 // Emby服务器处理器
 type EmbyServerHandler struct {
-	server      *emby.EmbyServer  // Emby 服务器
-	routerRules []RegexpRouteRule // 正则路由规则
+	server      *emby.EmbyServer       // Emby 服务器
+	routerRules []RegexpRouteRule      // 正则路由规则
+	proxy       *httputil.ReverseProxy // 反向代理
 }
 
 // 初始化
 func (embyServerHandler *EmbyServerHandler) Init() {
 	embyServerHandler.server = emby.New(config.MediaServer.ADDR, config.MediaServer.AUTH)
+	target, _ := url.Parse(embyServerHandler.server.GetEndpoint())
+	embyServerHandler.proxy = httputil.NewSingleHostReverseProxy(target)
+
 	{ // 初始化路由规则
 		embyServerHandler.routerRules = []RegexpRouteRule{
 			{
@@ -35,12 +41,18 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 				Handler: embyServerHandler.VideosHandler,
 			},
 			{
-				Regexp:  constants.EmbyRegexp.Router.ModifyPlaybackInfo,
-				Handler: responseModifyCreater(embyServerHandler.server.GetReverseProxy(), embyServerHandler.ModifyPlaybackInfo),
+				Regexp: constants.EmbyRegexp.Router.ModifyPlaybackInfo,
+				Handler: responseModifyCreater(
+					&httputil.ReverseProxy{Director: embyServerHandler.proxy.Director},
+					embyServerHandler.ModifyPlaybackInfo,
+				),
 			},
 			{
-				Regexp:  constants.EmbyRegexp.Router.ModifyBaseHtmlPlayer,
-				Handler: responseModifyCreater(embyServerHandler.server.GetReverseProxy(), embyServerHandler.ModifyBaseHtmlPlayer),
+				Regexp: constants.EmbyRegexp.Router.ModifyBaseHtmlPlayer,
+				Handler: responseModifyCreater(
+					&httputil.ReverseProxy{Director: embyServerHandler.proxy.Director},
+					embyServerHandler.ModifyBaseHtmlPlayer,
+				),
 			},
 		}
 
@@ -48,8 +60,11 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 			if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.VideoTogether {
 				embyServerHandler.routerRules = append(embyServerHandler.routerRules,
 					RegexpRouteRule{
-						Regexp:  constants.EmbyRegexp.Router.ModifyIndex,
-						Handler: responseModifyCreater(embyServerHandler.server.GetReverseProxy(), embyServerHandler.ModifyIndex),
+						Regexp: constants.EmbyRegexp.Router.ModifyIndex,
+						Handler: responseModifyCreater(
+							&httputil.ReverseProxy{Director: embyServerHandler.proxy.Director},
+							embyServerHandler.ModifyIndex,
+						),
 					},
 				)
 			}
@@ -57,8 +72,11 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 		if config.Subtitle.Enable && config.Subtitle.SRT2ASS {
 			embyServerHandler.routerRules = append(embyServerHandler.routerRules,
 				RegexpRouteRule{
-					Regexp:  constants.EmbyRegexp.Router.ModifySubtitles,
-					Handler: responseModifyCreater(embyServerHandler.server.GetReverseProxy(), embyServerHandler.ModifySubtitles),
+					Regexp: constants.EmbyRegexp.Router.ModifySubtitles,
+					Handler: responseModifyCreater(
+						&httputil.ReverseProxy{Director: embyServerHandler.proxy.Director},
+						embyServerHandler.ModifySubtitles,
+					),
 				},
 			)
 		}
@@ -67,7 +85,7 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 
 // 转发请求至上游服务器
 func (embyServerHandler *EmbyServerHandler) ReverseProxy(rw http.ResponseWriter, req *http.Request) {
-	embyServerHandler.server.ReverseProxy(rw, req)
+	embyServerHandler.proxy.ServeHTTP(rw, req)
 }
 
 // 正则路由表
@@ -198,7 +216,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询 item 需要去除前缀仅保留数字部分
 	if err != nil {
 		logging.Warning("请求 ItemsServiceQueryItem 失败：", err)
-		embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
+		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
 		return
 	}
 
@@ -206,7 +224,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 
 	if !strings.HasSuffix(strings.ToLower(*item.Path), ".strm") { // 不是 Strm 文件
 		logging.Debug("播放本地视频：" + *item.Path + "，不进行处理")
-		embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
+		embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
 		return
 	}
 
@@ -245,7 +263,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 				ctx.Redirect(http.StatusFound, redirectURL)
 				return
 			case constants.UnknownStrm:
-				embyServerHandler.server.ReverseProxy(ctx.Writer, ctx.Request)
+				embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
 				return
 			}
 		}
