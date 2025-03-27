@@ -103,9 +103,9 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 						logging.Warning("解析API键值对失败：", err)
 						continue
 					}
-					directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
+					directStreamURL := fmt.Sprintf("/Videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ID, *mediasource.ID, apikeypair)
 					playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
-					logging.Info(*mediasource.Name, "强制禁止转码，直链播放链接为:", directStreamURL)
+					logging.Info(*mediasource.Name, "强制禁止转码，直链播放链接为: ", directStreamURL)
 				}
 			}
 
@@ -117,7 +117,7 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 				playbackInfoResponse.MediaSources[index].TranscodingURL = nil
 				playbackInfoResponse.MediaSources[index].TranscodingSubProtocol = nil
 				playbackInfoResponse.MediaSources[index].TranscodingContainer = nil
-				directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true", *mediasource.ItemID, *mediasource.ID)
+				directStreamURL := fmt.Sprintf("/Videos/%s/stream?MediaSourceId=%s&Static=true", *mediasource.ID, *mediasource.ID)
 				if mediasource.DirectStreamURL != nil {
 					logging.Debugf("%s 原直链播放链接: %s", *mediasource.Name, *mediasource.DirectStreamURL)
 					apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
@@ -130,9 +130,9 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 				playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
 				container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 				playbackInfoResponse.MediaSources[index].Container = &container
-				logging.Info(*mediasource.Name, "强制禁止转码，直链播放链接为:", directStreamURL, "，容器为: %s", container)
+				logging.Info(*mediasource.Name, " 强制禁止转码，直链播放链接为: ", directStreamURL, "，容器为: ", container)
 			} else {
-				logging.Info(*mediasource.Name, "保持原有转码设置")
+				logging.Info(*mediasource.Name, " 保持原有转码设置")
 			}
 
 			if playbackInfoResponse.MediaSources[index].Size == nil {
@@ -153,7 +153,7 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 	}
 
 	if data, err = json.Marshal(playbackInfoResponse); err != nil {
-		logging.Warning("序列化 emby.PlaybackInfoResponse Json 错误：", err)
+		logging.Warning("序列化 jellyfin.PlaybackInfoResponse Json 错误：", err)
 		return err
 	}
 	updateBody(rw, data)
