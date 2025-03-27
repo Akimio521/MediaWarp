@@ -61,7 +61,13 @@ func readBody(rw *http.Response) ([]byte, error) {
 	var err error
 	encodingType := rw.Header.Get("Content-Encoding")
 	switch encodingType {
+	case "": // 无 Content-Encoding 头
+		logging.Debug("无 Content-Encoding 头")
+		if data, err = io.ReadAll(rw.Body); err != nil { // 不是压缩格式，直接读取数据
+			return nil, fmt.Errorf("读取 Body 出错：%w", err)
+		}
 	case "gzip":
+		logging.Debug("解压 GZIP 数据")
 		// 解压缩 GZIP 数据
 		gzipReader, err := gzip.NewReader(rw.Body)
 		if err != nil {
@@ -73,15 +79,14 @@ func readBody(rw *http.Response) ([]byte, error) {
 			return nil, fmt.Errorf("读取解压后的数据失败：%w", err)
 		}
 	case "br":
+		logging.Debug("解压 Brotli 数据")
 		// 解压 Brotli 数据
 		brotliReader := brotli.NewReader(rw.Body)
 		if data, err = io.ReadAll(brotliReader); err != nil {
 			return nil, fmt.Errorf("读取 Brotli 解压后的数据失败：%w", err)
 		}
 	default:
-		if data, err = io.ReadAll(rw.Body); err != nil { // 如果不是压缩格式，直接读取数据
-			return nil, fmt.Errorf("读取 Body 出错：%w", err)
-		}
+		return nil, fmt.Errorf("未知的 Content-Encoding：%s", encodingType)
 	}
 	return data, nil
 }
