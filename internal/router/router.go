@@ -55,7 +55,7 @@ func RegexpRouterHandler(ctx *gin.Context) {
 
 	for _, rule := range mediaServerHandler.GetRegexpRouteRules() {
 		if rule.Regexp.MatchString(ctx.Request.URL.Path) { // 不带查询参数的字符串：/emby/Items/54/Images/Primary
-			logging.Debug("URL: ", ctx.Request.URL.Path, "匹配成功 -> ", rule.Regexp.String())
+			logging.Debugf("URL: %s 匹配成功 -> %s", ctx.Request.URL.Path, rule.Regexp.String())
 			rule.Handler(ctx)
 			return
 		}
