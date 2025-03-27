@@ -96,8 +96,8 @@ func ListenAddr() string {
 }
 
 // 初始化configManager
-func Init() error {
-	if err := loadConfig(); err != nil {
+func Init(path string) error {
+	if err := loadConfig(path); err != nil {
 		return err
 	}
 	if err := createDir(); err != nil {
@@ -107,9 +107,13 @@ func Init() error {
 }
 
 // 读取并解析配置文件
-func loadConfig() error {
-	viper.AddConfigPath(ConfigDir())
-	viper.SetConfigName("config")
+func loadConfig(path string) error {
+	if path != "" {
+		viper.SetConfigFile(path)
+	} else {
+		viper.AddConfigPath(ConfigDir())
+		viper.SetConfigName("config")
+	}
 
 	if err := viper.ReadInConfig(); err != nil {
 		return fmt.Errorf("读取配置文件失败: %v", err)

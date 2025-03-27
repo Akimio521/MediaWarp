@@ -21,8 +21,9 @@ import (
 )
 
 var (
-	isDebug     bool // 开启调试模式
-	showVersion bool // 显示版本信息
+	isDebug     bool   // 开启调试模式
+	showVersion bool   // 显示版本信息
+	configPath  string // 配置文件路径
 )
 
 func init() {
@@ -30,6 +31,7 @@ func init() {
 	fmt.Println(utils.Center(fmt.Sprintf(" MediaWarp %s ", config.Version().AppVersion), 71, "="))
 	flag.BoolVar(&showVersion, "version", false, "显示版本信息")
 	flag.BoolVar(&isDebug, "debug", false, "是否启用调试模式")
+	flag.StringVar(&configPath, "config", "", "指定配置文件路径")
 }
 
 func main() {
@@ -48,7 +50,7 @@ func main() {
 		fmt.Println("MediaWarp 已退出")
 	}()
 
-	if err := config.Init(); err != nil { // 初始化配置
+	if err := config.Init(configPath); err != nil { // 初始化配置
 		fmt.Println("配置初始化失败：", err)
 		return
 	}
