@@ -13,3 +13,6 @@
 [submodule "static/emby-crx"]
 	path = static/emby-crx
 	url = https://github.com/Nolovenodie/emby-crx.git
+[submodule "static/jellyfin-danmaku"]
+	path = static/jellyfin-danmaku
+	url = https://github.com/Izumiko/jellyfin-danmaku.git
