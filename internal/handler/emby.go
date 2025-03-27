@@ -340,6 +340,13 @@ func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error
 	if config.Web.ExternalPlayerUrl { // 外部播放器
 		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/embyExternalUrl/embyWebAddExternalUrl/embyLaunchPotplayer.js"></script>`+"\n")...)
 	}
+	if config.Web.Crx { // crx 美化
+		addHEAD = append(addHEAD, []byte(`<link rel="stylesheet" id="theme-css" href="/MediaWarp/static/emby-crx/static/css/style.css" type="text/css" media="all" />
+    <script src="/MediaWarp/static/emby-crx/static/js/common-utils.js"></script>
+    <script src="/MediaWarp/static/emby-crx/static/js/jquery-3.6.0.min.js"></script>
+    <script src="/MediaWarp/static/emby-crx/static/js/md5.min.js"></script>
+    <script src="/MediaWarp/static/emby-crx/content/main.js"></script>`+"\n")...)
+	}
 	if config.Web.ActorPlus { // 过滤没有头像的演员和制作人员
 		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/emby-web-mod/actorPlus/actorPlus.js"></script>`+"\n")...)
 	}

@@ -35,12 +35,13 @@ type BaseLoggerSetting struct {
 type WebSetting struct {
 	Enable            bool   // 启用自定义前端设置
 	Custom            bool   // 启用用户自定义静态资源
-	Index             bool   // 是否从static目录读取index.html文件作为首页
-	Head              string // 添加到index.html的HEAD中
+	Index             bool   // 是否从 custom 目录读取 index.html 文件作为首页
+	Head              string // 添加到 index.html 的 HEAD 中
 	ExternalPlayerUrl bool   // 是否开启外置播放器
+	Crx               bool   // crx 美化
 	ActorPlus         bool   // 过滤没有头像的演员和制作人员
 	FanartShow        bool   // 显示同人图（fanart图）
-	Danmaku           bool   // Web显示弹幕
+	Danmaku           bool   // Web 弹幕
 	VideoTogether     bool   // VideoTogether
 }
 
