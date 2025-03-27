@@ -281,7 +281,7 @@ func (jellyfinHandler *JellyfinHandler) ModifyIndex(rw *http.Response) error {
 		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/emby-web-mod/fanart_show/fanart_show.js"></script>`+"\n")...)
 	}
 	if config.Web.Danmaku { // 弹幕
-		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/dd-danmaku/ede.js" defer></script>`+"\n")...)
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/jellyfin-danmaku/ede.js" defer></script>`+"\n")...)
 	}
 	if config.Web.VideoTogether { // VideoTogether
 		addHEAD = append(addHEAD, []byte(`<script src="https://2gether.video/release/extension.website.user.js"></script>`+"\n")...)

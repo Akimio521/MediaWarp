@@ -6,6 +6,7 @@ import (
 
 //go:embed embyExternalUrl/embyWebAddExternalUrl/embyLaunchPotplayer.js
 //go:embed dd-danmaku/ede.js
+//go:embed jellyfin-danmaku/ede.js
 //go:embed emby-web-mod/actorPlus/actorPlus.js
 //go:embed emby-web-mod/emby-swiper/emby-swiper.js
 //go:embed emby-web-mod/emby-tab/emby-tab.js
