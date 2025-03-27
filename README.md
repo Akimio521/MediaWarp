@@ -49,16 +49,18 @@ MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原�
     <img src="./img/index.jpg" alt="首页" width=310px /> 
     <img src="./img/movie.jpg" alt="电影" width=310px />
     <img src="./img/series.jpg" alt="电视剧" width=310px />
+    <img src="./img/danmaku.png" alt="danmaku 弹幕" width=310px />
 
 - 嵌入功能
+  - ExternalPlayerUrl：调用外部播放器
+  - crx：美化包 [emby-crx](https://github.com/Nolovenodie/emby-crx)；[jellyfin-crx](https://github.com/newday-life/jellyfin-crx)
   - ActorPlus：隐藏没有头像的演员和制作人员
   - FanartShow：显示同人图（fanart 图）
-  - ExternalPlayerUrl：调用外部播放器
-  - Danmaku：Web 显示弹幕
+  - Danmaku：Web 弹幕 [Emby](https://github.com/9channel/dd-danmaku)；[Jellyfin](https://github.com/Izumiko/jellyfin-danmaku)
   - ~~BeautifyCSS：Emby 美化 CSS 样式~~（已移除，若有需求请实用通过自定义 Web.Head 功能实现）
 
 # TODO LIST
-- [x] HttpStrm 实现 302 重定向
+- [x] HTTPStrm 实现 302 重定向
 - [x] 屏蔽特定客户端访问
 - [x] 提供多种 Web 前端美化功能
 - [x] AlistStrm 实现 302 重定向
@@ -68,7 +70,8 @@ MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原�
 - [x] 支持通过 `--config` 参数指定配置文件地址（默认在执行文件的目录下的 config 子目录中查询配置文件）
 - [x] ART 字幕转 ASS 字幕
 - [ ] ASS 字幕字体子集化并嵌入字体
-- [ ] 适配 Jellyfin
+- [x] 适配 Emby
+- [x] 适配 Jellyfin
 - [ ] 适配 Plex
 
 - [ ] ~~利用 Redis 做数据缓存~~
@@ -96,6 +99,7 @@ MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原�
 - [newday-life/emby-front-end-mod](https://github.com/newday-life/emby-front-end-mod)
 - [9channel/dd-danmaku](https://github.com/9channel/dd-danmaku)
 - [Nolovenodie/emby-crx](https://github.com/Nolovenodie/emby-crx)
+- [newday-life/jellyfin-crx](https://github.com/newday-life/jellyfin-crx)
 - [RiderLty/fontInAss](https://github.com/RiderLty/fontInAss)
 
 # Star History
