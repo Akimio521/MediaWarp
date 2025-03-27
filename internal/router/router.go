@@ -16,7 +16,7 @@ func InitRouter() *gin.Engine {
 	ginR := gin.New()
 	ginR.Use(
 		middleware.Logger(),
-		gin.Recovery(),
+		middleware.Recovery(),
 		middleware.QueryCaseInsensitive(),
 		middleware.SetRefererPolicy(constants.SAME_ORIGIN),
 	)
