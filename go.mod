@@ -4,6 +4,7 @@ go 1.24.1
 
 require (
 	github.com/ConradIrwin/font v0.2.1
+	github.com/andybalholm/brotli v1.1.1
 	github.com/flopp/go-findfont v0.1.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0

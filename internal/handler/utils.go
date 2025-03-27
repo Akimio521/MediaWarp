@@ -5,12 +5,15 @@ import (
 	"MediaWarp/internal/config"
 	"MediaWarp/internal/logging"
 	"bytes"
+	"compress/gzip"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
 	"strconv"
 	"strings"
 
+	"github.com/andybalholm/brotli"
 	"github.com/gin-gonic/gin"
 )
 
@@ -48,6 +51,39 @@ func recgonizeStrmFileType(strmFilePath string) (constants.StrmFileType, any) {
 	}
 	logging.Debug(strmFilePath + " 未匹配任何路径，Strm 类型：" + string(constants.UnknownStrm))
 	return constants.UnknownStrm, nil
+}
+
+// 读取响应体
+//
+// 读取响应体，解压缩 GZIP、Brotli 数据（若响应体被压缩）
+func readBody(rw *http.Response) ([]byte, error) {
+	var data []byte
+	var err error
+	encodingType := rw.Header.Get("Content-Encoding")
+	switch encodingType {
+	case "gzip":
+		// 解压缩 GZIP 数据
+		gzipReader, err := gzip.NewReader(rw.Body)
+		if err != nil {
+			return nil, fmt.Errorf("创建 GZIP 解压器失败：%w", err)
+		}
+		defer gzipReader.Close()
+
+		if data, err = io.ReadAll(gzipReader); err != nil { // 读取解压后的数据
+			return nil, fmt.Errorf("读取解压后的数据失败：%w", err)
+		}
+	case "br":
+		// 解压 Brotli 数据
+		brotliReader := brotli.NewReader(rw.Body)
+		if data, err = io.ReadAll(brotliReader); err != nil {
+			return nil, fmt.Errorf("读取 Brotli 解压后的数据失败：%w", err)
+		}
+	default:
+		if data, err = io.ReadAll(rw.Body); err != nil { // 如果不是压缩格式，直接读取数据
+			return nil, fmt.Errorf("读取 Body 出错：%w", err)
+		}
+	}
+	return data, nil
 }
 
 // 更新响应体

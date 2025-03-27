@@ -10,7 +10,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -104,7 +103,7 @@ func (embyServerHandler *EmbyServerHandler) GetRegexpRouteRules() []RegexpRouteR
 // 强制将 HTTPStrm 设置为支持直链播放和转码、AlistStrm 设置为支持直链播放并且禁止转码
 func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response) error {
 	defer rw.Body.Close()
-	body, err := io.ReadAll(rw.Body)
+	body, err := readBody(rw)
 	if err != nil {
 		logging.Warning("读取 Body 出错：", err)
 		return err
@@ -280,7 +279,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 // 将 SRT 字幕转 ASS
 func (embyServerHandler *EmbyServerHandler) ModifySubtitles(rw *http.Response) error {
 	defer rw.Body.Close()
-	subtitile, err := io.ReadAll(rw.Body) // 读取字幕文件
+	subtitile, err := readBody(rw) // 读取字幕文件
 	if err != nil {
 		logging.Warning("读取原始字幕 Body 出错：", err)
 		return err
@@ -303,7 +302,7 @@ func (embyServerHandler *EmbyServerHandler) ModifySubtitles(rw *http.Response) e
 // 用于修改播放器 JS，实现跨域播放 Strm 文件（302 重定向）
 func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayer(rw *http.Response) error {
 	defer rw.Body.Close()
-	body, err := io.ReadAll(rw.Body)
+	body, err := readBody(rw)
 	if err != nil {
 		return err
 	}
@@ -325,7 +324,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error
 
 	defer rw.Body.Close()  // 无论哪种情况，最终都要确保原 Body 被关闭，避免内存泄漏
 	if !config.Web.Index { // 从上游获取响应体
-		if htmlContent, err = io.ReadAll(rw.Body); err != nil {
+		if htmlContent, err = readBody(rw); err != nil {
 			return err
 		}
 	} else { // 从本地文件读取index.html
