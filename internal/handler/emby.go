@@ -29,9 +29,13 @@ type EmbyServerHandler struct {
 }
 
 // 初始化
-func (embyServerHandler *EmbyServerHandler) Init() {
-	embyServerHandler.server = emby.New(config.MediaServer.ADDR, config.MediaServer.AUTH)
-	target, _ := url.Parse(embyServerHandler.server.GetEndpoint())
+func NewEmbyServerHandler(addr string, apiKey string) (*EmbyServerHandler, error) {
+	var embyServerHandler = EmbyServerHandler{}
+	embyServerHandler.server = emby.New(addr, apiKey)
+	target, err := url.Parse(embyServerHandler.server.GetEndpoint())
+	if err != nil {
+		return nil, err
+	}
 	embyServerHandler.proxy = httputil.NewSingleHostReverseProxy(target)
 
 	{ // 初始化路由规则
@@ -81,6 +85,7 @@ func (embyServerHandler *EmbyServerHandler) Init() {
 			)
 		}
 	}
+	return &embyServerHandler, nil
 }
 
 // 转发请求至上游服务器

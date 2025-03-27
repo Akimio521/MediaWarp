@@ -52,9 +52,12 @@ func main() {
 		fmt.Println("配置初始化失败：", err)
 		return
 	}
-	logging.Init()           // 初始化日志
-	service.InitAlistSerer() // 初始化Alist服务器
-	handler.Init()           // 初始化媒体服务器处理器
+	logging.Init()                         // 初始化日志
+	service.InitAlistSerer()               // 初始化Alist服务器
+	if err := handler.Init(); err != nil { // 初始化媒体服务器处理器
+		logging.Error("媒体服务器处理器初始化失败：", err)
+		return
+	}
 
 	if isDebug {
 		logging.SetLevel(logrus.DebugLevel)
