@@ -57,3 +57,14 @@
   -  优化程序启动逻辑，改进错误处理
   -  解析构建时间格式，改进构建日期处理逻辑
   -  更新 go-lang 版本及第三方依赖
+- 2025.3.27: v0.0.10
+  -  主函数添加信号处理和错误处理机制，优化服务退出流程
+  -  修复配置初始化失败时错误调用日志输出，改为使用标准输出
+  -  将 responseModifyCreater、recgonizeStrmFileType、updateBody 函数移至 utils.go 并独立与 EmbyServerHandler，便于后续复用
+  -  修复日志中间件颜色控制输出错误问题
+  -  将反向代理逻辑从 emby.EmbyServer 移至 handler.EmbyServerHandler
+  -  重构媒体服务器处理器初始化逻辑，改为返回错误以便更好地处理初始化失败情况
+  -  添加 GZIP、Brotli 解压支持并重构读取响应体的逻辑
+  -  在正则路由处理器中添加调试日志以记录匹配成功的 URL
+  -  在恢复中间件中添加详细的错误日志记录以处理 panic 错误
+  -  支持通过命令行参数指定配置文件路径
