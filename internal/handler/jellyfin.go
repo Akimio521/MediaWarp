@@ -7,11 +7,13 @@ import (
 	"MediaWarp/internal/service"
 	"MediaWarp/internal/service/jellyfin"
 	"MediaWarp/utils"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 
@@ -47,6 +49,20 @@ func NewJellyfinHander(addr string, apiKey string) (*JellyfinHandler, error) {
 				Regexp:  constants.JellyfinRegexp.Router.VideosHandler,
 				Handler: jellyfinHandler.VideosHandler,
 			},
+		}
+		if config.Web.Enable {
+			if config.Web.Index || config.Web.Head != "" || config.Web.ExternalPlayerUrl || config.Web.VideoTogether {
+				jellyfinHandler.routerRules = append(
+					jellyfinHandler.routerRules,
+					RegexpRouteRule{
+						Regexp: constants.JellyfinRegexp.Router.ModifyIndex,
+						Handler: responseModifyCreater(
+							&httputil.ReverseProxy{Director: jellyfinHandler.proxy.Director},
+							jellyfinHandler.ModifyIndex,
+						),
+					},
+				)
+			}
 		}
 	}
 	return &jellyfinHandler, nil
@@ -105,7 +121,7 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 					}
 					directStreamURL := fmt.Sprintf("/Videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ID, *mediasource.ID, apikeypair)
 					playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
-					logging.Info(*mediasource.Name, "强制禁止转码，直链播放链接为: ", directStreamURL)
+					logging.Info(*mediasource.Name, " 强制禁止转码，直链播放链接为: ", directStreamURL)
 				}
 			}
 
@@ -229,6 +245,52 @@ func (jellyfinHandler *JellyfinHandler) VideosHandler(ctx *gin.Context) {
 			}
 		}
 	}
+}
+
+// 修改首页函数
+func (jellyfinHandler *JellyfinHandler) ModifyIndex(rw *http.Response) error {
+	var (
+		htmlFilePath string = path.Join(config.CostomDir(), "index.html")
+		htmlContent  []byte
+		addHEAD      []byte
+		err          error
+	)
+
+	defer rw.Body.Close() // 无论哪种情况，最终都要确保原 Body 被关闭，避免内存泄漏
+	if config.Web.Index { // 从本地文件读取index.html
+		if htmlContent, err = os.ReadFile(htmlFilePath); err != nil {
+			logging.Warning("读取文件内容出错，错误信息：", err)
+			return err
+		}
+	} else { // 从上游获取响应体
+		if htmlContent, err = readBody(rw); err != nil {
+			return err
+		}
+	}
+
+	if config.Web.Head != "" { // 用户自定义HEAD
+		addHEAD = append(addHEAD, []byte(config.Web.Head+"\n")...)
+	}
+	if config.Web.ExternalPlayerUrl { // 外部播放器
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/embyExternalUrl/embyWebAddExternalUrl/embyLaunchPotplayer.js"></script>`+"\n")...)
+	}
+	if config.Web.ActorPlus { // 过滤没有头像的演员和制作人员
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/emby-web-mod/actorPlus/actorPlus.js"></script>`+"\n")...)
+	}
+	if config.Web.FanartShow { // 显示同人图（fanart图）
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/emby-web-mod/fanart_show/fanart_show.js"></script>`+"\n")...)
+	}
+	if config.Web.Danmaku { // 弹幕
+		addHEAD = append(addHEAD, []byte(`<script src="/MediaWarp/static/emby-web-mod/dd-danmaku/ede.js" defer></script>`+"\n")...)
+	}
+	if config.Web.VideoTogether { // VideoTogether
+		addHEAD = append(addHEAD, []byte(`<script src="https://2gether.video/release/extension.website.user.js"></script>`+"\n")...)
+	}
+	htmlContent = bytes.Replace(htmlContent, []byte("</head>"), append(addHEAD, []byte("</head>")...), 1) // 将添加HEAD
+
+	updateBody(rw, htmlContent)
+	rw.Header.Set("Content-Encoding", "") // 更新 Content-Encoding 头
+	return nil
 }
 
 var _ MediaServerHandler = (*JellyfinHandler)(nil) // 确保 JellyfinHandler 实现 MediaServerHandler 接口
