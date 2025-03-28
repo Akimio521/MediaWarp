@@ -172,10 +172,9 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 		logging.Warning("序列化 jellyfin.PlaybackInfoResponse Json 错误：", err)
 		return err
 	}
-	updateBody(rw, data)
-	rw.Header.Set("Content-Encoding", "")             // 更新 Content-Encoding 头
+
 	rw.Header.Set("Content-Type", "application/json") // 更新 Content-Type 头
-	return nil
+	return updateBody(rw, data)
 }
 
 // 视频流处理器
@@ -295,9 +294,7 @@ func (jellyfinHandler *JellyfinHandler) ModifyIndex(rw *http.Response) error {
 	}
 	htmlContent = bytes.Replace(htmlContent, []byte("</head>"), append(addHEAD, []byte("</head>")...), 1) // 将添加HEAD
 
-	updateBody(rw, htmlContent)
-	rw.Header.Set("Content-Encoding", "") // 更新 Content-Encoding 头
-	return nil
+	return updateBody(rw, htmlContent)
 }
 
 var _ MediaServerHandler = (*JellyfinHandler)(nil) // 确保 JellyfinHandler 实现 MediaServerHandler 接口

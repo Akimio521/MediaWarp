@@ -188,9 +188,9 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 		logging.Warning("序列化 emby.PlaybackInfoResponse Json 错误：", err)
 		return err
 	}
-	updateBody(rw, body)
+
 	rw.Header.Set("Content-Type", "application/json") // 更新 Content-Type 头
-	return nil
+	return updateBody(rw, body)
 }
 
 // 视频流处理器
@@ -286,13 +286,12 @@ func (embyServerHandler *EmbyServerHandler) ModifySubtitles(rw *http.Response) e
 	}
 
 	if utils.IsSRT(subtitile) { // 判断是否为 SRT 格式
-		msg := "字幕文件为 SRT 格式"
+		logging.Info("字幕文件为 SRT 格式")
 		if config.Subtitle.SRT2ASS {
-			msg += "，已转为 ASS 格式"
+			logging.Info("已将 SRT 字幕已转为 ASS 格式")
 			assSubtitle := utils.SRT2ASS(subtitile, config.Subtitle.ASSStyle)
-			updateBody(rw, assSubtitle)
+			return updateBody(rw, assSubtitle)
 		}
-		logging.Info(msg)
 	}
 	return nil
 }
@@ -308,8 +307,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyBaseHtmlPlayer(rw *http.Respon
 	}
 
 	body = bytes.ReplaceAll(body, []byte(`mediaSource.IsRemote&&"DirectPlay"===playMethod?null:"anonymous"`), []byte("null")) // 修改响应体
-	updateBody(rw, body)
-	return nil
+	return updateBody(rw, body)
 
 }
 
@@ -360,8 +358,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyIndex(rw *http.Response) error
 		addHEAD = append(addHEAD, []byte(`<script src="https://2gether.video/release/extension.website.user.js"></script>`+"\n")...)
 	}
 	htmlContent = bytes.Replace(htmlContent, []byte("</head>"), append(addHEAD, []byte("</head>")...), 1) // 将添加HEAD
-	updateBody(rw, htmlContent)
-	return nil
+	return updateBody(rw, htmlContent)
 }
 
 var _ MediaServerHandler = (*EmbyServerHandler)(nil) // 确保 EmbyServerHandler 实现 MediaServerHandler 接口
