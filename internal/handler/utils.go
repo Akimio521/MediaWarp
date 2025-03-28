@@ -57,38 +57,33 @@ func recgonizeStrmFileType(strmFilePath string) (constants.StrmFileType, any) {
 //
 // 读取响应体，解压缩 GZIP、Brotli 数据（若响应体被压缩）
 func readBody(rw *http.Response) ([]byte, error) {
-	var data []byte
-	var err error
-	encodingType := rw.Header.Get("Content-Encoding")
-	switch encodingType {
-	case "": // 无 Content-Encoding 头
-		logging.Debug("无 Content-Encoding 头")
-		if data, err = io.ReadAll(rw.Body); err != nil { // 不是压缩格式，直接读取数据
-			return nil, fmt.Errorf("读取 Body 出错：%w", err)
-		}
-	case "gzip":
-		logging.Debug("解压 GZIP 数据")
-		// 解压缩 GZIP 数据
-		gzipReader, err := gzip.NewReader(rw.Body)
-		if err != nil {
-			return nil, fmt.Errorf("创建 GZIP 解压器失败：%w", err)
-		}
-		defer gzipReader.Close()
+	encoding := rw.Header.Get("Content-Encoding")
 
-		if data, err = io.ReadAll(gzipReader); err != nil { // 读取解压后的数据
-			return nil, fmt.Errorf("读取解压后的数据失败：%w", err)
+	var reader io.Reader
+	switch encoding {
+	case "gzip":
+		logging.Debug("解压缩 GZIP 数据")
+		gr, err := gzip.NewReader(rw.Body)
+		if err != nil {
+			return nil, fmt.Errorf("gzip reader error: %w", err)
 		}
+		defer gr.Close()
+		reader = gr
+
 	case "br":
-		logging.Debug("解压 Brotli 数据")
-		// 解压 Brotli 数据
-		brotliReader := brotli.NewReader(rw.Body)
-		if data, err = io.ReadAll(brotliReader); err != nil {
-			return nil, fmt.Errorf("读取 Brotli 解压后的数据失败：%w", err)
-		}
+		logging.Debug("解压缩 Brotli 数据")
+		reader = brotli.NewReader(rw.Body)
+
+	case "": // 无压缩
+		logging.Debug("无压缩数据")
+		reader = rw.Body
+
 	default:
-		return nil, fmt.Errorf("未知的 Content-Encoding：%s", encodingType)
+		return nil, fmt.Errorf("unsupported Content-Encoding: %s", encoding)
 	}
-	return data, nil
+
+	data, err := io.ReadAll(reader)
+	return data, err
 }
 
 // 更新响应体
