@@ -45,33 +45,33 @@ func getColor(statusCode int, method string) (uint8, uint8) {
 	var statusColor, methodColor uint8
 	switch {
 	case statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices:
-		statusColor = constants.COLOR_STATUS_CODE200
+		statusColor = constants.StatusCode200Color
 	case statusCode >= http.StatusMultipleChoices && statusCode < http.StatusBadRequest:
-		statusColor = constants.COLOR_STATUS_CODE300
+		statusColor = constants.StatusCode300Color
 	case statusCode >= http.StatusBadRequest && statusCode < http.StatusInternalServerError:
-		statusColor = constants.COLOR_STATUS_CODE400
+		statusColor = constants.StatusCode400Color
 	case statusCode >= http.StatusInternalServerError:
-		statusColor = constants.COLOR_STATUS_CODE500
+		statusColor = constants.StatusCode500Color
 	default:
-		statusColor = constants.COLOR_BACK
+		statusColor = constants.ColorBlack
 	}
 	switch method {
 	case http.MethodGet:
-		methodColor = constants.COLOR_METHOD_GET
+		methodColor = constants.MethodGetColor
 	case http.MethodPost:
-		methodColor = constants.COLOR_METHOD_POST
+		methodColor = constants.MethodPostColor
 	case http.MethodPut:
-		methodColor = constants.COLOR_METHOD_PUT
+		methodColor = constants.MethodPutColor
 	case http.MethodPatch:
-		methodColor = constants.COLOR_METHOD_PATCH
+		methodColor = constants.MethodPatchColor
 	case http.MethodDelete:
-		methodColor = constants.COLOR_METHOD_DELETE
+		methodColor = constants.MethodDeleteColor
 	case http.MethodHead:
-		methodColor = constants.COLOR_METHOD_HEAD
+		methodColor = constants.MethodHeadColor
 	case http.MethodOptions:
-		methodColor = constants.COLOR_METHOD_OPTIONS
+		methodColor = constants.MethodOptionsColor
 	default:
-		methodColor = constants.COLOR_BACK
+		methodColor = constants.ColorBlack
 	}
 	return statusColor, methodColor
 }

@@ -1,29 +1,32 @@
 package constants
 
+// 基础颜色枚举
 const (
-	COLOR_BACK   uint8 = iota // 黑色
-	COLOR_RED                 // 红色
-	COLOR_GREEN               // 绿色
-	COLOR_YELLOW              // 黄色
-	COLOR_BLUE                // 蓝色
-	COLOR_PURPLE              // 紫色
-	COLOR_CYAN                // 青色
-	COLOR_GRAY                // 灰色
+	ColorBlack  uint8 = iota // 黑色
+	ColorRed                 // 红色
+	ColorGreen               // 绿色
+	ColorYellow              // 黄色
+	ColorBlue                // 蓝色
+	ColorPurple              // 紫色
+	ColorCyan                // 青色
+	ColorGray                // 灰色
 )
 
+// HTTP 状态码对应颜色
 const (
-	COLOR_STATUS_CODE200 = COLOR_GREEN  // HTTP 请求成功状态颜色
-	COLOR_STATUS_CODE300 = COLOR_GRAY   // HTTP 重定向状态颜色
-	COLOR_STATUS_CODE400 = COLOR_YELLOW // HTTP 客户端错误颜色
-	COLOR_STATUS_CODE500 = COLOR_RED    // HTTP 服务器错误颜色
+	StatusCode200Color = ColorGreen  // HTTP 200 成功响应颜色
+	StatusCode300Color = ColorGray   // HTTP 300 重定向颜色
+	StatusCode400Color = ColorYellow // HTTP 400 客户端错误颜色
+	StatusCode500Color = ColorRed    // HTTP 500 服务器错误颜色
 )
 
+// HTTP 方法对应颜色
 const (
-	COLOR_METHOD_GET     = COLOR_BLUE   // HTTP GET 请求方法颜色
-	COLOR_METHOD_POST    = COLOR_CYAN   // HTTP POST 请求方法颜色
-	COLOR_METHOD_PUT     = COLOR_YELLOW // HTTP PUT 请求方法颜色
-	COLOR_METHOD_PATCH   = COLOR_GREEN  // HTTP PATCH 请求方法颜色
-	COLOR_METHOD_DELETE  = COLOR_RED    // HTTP DELETE 请求方法颜色
-	COLOR_METHOD_HEAD    = COLOR_PURPLE // HTTP HEAD 请求方法颜色
-	COLOR_METHOD_OPTIONS = COLOR_GRAY   // HTTP OPTIONS 请求方法颜色
+	MethodGetColor     = ColorBlue   // GET 方法颜色
+	MethodPostColor    = ColorCyan   // POST 方法颜色
+	MethodPutColor     = ColorYellow // PUT 方法颜色
+	MethodPatchColor   = ColorGreen  // PATCH 方法颜色
+	MethodDeleteColor  = ColorRed    // DELETE 方法颜色
+	MethodHeadColor    = ColorPurple // HEAD 方法颜色
+	MethodOptionsColor = ColorGray   // OPTIONS 方法颜色
 )

@@ -19,15 +19,15 @@ func (s *serviceLoggerSetting) Format(entry *logrus.Entry) ([]byte, error) {
 	var colorCode uint8
 	switch entry.Level {
 	case logrus.DebugLevel:
-		colorCode = constants.COLOR_BLUE
+		colorCode = constants.ColorBlue
 	case logrus.InfoLevel:
-		colorCode = constants.COLOR_GREEN
+		colorCode = constants.ColorGreen
 	case logrus.WarnLevel:
-		colorCode = constants.COLOR_YELLOW
+		colorCode = constants.ColorYellow
 	case logrus.ErrorLevel:
-		colorCode = constants.COLOR_RED
+		colorCode = constants.ColorRed
 	default:
-		colorCode = constants.COLOR_GRAY
+		colorCode = constants.ColorGray
 	}
 
 	// 设置文本Buffer
