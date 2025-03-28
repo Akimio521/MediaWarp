@@ -62,7 +62,7 @@ func readBody(rw *http.Response) ([]byte, error) {
 	var reader io.Reader
 	switch encoding {
 	case "gzip":
-		logging.Debug("解压缩 GZIP 数据")
+		logging.Debug("解码 GZIP 数据")
 		gr, err := gzip.NewReader(rw.Body)
 		if err != nil {
 			return nil, fmt.Errorf("gzip reader error: %w", err)
@@ -71,7 +71,7 @@ func readBody(rw *http.Response) ([]byte, error) {
 		reader = gr
 
 	case "br":
-		logging.Debug("解压缩 Brotli 数据")
+		logging.Debug("解码 Brotli 数据")
 		reader = brotli.NewReader(rw.Body)
 
 	case "": // 无压缩
@@ -81,9 +81,7 @@ func readBody(rw *http.Response) ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("unsupported Content-Encoding: %s", encoding)
 	}
-
-	data, err := io.ReadAll(reader)
-	return data, err
+	return io.ReadAll(reader)
 }
 
 // 更新响应体
