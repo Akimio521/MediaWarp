@@ -13,7 +13,7 @@
 
 # MediaWarp
 
-MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原版 EmbyServer 的 API 返回内容以实现特殊功能  
+MediaWarp 是**前置于 EmbyServer/Jellyfin 的 反向代理服务器**，修改了原版 EmbyServer 的 API 返回内容以实现特殊功能  
 
 [![license][license-badge]][license]
 [![prs][prs-badge]][prs]
@@ -32,7 +32,7 @@ MediaWarp 是**前置于 EmbyServer 的 反向代理服务器**，修改了原�
 </div>
 
 # 功能
-- Strm 文件可以实现 302 直链播放，流量不经过 EmbyServer
+- Strm 文件可以实现 302 直链播放，流量不经过 EmbyServer/Jellyfin
   - **推荐配合 [AutoFilm](https://github.com/Akimio521/AutoFilm) 使用**
   - 已通过测试客户端（Web、iOS Emby、Infuse、Conflux、Fileball、Vidhub）
   - 支持 Strm：

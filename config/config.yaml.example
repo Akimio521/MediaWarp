@@ -61,7 +61,7 @@ AlistStrm:                                  # AlistStrm 相关配置（Strm 文�
       PrefixList: 
         - /media/strm
 
-Subtitle:                                   # 字体相关设置
+Subtitle:                                   # 字体相关设置（仅 Emby 支持）
   Enable: True                              # 启用
   SRT2ASS: True                             # SRT 字幕转 ASS 字幕
   ASSStyle:                                 # SRT 字幕转 ASS 字幕使用的样式
