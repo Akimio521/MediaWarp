@@ -27,19 +27,19 @@ var (
 )
 
 func init() {
-	fmt.Print(constants.LOGO)
-	fmt.Println(utils.Center(fmt.Sprintf(" MediaWarp %s ", config.Version().AppVersion), 71, "="))
 	flag.BoolVar(&showVersion, "version", false, "显示版本信息")
 	flag.BoolVar(&isDebug, "debug", false, "是否启用调试模式")
 	flag.StringVar(&configPath, "config", "", "指定配置文件路径")
+	flag.Parse()
+
+	fmt.Print(constants.LOGO)
+	fmt.Println(utils.Center(fmt.Sprintf(" MediaWarp %s ", config.Version().AppVersion), 71, "="))
 }
 
 func main() {
-	flag.Parse()
-
 	if showVersion {
-		ver, _ := json.MarshalIndent(config.Version(), "", "  ")
-		fmt.Println(string(ver))
+		versionInfo, _ := json.MarshalIndent(config.Version(), "", "  ")
+		fmt.Println(string(versionInfo))
 		return
 	}
 
