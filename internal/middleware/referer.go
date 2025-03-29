@@ -7,7 +7,7 @@ import (
 )
 
 // 设置Referer策略
-func SetRefererPolicy(value constants.REFERER_VALUE) gin.HandlerFunc {
+func SetRefererPolicy(value constants.ReferrerPolicy) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.Header("Referrer-Policy", string(value))
 	}
