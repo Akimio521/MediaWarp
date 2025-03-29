@@ -290,8 +290,3 @@ func AnalyseASS(assText string) (map[ASSFontStyle]SetInterface[rune], error) {
 	}
 	return subFontSets, nil
 }
-
-// 从系统已安装的字体获取
-func loadLocalFont(ASSFontStyle) {
-
-}
