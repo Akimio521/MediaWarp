@@ -27,7 +27,7 @@ Web:                                        # Web 页面修改相关设置
   Crx: True                                 # crx 美化（Emby：https://github.com/Nolovenodie/emby-crx；Jellyfin：https://github.com/newday-life/jellyfin-crx）
   ActorPlus: True                           # 过滤没有头像的演员和制作人员
   FanartShow: False                         # 显示同人图（fanart 图）
-  ExternalPlayerUrl: True                   # 是否开启外置播放器
+  ExternalPlayerUrl: True                   # 是否开启外置播放器（仅 Emby）
   Danmaku: True                             # Web 弹幕（Emby：https://github.com/9channel/dd-danmaku；Jellyfin：https://github.com/Izumiko/jellyfin-danmaku）
   VideoTogether: True                       # 共同观影，详情见 https://videotogether.github.io/
 

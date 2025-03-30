@@ -13,7 +13,7 @@
 
 # MediaWarp
 
-MediaWarp 是**前置于 EmbyServer/Jellyfin 的 反向代理服务器**，修改了原媒体服务器返回响应以实现特殊功能  
+MediaWarp 是**前置于 EmbyServer/Jellyfin 的反向代理服务器**，修改了原媒体服务器返回响应以实现特殊功能  
 
 [![license][license-badge]][license]
 [![prs][prs-badge]][prs]
@@ -52,7 +52,7 @@ MediaWarp 是**前置于 EmbyServer/Jellyfin 的 反向代理服务器**，修�
     <img src="./img/danmaku.png" alt="danmaku 弹幕" width=310px />
 
 - 嵌入功能
-  - ExternalPlayerUrl：调用外部播放器
+  - ExternalPlayerUrl：调用外部播放器（仅 Emby）
   - crx：美化包 [emby-crx](https://github.com/Nolovenodie/emby-crx)；[jellyfin-crx](https://github.com/newday-life/jellyfin-crx)
   - ActorPlus：隐藏没有头像的演员和制作人员
   - FanartShow：显示同人图（fanart 图）
