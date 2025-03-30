@@ -1,9 +1,15 @@
-test/*
-config/config.yaml
-*.log
+
+config/*
+!config/.gitkeep
+logs/*
+!logs/.gitkeep
 /custom/*
 !/custom/.gitkeep
 
 # 执行文件
 dist/
 MediaWarp*
+
+# 其他
+test/*
+.DS_Store
