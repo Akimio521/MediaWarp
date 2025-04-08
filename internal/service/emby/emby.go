@@ -43,6 +43,7 @@ func (embyServer *EmbyServer) ItemsServiceQueryItem(ids string, limit int, field
 	params.Add("Ids", ids)
 	params.Add("Limit", strconv.Itoa(limit))
 	params.Add("Fields", fields)
+	params.Add("Recursive","true")
 	params.Add("api_key", embyServer.GetAPIKey())
 	api := embyServer.GetEndpoint() + "/Items?" + params.Encode()
 	resp, err := http.Get(api)
