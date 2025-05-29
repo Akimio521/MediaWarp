@@ -34,7 +34,7 @@ func recgonizeStrmFileType(strmFilePath string) (constants.StrmFileType, any) {
 	if config.HTTPStrm.Enable {
 		for _, prefix := range config.HTTPStrm.PrefixList {
 			if strings.HasPrefix(strmFilePath, prefix) {
-				logging.Debug(strmFilePath + " 成功匹配路径：" + prefix + "，Strm 类型：" + string(constants.HTTPStrm))
+				logging.Debugf("%s 成功匹配路径：%s，Strm 类型：%s", strmFilePath, prefix, constants.HTTPStrm)
 				return constants.HTTPStrm, nil
 			}
 		}
@@ -43,13 +43,13 @@ func recgonizeStrmFileType(strmFilePath string) (constants.StrmFileType, any) {
 		for _, alistStrmConfig := range config.AlistStrm.List {
 			for _, prefix := range alistStrmConfig.PrefixList {
 				if strings.HasPrefix(strmFilePath, prefix) {
-					logging.Debug(strmFilePath + " 成功匹配路径：" + prefix + "，Strm 类型：" + string(constants.AlistStrm) + "，AlistServer 地址：" + alistStrmConfig.ADDR)
+					logging.Debugf("%s 成功匹配路径：%s，Strm 类型：%s，AlistServer 地址：%s", strmFilePath, prefix, constants.AlistStrm, alistStrmConfig.ADDR)
 					return constants.AlistStrm, alistStrmConfig.ADDR
 				}
 			}
 		}
 	}
-	logging.Debug(strmFilePath + " 未匹配任何路径，Strm 类型：" + string(constants.UnknownStrm))
+	logging.Debugf("%s 未匹配任何路径，Strm 类型：%s", strmFilePath, constants.UnknownStrm)
 	return constants.UnknownStrm, nil
 }
 

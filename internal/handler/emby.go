@@ -140,7 +140,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 					}
 					directStreamURL := fmt.Sprintf("/videos/%s/stream?MediaSourceId=%s&Static=true&%s", *mediasource.ItemID, *mediasource.ID, apikeypair)
 					playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
-					logging.Info(*mediasource.Name, "强制禁止转码，直链播放链接为:", directStreamURL)
+					logging.Infof("%s 强制禁止转码，直链播放链接为：%s", *mediasource.Name, directStreamURL)
 				}
 			}
 
@@ -161,9 +161,9 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 				playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
 				container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 				playbackInfoResponse.MediaSources[index].Container = &container
-				logging.Info(*mediasource.Name, "强制禁止转码，直链播放链接为:", directStreamURL, "，容器为: %s", container)
+				logging.Infof("%s 强制禁止转码，直链播放链接为：%s，容器为：%s", *mediasource.Name, directStreamURL, container)
 			} else {
-				logging.Info(*mediasource.Name, "保持原有转码设置")
+				logging.Infof("%s 保持原有转码设置", *mediasource.Name)
 			}
 
 			if playbackInfoResponse.MediaSources[index].Size == nil {
@@ -178,7 +178,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 					continue
 				}
 				playbackInfoResponse.MediaSources[index].Size = &fsGetData.Size
-				logging.Info(*mediasource.Name, "设置文件大小为:", fsGetData.Size)
+				logging.Infof("%s 设置文件大小为：%d", *mediasource.Name, fsGetData.Size)
 			}
 		}
 	}
@@ -207,7 +207,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	matches := constants.EmbyRegexp.Others.VideoRedirectReg.FindStringSubmatch(orginalPath)
 	if len(matches) == 2 {
 		redirectPath := fmt.Sprintf("/videos/%s/stream", matches[0])
-		logging.Debug(orginalPath + " 重定向至：" + redirectPath)
+		logging.Debugf("%s 重定向至：%s", orginalPath, redirectPath)
 		ctx.Redirect(http.StatusFound, redirectPath)
 		return
 	}
@@ -216,7 +216,7 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 	// EmbyServer >= 4.9 ====> mediaSourceID = mediasource_31
 	mediaSourceID := ctx.Query("mediasourceid")
 
-	logging.Debug("请求 ItemsServiceQueryItem：", mediaSourceID)
+	logging.Debugf("请求 ItemsServiceQueryItem：%s", mediaSourceID)
 	itemResponse, err := embyServerHandler.server.ItemsServiceQueryItem(strings.Replace(mediaSourceID, "mediasource_", "", 1), 1, "Path,MediaSources") // 查询 item 需要去除前缀仅保留数字部分
 	if err != nil {
 		logging.Warning("请求 ItemsServiceQueryItem 失败：", err)

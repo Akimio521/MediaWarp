@@ -135,7 +135,7 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 				playbackInfoResponse.MediaSources[index].TranscodingContainer = nil
 				directStreamURL := fmt.Sprintf("/Videos/%s/stream?MediaSourceId=%s&Static=true", *mediasource.ID, *mediasource.ID)
 				if mediasource.DirectStreamURL != nil {
-					logging.Debugf("%s 原直链播放链接: %s", *mediasource.Name, *mediasource.DirectStreamURL)
+					logging.Debugf("%s 原直链播放链接： %s", *mediasource.Name, *mediasource.DirectStreamURL)
 					apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
 					if err != nil {
 						logging.Warning("解析API键值对失败：", err)
@@ -146,9 +146,9 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 				playbackInfoResponse.MediaSources[index].DirectStreamURL = &directStreamURL
 				container := strings.TrimPrefix(path.Ext(*mediasource.Path), ".")
 				playbackInfoResponse.MediaSources[index].Container = &container
-				logging.Info(*mediasource.Name, " 强制禁止转码，直链播放链接为: ", directStreamURL, "，容器为: ", container)
+				logging.Infof("%s 强制禁止转码，直链播放链接为：%s，容器为： %s", *mediasource.Name, directStreamURL, container)
 			} else {
-				logging.Info(*mediasource.Name, " 保持原有转码设置")
+				logging.Infof("%s 保持原有转码设置", *mediasource.Name)
 			}
 
 			if playbackInfoResponse.MediaSources[index].Size == nil {
@@ -163,7 +163,7 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 					continue
 				}
 				playbackInfoResponse.MediaSources[index].Size = &fsGetData.Size
-				logging.Info(*mediasource.Name, "设置文件大小为:", fsGetData.Size)
+				logging.Infof("%s 设置文件大小为：%d", *mediasource.Name, fsGetData.Size)
 			}
 		}
 	}
@@ -188,7 +188,7 @@ func (jellyfinHandler *JellyfinHandler) VideosHandler(ctx *gin.Context) {
 	}
 
 	mediaSourceID := ctx.Query("mediasourceid")
-	logging.Debug("请求 ItemsServiceQueryItem：", mediaSourceID)
+	logging.Debugf("请求 ItemsServiceQueryItem：%s", mediaSourceID)
 	itemResponse, err := jellyfinHandler.server.ItemsServiceQueryItem(mediaSourceID, 1, "Path,MediaSources") // 查询 item 需要去除前缀仅保留数字部分
 	if err != nil {
 		logging.Warning("请求 ItemsServiceQueryItem 失败：", err)
@@ -199,7 +199,7 @@ func (jellyfinHandler *JellyfinHandler) VideosHandler(ctx *gin.Context) {
 	item := itemResponse.Items[0]
 
 	if !strings.HasSuffix(strings.ToLower(*item.Path), ".strm") { // 不是 Strm 文件
-		logging.Debug("播放本地视频：" + *item.Path + "，不进行处理")
+		logging.Debugf("播放本地视频：%s，不进行处理", *item.Path)
 		jellyfinHandler.proxy.ServeHTTP(ctx.Writer, ctx.Request)
 		return
 	}
@@ -210,7 +210,7 @@ func (jellyfinHandler *JellyfinHandler) VideosHandler(ctx *gin.Context) {
 			switch strmFileType {
 			case constants.HTTPStrm:
 				if *mediasource.Protocol == jellyfin.HTTP {
-					logging.Info("HTTPStrm 重定向至：", *mediasource.Path)
+					logging.Infof("HTTPStrm 重定向至：%s", *mediasource.Path)
 					ctx.Redirect(http.StatusFound, *mediasource.Path)
 				}
 				return
@@ -235,7 +235,7 @@ func (jellyfinHandler *JellyfinHandler) VideosHandler(ctx *gin.Context) {
 						redirectURL += "?sign=" + fsGetData.Sign
 					}
 				}
-				logging.Info("AlistStrm 重定向至：", redirectURL)
+				logging.Infof("AlistStrm 重定向至：%s", redirectURL)
 				ctx.Redirect(http.StatusFound, redirectURL)
 				return
 			case constants.UnknownStrm:
