@@ -68,6 +68,13 @@ body:
       description: 上游媒体服务器版本（如果使用 docker 最好可以提供详细标签信息，例如`linuxserver/emby:4.9.0-beta`）
     validations:
       required: true
+  - type: input
+    id: client-version
+    attributes:
+      label: 客户端版本
+      description: 使用的客户端版本及版本号（Fileball/238 CFNetwork/1410.0.3 Darwin/22.6.0、Infuse-Direct/7.8、Emby/3.2.32-17.41 (Linux;Android 14) ExoPlayerLib/2.13.2）
+    validations:
+      required: true
   - type: dropdown
     id: type
     attributes:
