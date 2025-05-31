@@ -152,6 +152,10 @@ var (
 
 // 获取URL的最终目标地址（自动跟踪重定向）
 func getFinalURL(rawURL string) (string, error) {
+	startTime := time.Now()
+	defer func() {
+		logging.Debugf("获取 %s 最终URL耗时：%s", rawURL, time.Since(startTime))
+	}()
 
 	parsedURL, err := url.Parse(rawURL) // 验证并解析输入URL
 	if err != nil {
