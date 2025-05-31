@@ -151,7 +151,7 @@ var (
 )
 
 // 获取URL的最终目标地址（自动跟踪重定向）
-func getFinalURL(rawURL string) (string, error) {
+func getFinalURL(rawURL string, ua string) (string, error) {
 	startTime := time.Now()
 	defer func() {
 		logging.Debugf("获取 %s 最终URL耗时：%s", rawURL, time.Since(startTime))
@@ -187,8 +187,13 @@ func getFinalURL(rawURL string) (string, error) {
 		visited[currentURL] = struct{}{}
 		redirectChain = append(redirectChain, currentURL)
 
-		// 创建HEAD请求（更高效，只获取头部信息）
-		resp, err := client.Head(currentURL)
+		req, err := http.NewRequest(http.MethodHead, currentURL, nil) // 创建 HEAD 请求（更高效，只获取头部信息）
+		if err != nil {
+			return "", fmt.Errorf("创建请求失败: %w", err)
+		}
+		req.Header.Set("User-Agent", ua) // 设置 User-Agent 头部
+
+		resp, err := client.Do(req)
 		if err != nil {
 			return "", fmt.Errorf("发送 HTTP 请求失败：%w", err)
 		}

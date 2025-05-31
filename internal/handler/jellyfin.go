@@ -213,7 +213,7 @@ func (jellyfinHandler *JellyfinHandler) VideosHandler(ctx *gin.Context) {
 					redirectURL := *mediasource.Path
 					if config.HTTPStrm.FinalURL {
 						logging.Debug("HTTPStrm 启用获取最终 URL，开始尝试获取最终 URL")
-						if finalURL, err := getFinalURL(redirectURL); err != nil {
+						if finalURL, err := getFinalURL(redirectURL, ctx.Request.UserAgent()); err != nil {
 							logging.Warning("获取最终 URL 失败，使用原始 URL：", err)
 						} else {
 							redirectURL = finalURL
