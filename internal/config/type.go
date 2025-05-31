@@ -56,6 +56,7 @@ type ClientFilterSetting struct {
 type HTTPStrmSetting struct {
 	Enable     bool
 	TransCode  bool // false->强制关闭转码 true->保持原有转码设置
+	FinalURL   bool // 对 URL 进行重定向判断，找到非重定向地址再重定向给客户端，减少客户端重定向次数
 	PrefixList []string
 }
 

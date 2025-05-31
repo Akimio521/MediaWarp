@@ -6,12 +6,15 @@ import (
 	"MediaWarp/internal/logging"
 	"bytes"
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/andybalholm/brotli"
 	"github.com/gin-gonic/gin"
@@ -134,4 +137,75 @@ func updateBody(rw *http.Response, content []byte) error {
 	rw.Header.Set("Content-Length", strconv.Itoa(compressed.Len())) // 更新响应头
 
 	return nil
+}
+
+const (
+	MaxRedirectAttempts = 10               // 最大重定向次数限制
+	RedirectTimeout     = 10 * time.Second // 最大超时时间
+
+)
+
+var (
+	ErrInvalidLocationHeader = errors.New("重定向 Location 头无效")
+	ErrMaxRedirectsExceeded  = fmt.Errorf("超过最大重定向次数限制（%d）", MaxRedirectAttempts)
+)
+
+// 获取URL的最终目标地址（自动跟踪重定向）
+func getFinalURL(rawURL string) (string, error) {
+
+	parsedURL, err := url.Parse(rawURL) // 验证并解析输入URL
+	if err != nil {
+		return "", fmt.Errorf("非法 URL： %w", err)
+	}
+	if parsedURL.Scheme == "" {
+		return "", fmt.Errorf("URL 缺少协议头： %s", parsedURL)
+	}
+
+	// 创建自定义HTTP客户端配置
+	client := &http.Client{
+		Timeout: RedirectTimeout,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			// 禁止自动重定向，以便手动处理
+			return http.ErrUseLastResponse
+		},
+	}
+
+	currentURL := parsedURL.String()
+	visited := make(map[string]struct{}, MaxRedirectAttempts)
+	redirectChain := make([]string, 0, MaxRedirectAttempts+1)
+
+	// 跟踪重定向链
+	for i := 0; i <= MaxRedirectAttempts; i++ {
+		// 检测循环重定向
+		if _, exists := visited[currentURL]; exists {
+			return "", fmt.Errorf("检测到循环重定向，重定向链: %s", strings.Join(redirectChain, " -> "))
+		}
+		visited[currentURL] = struct{}{}
+		redirectChain = append(redirectChain, currentURL)
+
+		// 创建HEAD请求（更高效，只获取头部信息）
+		resp, err := client.Head(currentURL)
+		if err != nil {
+			return "", fmt.Errorf("发送 HTTP 请求失败：%w", err)
+		}
+		defer resp.Body.Close()
+
+		// 检查是否需要重定向 (3xx 状态码)
+		if resp.StatusCode >= http.StatusMultipleChoices && resp.StatusCode < http.StatusBadRequest {
+			location, err := resp.Location()
+			if err != nil {
+				return "", ErrInvalidLocationHeader
+			}
+
+			// 处理相对路径重定向
+			currentURL = location.String()
+			continue
+		}
+
+		// 返回最终的非重定向URL
+		logging.Debug("重定向链：", strings.Join(redirectChain, " -> "))
+		return resp.Request.URL.String(), nil
+	}
+
+	return "", ErrMaxRedirectsExceeded
 }
