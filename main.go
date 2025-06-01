@@ -43,6 +43,8 @@ func main() {
 		return
 	}
 
+	gin.SetMode(gin.ReleaseMode)
+
 	signChan := make(chan os.Signal, 1)
 	errChan := make(chan error, 1)
 	signal.Notify(signChan, syscall.SIGINT, syscall.SIGTERM)
@@ -65,8 +67,6 @@ func main() {
 	if isDebug {
 		logging.SetLevel(logrus.DebugLevel)
 		logging.Warning("已启用调试模式")
-	} else {
-		gin.SetMode(gin.ReleaseMode)
 	}
 
 	logging.Info("MediaWarp 监听端口：", config.Port)
