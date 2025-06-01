@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	accessLogger  *logrus.Logger // 访问日志
-	serviceLogger *logrus.Logger // 服务日志
+	accessLogger  = logrus.New() // 访问日志
+	serviceLogger = logrus.New() // 服务日志
 )
 
 func Init() {
@@ -17,8 +17,6 @@ func Init() {
 		aLS = &accessLoggerSetting{}  // 访问日志logrus相关设置
 		sLS = &serviceLoggerSetting{} // 服务日志logrus相关设置
 	)
-	accessLogger = logrus.New()
-	serviceLogger = logrus.New()
 
 	serviceLogger.SetReportCaller(false) // 关闭报告调用方
 
