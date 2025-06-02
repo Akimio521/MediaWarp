@@ -72,3 +72,9 @@
   - 添加 Jellyfin 支持
   - 添加 crx 美化功能（支持 Emby 和 Jellyfin）
   - 调整某些常量命名，更符合 go-lang 命名
+- 2025.6.2: v0.1.1
+  - 更新上游依赖
+  - 提高对 EmbyServer beta 版本的兼容性
+  - HTTPStrm 添加获取最终 URL 获取功能，减少客户端重定向次数
+  - 提高对 Afusekt 客户端的兼容性 [#37](https://github.com/Akimio521/MediaWarp/issues/37)
+  - 优化 responseModifyCreater 函数，可以捕捉内层函数的 panic 信息
