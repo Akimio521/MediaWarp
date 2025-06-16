@@ -5,7 +5,6 @@ import (
 	"MediaWarp/utils"
 	"encoding/json"
 	"io"
-	"net/http"
 	"net/url"
 	"strconv"
 )
@@ -45,7 +44,7 @@ func (jellyfin *Jellyfin) ItemsServiceQueryItem(ids string, limit int, fields st
 	params.Add("Fields", fields)
 	params.Add("api_key", jellyfin.GetAPIKey())
 
-	resp, err := http.Get(jellyfin.GetEndpoint() + "/Items?" + params.Encode())
+	resp, err := utils.GetHTTPClient().Get(jellyfin.GetEndpoint() + "/Items?" + params.Encode())
 	if err != nil {
 		return nil, err
 	}

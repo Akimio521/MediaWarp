@@ -5,7 +5,6 @@ import (
 	"MediaWarp/utils"
 	"encoding/json"
 	"io"
-	"net/http"
 	"net/url"
 	"strconv"
 )
@@ -43,10 +42,10 @@ func (embyServer *EmbyServer) ItemsServiceQueryItem(ids string, limit int, field
 	params.Add("Ids", ids)
 	params.Add("Limit", strconv.Itoa(limit))
 	params.Add("Fields", fields)
-	params.Add("Recursive","true")
+	params.Add("Recursive", "true")
 	params.Add("api_key", embyServer.GetAPIKey())
 	api := embyServer.GetEndpoint() + "/Items?" + params.Encode()
-	resp, err := http.Get(api)
+	resp, err := utils.GetHTTPClient().Get(api)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +65,7 @@ func (embyServer *EmbyServer) ItemsServiceQueryItem(ids string, limit int, field
 
 // 获取index.html内容 API：/web/index.html
 func (embyServer *EmbyServer) GetIndexHtml() ([]byte, error) {
-	resp, err := http.Get(embyServer.GetEndpoint() + "/web/index.html")
+	resp, err := utils.GetHTTPClient().Get(embyServer.GetEndpoint() + "/web/index.html")
 	if err != nil {
 		return nil, err
 	}

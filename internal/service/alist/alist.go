@@ -77,7 +77,7 @@ func (alistServer *AlistServer) authLogin() (string, error) {
 		authLoginResponse AlistResponse[AuthLoginData]
 	)
 
-	client := &http.Client{}
+	client := utils.GetHTTPClient()
 	req, err := http.NewRequest(method, url, payload)
 	if err != nil {
 		err = fmt.Errorf("创建 %s 请求失败: %w", funcInfo, err)
@@ -128,7 +128,7 @@ func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
 		return fsGetDataResponse.Data, nil
 	}
 
-	client := &http.Client{}
+	client := utils.GetHTTPClient()
 	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
