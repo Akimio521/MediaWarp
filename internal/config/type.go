@@ -37,6 +37,7 @@ type WebSetting struct {
 	Custom            bool   // 启用用户自定义静态资源
 	Index             bool   // 是否从 custom 目录读取 index.html 文件作为首页
 	Head              string // 添加到 index.html 的 HEAD 中
+	Robots            string // 自定义 robots.txt，若为空表示不修改
 	ExternalPlayerUrl bool   // 是否开启外置播放器
 	Crx               bool   // crx 美化
 	ActorPlus         bool   // 过滤没有头像的演员和制作人员

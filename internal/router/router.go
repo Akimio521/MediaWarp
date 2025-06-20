@@ -38,6 +38,14 @@ func InitRouter() *gin.Engine {
 			if config.Web.Custom { // 用户自定义静态资源目录
 				mediawarpRouter.Static("/custom", config.CostomDir())
 			}
+			if config.Web.Robots != "" { // 自定义 robots.txt
+				mediawarpRouter.GET(
+					"/robots.txt",
+					func(ctx *gin.Context) {
+						ctx.String(http.StatusOK, config.Web.Robots)
+					},
+				)
+			}
 		}
 	}
 
