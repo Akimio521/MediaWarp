@@ -1,7 +1,6 @@
 package config
 
 import (
-	"MediaWarp/constants"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -120,27 +119,25 @@ func loadConfig(path string) error {
 	}
 
 	Port = viper.GetInt("Port")
-	MediaServer.Type = constants.MediaServerType(viper.GetString("MediaServer.Type"))
-	MediaServer.ADDR = viper.GetString("MediaServer.ADDR")
-	MediaServer.AUTH = viper.GetString("MediaServer.AUTH")
+	viper.UnmarshalKey("MediaServer", &MediaServer)
 
 	if err := viper.UnmarshalKey("Logger", &Logger); err != nil {
-		return fmt.Errorf("LoggerSetting 解析失败, %v", err)
+		return fmt.Errorf("LoggerSetting 解析失败：%v", err)
 	}
 	if err := viper.UnmarshalKey("Web", &Web); err != nil {
-		return fmt.Errorf("WebSetting  解析失败, %v", err)
+		return fmt.Errorf("WebSetting 解析失败：%v", err)
 	}
 	if err := viper.UnmarshalKey("ClientFilter", &ClientFilter); err != nil {
-		return fmt.Errorf("ClientFilterSetting  解析失败, %v", err)
+		return fmt.Errorf("ClientFilterSetting 解析失败：%v", err)
 	}
 	if err := viper.UnmarshalKey("HTTPStrm", &HTTPStrm); err != nil {
-		return fmt.Errorf("HTTPStrmSetting  解析失败, %v", err)
+		return fmt.Errorf("HTTPStrmSetting 解析失败：%v", err)
 	}
 	if err := viper.UnmarshalKey("AlistStrm", &AlistStrm); err != nil {
-		return fmt.Errorf("AlistStrmSetting  解析失败, %v", err)
+		return fmt.Errorf("AlistStrmSetting 解析失败：%v", err)
 	}
 	if err := viper.UnmarshalKey("Subtitle", &Subtitle); err != nil {
-		return fmt.Errorf("SubtitleSetting  解析失败, %v", err)
+		return fmt.Errorf("SubtitleSetting 解析失败：%v", err)
 	}
 	return nil
 }
