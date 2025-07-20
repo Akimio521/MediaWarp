@@ -39,7 +39,7 @@ func InitRouter() *gin.Engine {
 				mediawarpRouter.Static("/custom", config.CostomDir())
 			}
 			if config.Web.Robots != "" { // 自定义 robots.txt
-				mediawarpRouter.GET(
+				ginR.GET(
 					"/robots.txt",
 					func(ctx *gin.Context) {
 						ctx.String(http.StatusOK, config.Web.Robots)
