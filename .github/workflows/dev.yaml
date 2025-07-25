@@ -45,10 +45,10 @@ jobs:
 
       # - name: Push Dev Docker Image
       #   run: |
-      #     docker images akimio/mediawarp
-      #     VERSION=$(docker images akimio/mediawarp | grep -oP 'akimio/mediawarp\s+\K[^\s]+(?=-amd64)')
+      #     docker images dyimo/mediawarp
+      #     VERSION=$(docker images dyimo/mediawarp | grep -oP 'dyimo/mediawarp\s+\K[^\s]+(?=-amd64)')
       #     echo $VERSION
-      #     IMAGE_NAME="akimio/mediawarp"
+      #     IMAGE_NAME="dyimo/mediawarp"
       #     docker manifest create ${IMAGE_NAME}:${VERSION} \
       #       ${IMAGE_NAME}:${VERSION}-amd64 \
       #       ${IMAGE_NAME}:${VERSION}-arm64 \

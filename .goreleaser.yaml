@@ -55,7 +55,7 @@ dockers:
     goarch: amd64
     goamd64: v1
     image_templates:
-      - "akimio/mediawarp:{{ .Version }}-amd64"
+      - "dyimo/mediawarp:{{ .Version }}-amd64"
 
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
@@ -69,7 +69,7 @@ dockers:
     goos: linux
     goarch: arm64
     image_templates:
-      - "akimio/mediawarp:{{ .Version }}-arm64"
+      - "dyimo/mediawarp:{{ .Version }}-arm64"
 
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
@@ -84,7 +84,7 @@ dockers:
     goarch: arm
     goarm: "6"
     image_templates:
-      - "akimio/mediawarp:{{ .Version }}-armv6"
+      - "dyimo/mediawarp:{{ .Version }}-armv6"
 
   - dockerfile: docker/Dockerfile-goreleaser
     use: buildx
@@ -99,21 +99,21 @@ dockers:
     goarch: arm
     goarm: "7"
     image_templates:
-      - "akimio/mediawarp:{{ .Version }}-armv7"
+      - "dyimo/mediawarp:{{ .Version }}-armv7"
 
 docker_manifests:
-  - name_template: "akimio/mediawarp:latest"
+  - name_template: "dyimo/mediawarp:latest"
     image_templates:
-      - "akimio/mediawarp:{{ .Version }}-amd64"
-      - "akimio/mediawarp:{{ .Version }}-arm64"
-      - "akimio/mediawarp:{{ .Version }}-armv6"
-      - "akimio/mediawarp:{{ .Version }}-armv7"
-  - name_template: "akimio/mediawarp:{{ .Version }}"
+      - "dyimo/mediawarp:{{ .Version }}-amd64"
+      - "dyimo/mediawarp:{{ .Version }}-arm64"
+      - "dyimo/mediawarp:{{ .Version }}-armv6"
+      - "dyimo/mediawarp:{{ .Version }}-armv7"
+  - name_template: "dyimo/mediawarp:{{ .Version }}"
     image_templates:
-      - "akimio/mediawarp:{{ .Version }}-amd64"
-      - "akimio/mediawarp:{{ .Version }}-arm64"
-      - "akimio/mediawarp:{{ .Version }}-armv6"
-      - "akimio/mediawarp:{{ .Version }}-armv7"
+      - "dyimo/mediawarp:{{ .Version }}-amd64"
+      - "dyimo/mediawarp:{{ .Version }}-arm64"
+      - "dyimo/mediawarp:{{ .Version }}-armv6"
+      - "dyimo/mediawarp:{{ .Version }}-armv7"
 
 archives:
   - format: tar.gz
