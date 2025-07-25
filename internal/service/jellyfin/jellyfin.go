@@ -2,11 +2,15 @@ package jellyfin
 
 import (
 	"MediaWarp/constants"
+	"MediaWarp/internal/logging"
+	"MediaWarp/internal/middleware"
 	"MediaWarp/utils"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 type Jellyfin struct {
@@ -35,6 +39,18 @@ func (jellyfin *Jellyfin) GetAPIKey() string {
 // ItemsService
 // /Items
 func (jellyfin *Jellyfin) ItemsServiceQueryItem(ids string, limit int, fields string) (*Response, error) {
+
+	cacheKey := fmt.Sprintf("ItemsServiceQueryItem_%s_%d_%s", ids, limit, fields)
+	cache := middleware.GetCache()
+	cacheValue, ret := cache.Get(cacheKey)
+	if ret {
+		response, ok := cacheValue.(*Response)
+		if ok {
+			logging.Infof("从缓存读取：%s", cacheKey)
+			return response, nil
+		}
+	}
+
 	var (
 		params       = url.Values{}
 		itemResponse = &Response{}
@@ -58,6 +74,8 @@ func (jellyfin *Jellyfin) ItemsServiceQueryItem(ids string, limit int, fields st
 	if err = json.Unmarshal(body, itemResponse); err != nil {
 		return nil, err
 	}
+	cache.Set(cacheKey, itemResponse, 30*time.Second)
+	logging.Infof("添加缓存：%s", cacheKey)
 	return itemResponse, nil
 }
 

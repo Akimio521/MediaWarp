@@ -4,6 +4,7 @@ import (
 	"MediaWarp/constants"
 	"MediaWarp/internal/config"
 	"MediaWarp/internal/logging"
+	"MediaWarp/internal/middleware"
 	"bytes"
 	"compress/gzip"
 	"errors"
@@ -172,6 +173,17 @@ func getFinalURL(rawURL string, ua string) (string, error) {
 		logging.Debugf("获取 %s 最终URL耗时：%s", rawURL, time.Since(startTime))
 	}()
 
+	cache := middleware.GetCache()
+	cacheKey := "getFinalURL:" + rawURL
+	cacheUrl, b := cache.Get(cacheKey)
+	if b {
+		urlTemp, ok := cacheUrl.(string)
+		if ok {
+			logging.Infof("从缓存读取: %s, url: %s", cacheKey, urlTemp)
+			return urlTemp, nil
+		}
+	}
+
 	parsedURL, err := url.Parse(rawURL) // 验证并解析输入URL
 	if err != nil {
 		return "", fmt.Errorf("非法 URL： %w", err)
@@ -232,6 +244,8 @@ func getFinalURL(rawURL string, ua string) (string, error) {
 
 		// 返回最终的非重定向URL
 		logging.Debug("重定向链：", strings.Join(redirectChain, " -> "))
+		cache.Set(cacheKey, resp.Request.URL.String(), 10*time.Second)
+		logging.Infof("设置缓存： %s -> %s", cacheKey, resp.Request.URL.String())
 		return resp.Request.URL.String(), nil
 	}
 
