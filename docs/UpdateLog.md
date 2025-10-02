@@ -76,5 +76,14 @@
   - 更新上游依赖
   - 提高对 EmbyServer beta 版本的兼容性
   - HTTPStrm 添加获取最终 URL 获取功能，减少客户端重定向次数
-  - 提高对 Afusekt 客户端的兼容性 [#37](https://github.com/Akimio521/MediaWarp/issues/37)
+  - 提高对 Afusekt 客户端的兼容性 [#37](https://github.com/AkimioJR/MediaWarp/issues/37)
   - 优化 responseModifyCreater 函数，可以捕捉内层函数的 panic 信息
+- 2025.7.10: v0.1.2
+  - 使用全局优化的 HTTP 客户端替换局部客户端实例，统一 HTTP 出口
+  - 添加自定义 robots.txt 支持
+  - 修正 Jellyfin 播放信息正则表达式，确保匹配正确的路径 [#47](https://github.com/AkimioJR/MediaWarp/issues/47)
+- 2025.10.2: v0.1.3
+  - 将 MediaServerType 从字符串类型更改为 uint8
+  - 修复 robots.txt 路由错误问题
+  - 优化初始化过程，统一日志输出，移除冗余代码
+  - 使用当前目录作为项目根目录
