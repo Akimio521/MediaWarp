@@ -1,11 +1,11 @@
 [license]: /LICENSE
-[license-badge]: https://img.shields.io/github/license/Akimio521/MediaWarp?style=flat-square&a=1
-[prs]: https://github.com/Akimio521/MediaWarp
+[license-badge]: https://img.shields.io/github/license/AkimioJR/MediaWarp?style=flat-square&a=1
+[prs]: https://github.com/AkimioJR/MediaWarp
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
-[issues]: https://github.com/Akimio521/MediaWarp/issues/new
+[issues]: https://github.com/AkimioJR/MediaWarp/issues/new
 [issues-badge]: https://img.shields.io/badge/Issues-welcome-brightgreen.svg?style=flat-square
-[release]: https://github.com/Akimio521/MediaWarp/releases/latest
-[release-badge]: https://img.shields.io/github/v/release/Akimio521/MediaWarp?style=flat-square
+[release]: https://github.com/AkimioJR/MediaWarp/releases/latest
+[release-badge]: https://img.shields.io/github/v/release/AkimioJR/MediaWarp?style=flat-square
 [docker]: https://hub.docker.com/r/akimio/mediawarp
 [docker-badge]: https://img.shields.io/docker/pulls/akimio/mediawarp?color=%2348BB78&logo=docker&label=pulls
 
@@ -33,7 +33,7 @@ MediaWarp 是**前置于 EmbyServer/Jellyfin 的反向代理服务器**，修改
 
 # 功能
 - Strm 文件可以实现 302 直链播放，流量不经过 EmbyServer/Jellyfin
-  - **推荐配合 [AutoFilm](https://github.com/Akimio521/AutoFilm) 使用**
+  - **推荐配合 [AutoFilm](https://github.com/AkimioJR/AutoFilm) 使用**
   - 已通过测试客户端（Web、iOS Emby、Infuse、Conflux、Fileball、Vidhub）
   - 支持 Strm：
     - HTTPStrm：Strm 文件内容是 HTTP 链接，浏览器访问链接可以直接下载到视频文件（**客户端需要可以访问到该链接，MediaWarp 不需要访问到该地址**）
@@ -103,6 +103,6 @@ MediaWarp 是**前置于 EmbyServer/Jellyfin 的反向代理服务器**，修改
 - [RiderLty/fontInAss](https://github.com/RiderLty/fontInAss)
 
 # Star History
-<a href="https://github.com/Akimio521/MediaWarp/stargazers">
-    <img width="500" alt="Star History Chart" src="https://api.star-history.com/svg?repos=Akimio521/MediaWarp&type=Date">
+<a href="https://github.com/AkimioJR/MediaWarp/stargazers">
+    <img width="500" alt="Star History Chart" src="https://api.star-history.com/svg?repos=AkimioJR/MediaWarp&type=Date">
 </a> 
