@@ -42,7 +42,7 @@ builds:
       - -X MediaWarp/internal/config.buildDate={{ .Date}}
 
 dockers:
-  - dockerfile: docker/Dockerfile-goreleaser
+  - dockerfile: docker/Dockerfile.goreleaser
     use: buildx
     skip_push: false
     build_flag_templates:
@@ -57,7 +57,7 @@ dockers:
     image_templates:
       - "akimio/mediawarp:{{ .Version }}-amd64"
 
-  - dockerfile: docker/Dockerfile-goreleaser
+  - dockerfile: docker/Dockerfile.goreleaser
     use: buildx
     skip_push: false
     build_flag_templates:
@@ -71,7 +71,7 @@ dockers:
     image_templates:
       - "akimio/mediawarp:{{ .Version }}-arm64"
 
-  - dockerfile: docker/Dockerfile-goreleaser
+  - dockerfile: docker/Dockerfile.goreleaser
     use: buildx
     skip_push: false
     build_flag_templates:
@@ -86,7 +86,7 @@ dockers:
     image_templates:
       - "akimio/mediawarp:{{ .Version }}-armv6"
 
-  - dockerfile: docker/Dockerfile-goreleaser
+  - dockerfile: docker/Dockerfile.goreleaser
     use: buildx
     skip_push: false
     build_flag_templates:
