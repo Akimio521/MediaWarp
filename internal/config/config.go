@@ -124,6 +124,16 @@ func loadConfig(path string) error {
 	if err := viper.UnmarshalKey("HTTPStrm", &HTTPStrm); err != nil {
 		return fmt.Errorf("HTTPStrmSetting 解析失败：%v", err)
 	}
+	if ttlStr := viper.GetString("HTTPStrm.CacheTTL"); ttlStr != "" {
+		duration, err := time.ParseDuration(ttlStr)
+		if err != nil {
+			return fmt.Errorf("HTTPStrm.CacheTTL 解析失败：%v", err)
+		}
+		HTTPStrm.CacheTTL = duration
+	}
+	if HTTPStrm.CacheTTL <= 0 {
+		HTTPStrm.CacheTTL = time.Minute
+	}
 	if err := viper.UnmarshalKey("AlistStrm", &AlistStrm); err != nil {
 		return fmt.Errorf("AlistStrmSetting 解析失败：%v", err)
 	}

@@ -238,6 +238,13 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 			switch strmFileType {
 			case constants.HTTPStrm:
 				if *mediasource.Protocol == emby.HTTP {
+					if config.HTTPStrm.CacheEnable {
+						if cachedURL, ok := httpStrmRedirectCache.Get(mediaSourceID); ok {
+							logging.Info("HTTPStrm 重定向至：", cachedURL)
+							ctx.Redirect(http.StatusFound, cachedURL)
+							return
+						}
+					}
 					redirectURL := *mediasource.Path
 					if config.HTTPStrm.FinalURL {
 						logging.Debug("HTTPStrm 启用获取最终 URL，开始尝试获取最终 URL")
@@ -248,6 +255,9 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 						}
 					} else {
 						logging.Debug("HTTPStrm 未启用获取最终 URL，直接使用原始 URL")
+					}
+					if config.HTTPStrm.CacheEnable && config.HTTPStrm.CacheTTL > 0 {
+						httpStrmRedirectCache.Set(mediaSourceID, redirectURL, config.HTTPStrm.CacheTTL)
 					}
 					logging.Info("HTTPStrm 重定向至：", redirectURL)
 					ctx.Redirect(http.StatusFound, redirectURL)
