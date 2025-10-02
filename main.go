@@ -27,6 +27,8 @@ var (
 )
 
 func init() {
+	gin.SetMode(gin.ReleaseMode)
+
 	flag.BoolVar(&showVersion, "version", false, "显示版本信息")
 	flag.BoolVar(&isDebug, "debug", false, "是否启用调试模式")
 	flag.StringVar(&configPath, "config", "", "指定配置文件路径")
@@ -43,30 +45,27 @@ func main() {
 		return
 	}
 
-	gin.SetMode(gin.ReleaseMode)
-
 	if isDebug {
 		logging.SetLevel(logrus.DebugLevel)
-		fmt.Println("已启用调试模式")
+		logging.Info("已启用调试模式")
 	}
 
 	signChan := make(chan os.Signal, 1)
 	errChan := make(chan error, 1)
 	signal.Notify(signChan, syscall.SIGINT, syscall.SIGTERM)
 	defer func() {
-		fmt.Println("MediaWarp 已退出")
+		logging.Info("MediaWarp 已退出")
 	}()
 
 	if err := config.Init(configPath); err != nil { // 初始化配置
-		fmt.Println("配置初始化失败：", err)
-		return
+		panic("配置初始化失败: " + err.Error())
 	}
+
 	logging.Init()                                                                                    // 初始化日志
 	logging.Infof("上游媒体服务器类型：%s，服务器地址：%s", config.MediaServer.Type.String(), config.MediaServer.ADDR) // 日志打印
 	service.InitAlistSerer()                                                                          // 初始化Alist服务器
 	if err := handler.Init(); err != nil {                                                            // 初始化媒体服务器处理器
-		logging.Error("媒体服务器处理器初始化失败：", err)
-		return
+		panic("媒体服务器处理器初始化失败: " + err.Error())
 	}
 
 	logging.Info("MediaWarp 监听端口：", config.Port)
