@@ -35,18 +35,9 @@ func Version() *VersionInfo {
 	return &version
 }
 
-// 二进制文件目录
-func RootDir() string {
-	executablePath, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	return filepath.Dir(executablePath)
-}
-
 // 配置文件目录
 func ConfigDir() string {
-	return filepath.Join(RootDir(), "config")
+	return "config"
 }
 
 // 配置文件路径
@@ -59,7 +50,7 @@ func ConfigPath() string {
 // 总日志目录
 // ./logs
 func LogDir() string {
-	return filepath.Join(RootDir(), "logs")
+	return "logs"
 }
 
 // 获取日志目录
@@ -84,7 +75,7 @@ func ServiceLogPath() string {
 //
 // 用户自定义静态文件存放地址
 func CostomDir() string {
-	return filepath.Join(RootDir(), "static")
+	return "custom"
 }
 
 // MediaWarp监听地址
