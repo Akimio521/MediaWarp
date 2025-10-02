@@ -14,9 +14,9 @@ Logger:                                     # 日志设定
     File: True                              # 是否将服务日志文件记录到文件中
 
 Web:                                        # Web 页面修改相关设置
-  Enable: True                              # 总开关
-  Custom: True                              # 是否加载自定义静态资源
-  Index: True                               # 是否从 custom 目录读取 index.html 文件 
+  Enable: False                             # 总开关
+  Custom: False                             # 是否加载自定义静态资源
+  Index: False                              # 是否从 custom 目录读取 index.html 文件 
   Head: |                                   # 是否添加自定义字段到 index.html 的头部中
     <script src="/MediaWarp/custom/emby-front-end-mod/actor-plus.js"></script>
     <script src="/MediaWarp/custom/emby-front-end-mod/emby-swiper.js"></script>
@@ -27,12 +27,13 @@ Web:                                        # Web 页面修改相关设置
   Robots: |                                 # 自定义 robots.txt，若为空表示不修改
     User-agent: *
     Disallow: /
-  Crx: True                                 # crx 美化（Emby：https://github.com/Nolovenodie/emby-crx；Jellyfin：https://github.com/newday-life/jellyfin-crx）
+    
+  Crx: False                                # crx 美化（Emby：https://github.com/Nolovenodie/emby-crx；Jellyfin：https://github.com/newday-life/jellyfin-crx）
   ActorPlus: True                           # 过滤没有头像的演员和制作人员
   FanartShow: False                         # 显示同人图（fanart 图）
-  ExternalPlayerUrl: True                   # 是否开启外置播放器（仅 Emby）
-  Danmaku: True                             # Web 弹幕（Emby：https://github.com/9channel/dd-danmaku；Jellyfin：https://github.com/Izumiko/jellyfin-danmaku）
-  VideoTogether: True                       # 共同观影，详情见 https://videotogether.github.io/
+  ExternalPlayerUrl: False                  # 是否开启外置播放器（仅 Emby）
+  Danmaku: False                            # Web 弹幕（Emby：https://github.com/9channel/dd-danmaku；Jellyfin：https://github.com/Izumiko/jellyfin-danmaku）
+  VideoTogether: False                      # 共同观影，详情见 https://videotogether.github.io/
 
 ClientFilter:                               # 客户端过滤器
   Enable: False                             # 是否启用客户端过滤器
