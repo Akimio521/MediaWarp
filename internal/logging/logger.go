@@ -12,17 +12,13 @@ var (
 	serviceLogger = logrus.New() // 服务日志
 )
 
+func init() {
+	accessLogger.SetFormatter(&LoggerAccessFormatter{})
+	serviceLogger.SetFormatter(&LoggerServiceFormatter{})
+}
+
 func Init() {
-	var (
-		aLS = &accessLoggerSetting{}  // 访问日志logrus相关设置
-		sLS = &serviceLoggerSetting{} // 服务日志logrus相关设置
-	)
-
 	serviceLogger.SetReportCaller(false) // 关闭报告调用方
-
-	// 设置样式
-	accessLogger.SetFormatter(aLS)
-	serviceLogger.SetFormatter(sLS)
 
 	if !config.Logger.AccessLogger.Console { // 访问日志不输出到终端
 		accessLogger.Out = io.Discard
@@ -33,13 +29,12 @@ func Init() {
 	}
 
 	if config.Logger.AccessLogger.File {
-		accessLogger.AddHook(aLS)
+		accessLogger.AddHook(NewLoggerFileHook(false))
 	}
 
 	if config.Logger.ServiceLogger.File {
-		serviceLogger.AddHook(sLS)
+		serviceLogger.AddHook(NewLoggerFileHook(true))
 	}
-
 }
 
 // 访问日志

@@ -2,19 +2,16 @@ package logging
 
 import (
 	"MediaWarp/constants"
-	"MediaWarp/internal/config"
-	"MediaWarp/utils"
 	"bytes"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 )
 
-type serviceLoggerSetting struct{}
+type LoggerServiceFormatter struct{}
 
-func (s *serviceLoggerSetting) Format(entry *logrus.Entry) ([]byte, error) {
+func (l *LoggerServiceFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// 根据日志级别设置颜色
 	var colorCode uint8
 	switch entry.Level {
@@ -51,28 +48,22 @@ func (s *serviceLoggerSetting) Format(entry *logrus.Entry) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-func (s *serviceLoggerSetting) Levels() []logrus.Level {
-	return []logrus.Level{logrus.ErrorLevel, logrus.WarnLevel}
-}
+var _ logrus.Formatter = (*LoggerServiceFormatter)(nil)
 
-// HOOK
-//
-// 将日志写入文件
-func (s *serviceLoggerSetting) Fire(entry *logrus.Entry) error {
-	if err := os.MkdirAll(config.LogDirWithDate(), os.ModePerm); err != nil {
-		return err
+type LoggerAccessFormatter struct{}
+
+// 实现Format方法
+func (l *LoggerAccessFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	var b *bytes.Buffer
+	if entry.Buffer == nil {
+		b = &bytes.Buffer{}
+	} else {
+		b = entry.Buffer
 	}
 
-	serviceLogFile, err := os.OpenFile(config.ServiceLogPath(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		return err
-	}
-	defer serviceLogFile.Close()
-
-	line, err := entry.String()
-	if err != nil {
-		return err
-	}
-	serviceLogFile.WriteString(utils.RemoveColorCodes(line))
-	return nil
+	fmt.Fprint(
+		b,
+		entry.Message+"\n",
+	)
+	return b.Bytes(), nil
 }
