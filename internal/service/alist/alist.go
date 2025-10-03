@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path"
 	"strings"
 	"sync"
 	"time"
@@ -27,6 +28,31 @@ type AlistServer struct {
 	token    alistToken
 	client   *http.Client
 	cache    *bigcache.BigCache
+}
+
+// 获得AlistServer实例
+func New(addr string, username string, password string, token *string) *AlistServer {
+	s := AlistServer{
+		endpoint: utils.GetEndpoint(addr),
+		username: username,
+		password: password,
+		client:   utils.GetHTTPClient(),
+	}
+	if token != nil {
+		s.token = alistToken{
+			value:    *token,
+			expireAt: time.Time{},
+		}
+	}
+	if config.Cache.Enable && config.Cache.AlistTTL > 0 {
+		cache, err := bigcache.NewBigCache(bigcache.DefaultConfig(config.Cache.AlistTTL))
+		if err == nil {
+			s.cache = cache
+		} else {
+			logging.Warning("创建 Alist API 缓存失败: ", err)
+		}
+	}
+	return &s
 }
 
 // 得到服务器入口
@@ -171,31 +197,6 @@ func (alistServer *AlistServer) FsGet(path string) (*FsGetData, error) {
 	return &data, nil
 }
 
-// 获得AlistServer实例
-func New(addr string, username string, password string, token *string) *AlistServer {
-	s := AlistServer{
-		endpoint: utils.GetEndpoint(addr),
-		username: username,
-		password: password,
-		client:   utils.GetHTTPClient(),
-	}
-	if token != nil {
-		s.token = alistToken{
-			value:    *token,
-			expireAt: time.Time{},
-		}
-	}
-	if config.Cache.Enable && config.Cache.AlistTTL > 0 {
-		cache, err := bigcache.NewBigCache(bigcache.DefaultConfig(config.Cache.AlistTTL))
-		if err == nil {
-			s.cache = cache
-		} else {
-			logging.Warning("创建 Alist API 缓存失败: ", err)
-		}
-	}
-	return &s
-}
-
 func (alistServer *AlistServer) Me() (*UserInfoData, error) {
 	var data UserInfoData
 	err := alistServer.doRequest(
@@ -210,4 +211,24 @@ func (alistServer *AlistServer) Me() (*UserInfoData, error) {
 		return nil, fmt.Errorf("获取用户信息失败: %w", err)
 	}
 	return &data, nil
+}
+
+// GetFileURL 获取文件的可访问 URL
+func (alistServer *AlistServer) GetFileURL(p string, isRawURL bool) (string, error) {
+	fileData, err := alistServer.FsGet(p)
+	if err != nil {
+		return "", fmt.Errorf("获取文件信息失败：%w", err)
+	}
+	if isRawURL {
+		return fileData.RawURL, nil
+	}
+	userInfo, err := alistServer.Me()
+	if err != nil {
+		return "", fmt.Errorf("获取用户当前信息失败：%w", err)
+	}
+	var sign string
+	if fileData.Sign != "" {
+		sign = "?sign=" + fileData.Sign
+	}
+	return alistServer.GetEndpoint() + path.Join(userInfo.BasePath, p) + sign, nil
 }
