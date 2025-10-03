@@ -13,10 +13,15 @@ logger:                                     # 日志设定
     console: true                           # 是否将服务日志文件输出到终端中
     file: true                              # 是否将服务日志文件记录到文件中
 
+# ttl 格式说明：
+# 有效的时间单位包括 "ns"（纳秒）、"us"（或 "µs"，微秒）、"ms"（毫秒）、"s"（秒）、"m"（分钟）、"h"（小时）
+# 支持的时间格式示例："300ms"、"-1.5h" 或 "2h45m" 等
+# 仅当值大于 0 时生效，否则表示禁用该项缓存
+# 如果你不清楚你在做什么，建议保持默认设置
 cache:                                        # 缓存相关设置
   enable: true                                # 是否启用 HTTPStrm 重定向内存缓存
-  http_strm_ttl: 1m                           # 重定向缓存有效期（time.ParseDuration 格式，仅大于等于 0 时生效）
-  alist_ttl: 10m                              # Alist API 缓存有效期（time.ParseDuration 格式，仅大于等于 0 时生效）
+  http_strm_ttl: 1m                           # 重定向缓存有效期
+  alist_ttl: 10m                              # Alist API 缓存有效期
 
 web:                                        # Web 页面修改相关设置
   enable: false                             # 总开关
