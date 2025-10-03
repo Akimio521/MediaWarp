@@ -1,6 +1,10 @@
 package constants
 
-import "fmt"
+import (
+	"fmt"
+
+	"gopkg.in/yaml.v3"
+)
 
 type MediaServerType uint8 // 媒体服务器类型
 
@@ -35,4 +39,22 @@ func (m MediaServerType) String() string {
 	default:
 		return "Unknown"
 	}
+}
+
+func (m *MediaServerType) UnmarshalYAML(value *yaml.Node) error {
+	var s string
+	if err := value.Decode(&s); err != nil {
+		return err
+	}
+	switch s {
+	case "Emby":
+		*m = EMBY
+	case "Jellyfin":
+		*m = JELLYFIN
+	case "Plex":
+		*m = PLEX
+	default:
+		return fmt.Errorf("invalid MediaServerType: %s", s)
+	}
+	return nil
 }
