@@ -5,7 +5,7 @@ server:                                     # 媒体服务器相关设置
   addr: http://localhost:8096               # 媒体服务器地址
   auth: 2eaxxxxxxxxxa8                      # 媒体服务器认证方式
 
-logger:                                     # 日志设定
+log:                                        # 日志设定
   access:                                   # 访问日志设定
     console: true                           # 是否将访问日志文件输出到终端中
     file: false                             # 是否将访问日志文件记录到文件中

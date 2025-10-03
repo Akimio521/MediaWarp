@@ -99,7 +99,7 @@ type SubtitleSetting struct {
 type Setting struct {
 	Port         uint16              `yaml:"port"`
 	MediaServer  MediaServerSetting  `yaml:"server"`
-	Logger       LoggerSetting       `yaml:"logger"`
+	Logger       LoggerSetting       `yaml:"log"`
 	Cache        CacheSetting        `yaml:"cache"`
 	Web          WebSetting          `yaml:"web"`
 	ClientFilter ClientFilterSetting `yaml:"client"`
