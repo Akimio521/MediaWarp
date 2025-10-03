@@ -230,5 +230,5 @@ func (alistServer *AlistServer) GetFileURL(p string, isRawURL bool) (string, err
 	if fileData.Sign != "" {
 		sign = "?sign=" + fileData.Sign
 	}
-	return alistServer.GetEndpoint() + path.Join(userInfo.BasePath, p) + sign, nil
+	return alistServer.GetEndpoint() + path.Join("/d", userInfo.BasePath, p) + sign, nil
 }
