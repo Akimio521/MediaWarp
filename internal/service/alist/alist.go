@@ -195,3 +195,19 @@ func New(addr string, username string, password string, token *string) *AlistSer
 	}
 	return &s
 }
+
+func (alistServer *AlistServer) Me() (*UserInfoData, error) {
+	var data UserInfoData
+	err := alistServer.doRequest(
+		http.MethodGet,
+		"/api/me",
+		nil,
+		&data,
+		true,
+		true,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("获取用户信息失败: %w", err)
+	}
+	return &data, nil
+}
