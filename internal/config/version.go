@@ -1,7 +1,6 @@
 package config
 
 import (
-	"MediaWarp/constants"
 	"time"
 )
 
@@ -15,6 +14,6 @@ func parseBuildTime(s string) string {
 	if t, err := time.Parse(time.RFC3339, s); err != nil {
 		return "Unkown"
 	} else {
-		return t.Local().Format(constants.FORMATE_TIME + " -07:00")
+		return t.Local().Format(time.DateTime + " -07:00")
 	}
 }

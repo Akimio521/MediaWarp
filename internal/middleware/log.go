@@ -30,7 +30,7 @@ func Logger() gin.HandlerFunc {
 
 		logging.AccessLog(
 			"【Access】 %s |\033[4%dm %d \033[0m| %-10s |\033[4%dm %-7s \033[0m| %s \"%s\"",
-			startTime.Format(constants.FORMATE_TIME),
+			startTime.Format(time.DateTime),
 			statusColor, statusCode,
 			wasteTime,
 			methodColor, method,

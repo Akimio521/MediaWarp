@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -35,7 +36,7 @@ func (l *LoggerServiceFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		b = entry.Buffer
 	}
 	// 时间格式化
-	formatTime := entry.Time.Format(constants.FORMATE_TIME)
+	formatTime := entry.Time.Format(time.DateTime)
 
 	fmt.Fprintf(
 		b,
