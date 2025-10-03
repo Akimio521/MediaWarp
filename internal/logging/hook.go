@@ -9,7 +9,7 @@ import (
 )
 
 type LoggerFileHook struct {
-	isService bool ``
+	isService bool
 }
 
 func NewLoggerFileHook(isService bool) *LoggerFileHook {
@@ -19,7 +19,7 @@ func NewLoggerFileHook(isService bool) *LoggerFileHook {
 }
 
 func (h *LoggerFileHook) Levels() []logrus.Level {
-	return []logrus.Level{logrus.ErrorLevel, logrus.WarnLevel}
+	return logrus.AllLevels
 }
 
 // HOOK
