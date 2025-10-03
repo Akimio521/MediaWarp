@@ -1,4 +1,4 @@
-Port: 9000                                  # MideWarp 监听端口
+﻿Port: 9000                                  # MideWarp 监听端口
 
 MediaServer:                                # 媒体服务器相关设置
   Type: Emby                                # 媒体服务器类型（可选选项：Emby、Jellyfin）
@@ -46,6 +46,8 @@ HTTPStrm:                                   # HTTPStrm 相关配置（Strm 文�
   Enable: True                              # 是否开启 HttpStrm 重定向
   TransCode: False                          # False：强制关闭转码 True：保持原有转码设置
   FinalURL: True                            # 对 URL 进行重定向判断，找到非重定向地址再重定向给客户端，减少客户端重定向次数（适用于 Strm 内容是局域网地址但是想要在公网之中播放）
+  CacheEnable: True                         # 是否启用 HTTPStrm 重定向内存缓存
+  CacheTTL: 1m                              # 重定向缓存有效期（time.ParseDuration 格式）
   PrefixList:                               # EmbyServer 中 Strm 文件的前缀（符合该前缀的 Strm 文件且被正确识别为 HTTP 协议都会路由到该规则下）
     - /media/strm/http
     - /media/strm/https

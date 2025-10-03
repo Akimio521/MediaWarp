@@ -1,6 +1,9 @@
 package config
 
-import "MediaWarp/constants"
+import (
+	"MediaWarp/constants"
+	"time"
+)
 
 // 程序版本信息
 type VersionInfo struct {
@@ -55,10 +58,12 @@ type ClientFilterSetting struct {
 
 // HTTPStrm播放设置
 type HTTPStrmSetting struct {
-	Enable     bool
-	TransCode  bool // false->强制关闭转码 true->保持原有转码设置
-	FinalURL   bool // 对 URL 进行重定向判断，找到非重定向地址再重定向给客户端，减少客户端重定向次数
-	PrefixList []string
+	Enable      bool
+	TransCode   bool // false->强制关闭转码 true->保持原有转码设置
+	FinalURL    bool // 对 URL 进行重定向判断，找到非重定向地址再重定向给客户端，减少客户端重定向次数
+	CacheEnable bool
+	CacheTTL    time.Duration
+	PrefixList  []string
 }
 
 // AlistStrm具体设置
