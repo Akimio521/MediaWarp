@@ -1,79 +1,79 @@
-﻿Port: 9000                                  # MideWarp 监听端口
+﻿port: 9000                                  # MideWarp 监听端口
 
-MediaServer:                                # 媒体服务器相关设置
-  Type: Emby                                # 媒体服务器类型（可选选项：Emby、Jellyfin）
-  ADDR: http://localhost:8096               # 媒体服务器地址
-  AUTH: 2eaxxxxxxxxxa8                      # 媒体服务器认证方式
+server:                                     # 媒体服务器相关设置
+  type: Emby                                # 媒体服务器类型（可选选项：Emby、Jellyfin）
+  addr: http://localhost:8096               # 媒体服务器地址
+  auth: 2eaxxxxxxxxxa8                      # 媒体服务器认证方式
 
-Logger:                                     # 日志设定
-  AccessLogger:                             # 访问日志设定
-    Console: True                           # 是否将访问日志文件输出到终端中
-    File: False                             # 是否将访问日志文件记录到文件中
-  ServiceLogger:                            # 服务日志设定
-    Console: True                           # 是否将服务日志文件输出到终端中
-    File: True                              # 是否将服务日志文件记录到文件中
+logger:                                     # 日志设定
+  access:                                   # 访问日志设定
+    console: true                           # 是否将访问日志文件输出到终端中
+    file: false                             # 是否将访问日志文件记录到文件中
+  service:                                  # 服务日志设定
+    console: true                           # 是否将服务日志文件输出到终端中
+    file: true                              # 是否将服务日志文件记录到文件中
 
-Cache:                                      # 缓存相关设置
-  Enable: True                              # 是否启用 HTTPStrm 重定向内存缓存
-  HTTPStrmTTL: 1m                           # 重定向缓存有效期（time.ParseDuration 格式，仅大于等于 0 时生效）
-  AlistTTL: 10m                             # Alist API 缓存有效期（time.ParseDuration 格式，仅大于等于 0 时生效）
+cache:                                        # 缓存相关设置
+  enable: true                                # 是否启用 HTTPStrm 重定向内存缓存
+  http_strm_ttl: 1m                           # 重定向缓存有效期（time.ParseDuration 格式，仅大于等于 0 时生效）
+  alist_ttl: 10m                              # Alist API 缓存有效期（time.ParseDuration 格式，仅大于等于 0 时生效）
 
-Web:                                        # Web 页面修改相关设置
-  Enable: False                             # 总开关
-  Custom: False                             # 是否加载自定义静态资源
-  Index: False                              # 是否从 custom 目录读取 index.html 文件 
-  Head: |                                   # 是否添加自定义字段到 index.html 的头部中
+web:                                        # Web 页面修改相关设置
+  enable: false                             # 总开关
+  custom: false                             # 是否加载自定义静态资源
+  index: false                              # 是否从 custom 目录读取 index.html 文件 
+  head: |                                   # 是否添加自定义字段到 index.html 的头部中
     <script src="/MediaWarp/custom/emby-front-end-mod/actor-plus.js"></script>
     <script src="/MediaWarp/custom/emby-front-end-mod/emby-swiper.js"></script>
     <script src="/MediaWarp/custom/emby-front-end-mod/emby-tab.js"></script>
     <script src="/MediaWarp/custom/emby-front-end-mod/fanart-show.js"></script>
     <script src="/MediaWarp/custom/emby-front-end-mod/playbackRate.js"></script>
 
-  Robots: |                                 # 自定义 robots.txt，若为空表示不修改
+  robots: |                                 # 自定义 robots.txt，若为空表示不修改
     User-agent: *
     Disallow: /
-    
-  Crx: False                                # crx 美化（Emby：https://github.com/Nolovenodie/emby-crx；Jellyfin：https://github.com/newday-life/jellyfin-crx）
-  ActorPlus: True                           # 过滤没有头像的演员和制作人员
-  FanartShow: False                         # 显示同人图（fanart 图）
-  ExternalPlayerUrl: False                  # 是否开启外置播放器（仅 Emby）
-  Danmaku: False                            # Web 弹幕（Emby：https://github.com/9channel/dd-danmaku；Jellyfin：https://github.com/Izumiko/jellyfin-danmaku）
-  VideoTogether: False                      # 共同观影，详情见 https://videotogether.github.io/
 
-ClientFilter:                               # 客户端过滤器
-  Enable: False                             # 是否启用客户端过滤器
-  Mode: BlackList # WhileList / BlackList   # 黑白名单模式
-  ClientList:                               # 名单列表
+  crx: false                                # crx 美化（Emby：https://github.com/Nolovenodie/emby-crx；Jellyfin：https://github.com/newday-life/jellyfin-crx）
+  actor_plus: true                          # 过滤没有头像的演员和制作人员
+  fanart_show: false                        # 显示同人图（fanart 图）
+  external_player_url: false                # 是否开启外置播放器（仅 Emby）
+  danmaku: false                            # Web 弹幕（Emby：https://github.com/9channel/dd-danmaku；Jellyfin：https://github.com/Izumiko/jellyfin-danmaku）
+  video_together: false                     # 共同观影，详情见 https://videotogether.github.io/
+
+client:                                     # 客户端过滤器
+  enable: false                             # 是否启用客户端过滤器
+  mode: BlackList # WhileList / BlackList   # 黑白名单模式
+  list:                                     # 名单列表
     - Fileball
     - Infuse
 
-HTTPStrm:                                   # HTTPStrm 相关配置（Strm 文件内容是 标准 HTTP URL）
-  Enable: True                              # 是否开启 HttpStrm 重定向
-  TransCode: False                          # False：强制关闭转码 True：保持原有转码设置
-  FinalURL: True                            # 对 URL 进行重定向判断，找到非重定向地址再重定向给客户端，减少客户端重定向次数（适用于 Strm 内容是局域网地址但是想要在公网之中播放）
-  PrefixList:                               # EmbyServer 中 Strm 文件的前缀（符合该前缀的 Strm 文件且被正确识别为 HTTP 协议都会路由到该规则下）
+http_strm:                                  # HTTPStrm 相关配置（Strm 文件内容是 标准 HTTP URL）
+  enable: true                              # 是否开启 HttpStrm 重定向
+  transCode: false                          # false：强制关闭转码 true：保持原有转码设置
+  final_url: true                           # 对 URL 进行重定向判断，找到非重定向地址再重定向给客户端，减少客户端重定向次数（适用于 Strm 内容是局域网地址但是想要在公网之中播放）
+  prefix_list:                              # EmbyServer 中 Strm 文件的前缀（符合该前缀的 Strm 文件且被正确识别为 HTTP 协议都会路由到该规则下）
     - /media/strm/http
     - /media/strm/https
 
-AlistStrm:                                  # AlistStrm 相关配置（Strm 文件内容是 Alist 上文件的路径，目前仅支持适配 Alist V3）
-  Enable: True                              # 是否启用 AlistStrm 重定向
-  TransCode: True                           # False：强制关闭转码 True：保持原有转码设置
-  RawURL: False                             # Fasle：响应 Alist 服务器的直链（要求客户端可以访问到 Alist） True：直接响应 Alist 上游的真实链接（alist api 中的 raw_url 属性）
-  List:                                     # Alist 服务关配置列表
-    - ADDR: http://192.168.1.100:5244       # Alist 服务器地址
-      Username: admin                       # Alist 服务器账号
-      Password: adminadmin                  # Alist 服务器密码
-      PrefixList:                           # EmbyServer 中 Strm 文件的前缀（符合该前缀的 Strm 文件都会路由到该规则下）
+alist_strm:                                 # AlistStrm 相关配置（Strm 文件内容是 Alist 上文件的路径，目前仅支持适配 Alist V3）
+  enable: true                              # 是否启用 AlistStrm 重定向
+  transCode: true                           # false：强制关闭转码 true：保持原有转码设置
+  raw_url: false                            # Fasle：响应 Alist 服务器的直链（要求客户端可以访问到 Alist） true：直接响应 Alist 上游的真实链接（alist api 中的 raw_url 属性）
+  list:                                     # Alist 服务关配置列表
+    - addr: http://192.168.1.100:5244       # Alist 服务器地址
+      username: admin                       # Alist 服务器账号
+      password: adminadmin                  # Alist 服务器密码
+      prefix_list:                          # EmbyServer 中 Strm 文件的前缀（符合该前缀的 Strm 文件都会路由到该规则下）
         - /media/strm/MyAlist               # 同一个 Alist 可以有多个前缀规则
         - /mnt/cd2/strm
-    - ADDR: https://xiaoya.com              # 可以填写多个配置
-      Token: xxxxxxx                        # Token 优先级高于 Username 和 Password
-      PrefixList: 
+    - addr: https://xiaoya.com              # 可以填写多个配置
+      token: xxxxxxx                        # Token 优先级高于 Username 和 Password
+      prefix_list: 
         - /media/strm
 
-Subtitle:                                   # 字体相关设置（仅 Emby 支持）
-  Enable: True                              # 启用
-  SRT2ASS: True                             # SRT 字幕转 ASS 字幕
-  ASSStyle:                                 # SRT 字幕转 ASS 字幕使用的样式
+subtitle:                                   # 字体相关设置（仅 Emby 支持）
+  enable: true                              # 启用
+  art2ass: true                             # SRT 字幕转 ASS 字幕
+  ass_style:                                # SRT 字幕转 ASS 字幕使用的样式
     - "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding"
     - "Style: Default,楷体,20,&H03FFFFFF,&H00FFFFFF,&H00000000,&H02000000,-1,0,0,0,100,100,0,0,1,1,0,2,10,10,10,1"
