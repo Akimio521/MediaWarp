@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -99,41 +99,25 @@ func Init(path string) error {
 
 // 读取并解析配置文件
 func loadConfig(path string) error {
-	if path != "" {
-		viper.SetConfigFile(path)
-	} else {
-		viper.AddConfigPath(ConfigDir())
-		viper.SetConfigName("config")
-	}
-
-	if err := viper.ReadInConfig(); err != nil {
+	var s Setting
+	data, err := os.ReadFile(path)
+	if err != nil {
 		return fmt.Errorf("读取配置文件失败: %v", err)
 	}
+	err = yaml.Unmarshal(data, &s)
+	if err != nil {
+		return fmt.Errorf("解析配置文件失败: %v", err)
+	}
 
-	Port = viper.GetInt("Port")
-	viper.UnmarshalKey("MediaServer", &MediaServer)
-
-	if err := viper.UnmarshalKey("Logger", &Logger); err != nil {
-		return fmt.Errorf("LoggerSetting 解析失败: %v", err)
-	}
-	if err := viper.UnmarshalKey("Cache", &Cache); err != nil {
-		return fmt.Errorf("CacheSetting 解析失败: %v", err)
-	}
-	if err := viper.UnmarshalKey("Web", &Web); err != nil {
-		return fmt.Errorf("WebSetting 解析失败: %v", err)
-	}
-	if err := viper.UnmarshalKey("ClientFilter", &ClientFilter); err != nil {
-		return fmt.Errorf("ClientFilterSetting 解析失败: %v", err)
-	}
-	if err := viper.UnmarshalKey("HTTPStrm", &HTTPStrm); err != nil {
-		return fmt.Errorf("HTTPStrmSetting 解析失败: %v", err)
-	}
-	if err := viper.UnmarshalKey("AlistStrm", &AlistStrm); err != nil {
-		return fmt.Errorf("AlistStrmSetting 解析失败: %v", err)
-	}
-	if err := viper.UnmarshalKey("Subtitle", &Subtitle); err != nil {
-		return fmt.Errorf("SubtitleSetting 解析失败: %v", err)
-	}
+	Port = s.Port
+	MediaServer = s.MediaServer
+	Logger = s.Logger
+	Cache = s.Cache
+	Web = s.Web
+	ClientFilter = s.ClientFilter
+	HTTPStrm = s.HTTPStrm
+	AlistStrm = s.AlistStrm
+	Subtitle = s.Subtitle
 	return nil
 }
 

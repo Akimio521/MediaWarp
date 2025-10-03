@@ -95,3 +95,15 @@ type SubtitleSetting struct {
 	ASSStyle []string
 	SubSet   bool // ASS 字幕字体子集化
 }
+
+type Setting struct {
+	Port         int
+	MediaServer  MediaServerSetting
+	Logger       LoggerSetting
+	Cache        CacheSetting
+	Web          WebSetting
+	ClientFilter ClientFilterSetting
+	HTTPStrm     HTTPStrmSetting
+	AlistStrm    AlistStrmSetting
+	Subtitle     SubtitleSetting
+}

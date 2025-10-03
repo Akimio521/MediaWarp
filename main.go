@@ -31,7 +31,7 @@ func init() {
 
 	flag.BoolVar(&showVersion, "version", false, "显示版本信息")
 	flag.BoolVar(&isDebug, "debug", false, "是否启用调试模式")
-	flag.StringVar(&configPath, "config", "", "指定配置文件路径")
+	flag.StringVar(&configPath, "config", "config/config.yaml", "指定配置文件路径")
 	flag.Parse()
 
 	fmt.Print(constants.LOGO)
@@ -61,10 +61,10 @@ func main() {
 		panic("配置初始化失败: " + err.Error())
 	}
 
-	logging.Init()                                                                                    // 初始化日志
-	logging.Infof("上游媒体服务器类型：%s，服务器地址：%s", config.MediaServer.Type.String(), config.MediaServer.ADDR) // 日志打印
-	service.InitAlistSerer()                                                                          // 初始化Alist服务器
-	if err := handler.Init(); err != nil {                                                            // 初始化媒体服务器处理器
+	logging.Init()                                                                           // 初始化日志
+	logging.Infof("上游媒体服务器类型：%s，服务器地址：%s", config.MediaServer.Type, config.MediaServer.ADDR) // 日志打印
+	service.InitAlistSerer()                                                                 // 初始化Alist服务器
+	if err := handler.Init(); err != nil {                                                   // 初始化媒体服务器处理器
 		panic("媒体服务器处理器初始化失败: " + err.Error())
 	}
 
