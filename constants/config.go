@@ -1,8 +1,19 @@
 package constants
 
-type FliterMode string
+type FliterMode uint8
 
 const (
-	WHITELIST FliterMode = "WhiteList" // 白名单
-	BLACKLIST FliterMode = "BlackList" // 黑名单
+	WHITELIST FliterMode = iota
+	BLACKLIST
 )
+
+func (f FliterMode) String() string {
+	switch f {
+	case WHITELIST:
+		return "WhiteList"
+	case BLACKLIST:
+		return "BlackList"
+	default:
+		return "Unknown"
+	}
+}
