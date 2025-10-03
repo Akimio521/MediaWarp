@@ -23,6 +23,7 @@ var (
 	Port         int                 // MediaWarp开放端口
 	MediaServer  MediaServerSetting  // 上游媒体服务器设置
 	Logger       LoggerSetting       // 日志设置
+	Cache        CacheSetting        // 缓存设置
 	Web          WebSetting          // Web服务器设置
 	ClientFilter ClientFilterSetting // 客户端过滤设置
 	HTTPStrm     HTTPStrmSetting     // HTTPSTRM设置
@@ -113,32 +114,25 @@ func loadConfig(path string) error {
 	viper.UnmarshalKey("MediaServer", &MediaServer)
 
 	if err := viper.UnmarshalKey("Logger", &Logger); err != nil {
-		return fmt.Errorf("LoggerSetting 解析失败：%v", err)
+		return fmt.Errorf("LoggerSetting 解析失败: %v", err)
+	}
+	if err := viper.UnmarshalKey("Cache", &Cache); err != nil {
+		return fmt.Errorf("CacheSetting 解析失败: %v", err)
 	}
 	if err := viper.UnmarshalKey("Web", &Web); err != nil {
-		return fmt.Errorf("WebSetting 解析失败：%v", err)
+		return fmt.Errorf("WebSetting 解析失败: %v", err)
 	}
 	if err := viper.UnmarshalKey("ClientFilter", &ClientFilter); err != nil {
-		return fmt.Errorf("ClientFilterSetting 解析失败：%v", err)
+		return fmt.Errorf("ClientFilterSetting 解析失败: %v", err)
 	}
 	if err := viper.UnmarshalKey("HTTPStrm", &HTTPStrm); err != nil {
-		return fmt.Errorf("HTTPStrmSetting 解析失败：%v", err)
-	}
-	if ttlStr := viper.GetString("HTTPStrm.CacheTTL"); ttlStr != "" {
-		duration, err := time.ParseDuration(ttlStr)
-		if err != nil {
-			return fmt.Errorf("HTTPStrm.CacheTTL 解析失败：%v", err)
-		}
-		HTTPStrm.CacheTTL = duration
-	}
-	if HTTPStrm.CacheTTL <= 0 {
-		HTTPStrm.CacheTTL = time.Minute
+		return fmt.Errorf("HTTPStrmSetting 解析失败: %v", err)
 	}
 	if err := viper.UnmarshalKey("AlistStrm", &AlistStrm); err != nil {
-		return fmt.Errorf("AlistStrmSetting 解析失败：%v", err)
+		return fmt.Errorf("AlistStrmSetting 解析失败: %v", err)
 	}
 	if err := viper.UnmarshalKey("Subtitle", &Subtitle); err != nil {
-		return fmt.Errorf("SubtitleSetting 解析失败：%v", err)
+		return fmt.Errorf("SubtitleSetting 解析失败: %v", err)
 	}
 	return nil
 }

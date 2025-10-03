@@ -210,7 +210,7 @@ func (jellyfinHandler *JellyfinHandler) VideosHandler(ctx *gin.Context) {
 			switch strmFileType {
 			case constants.HTTPStrm:
 				if *mediasource.Protocol == jellyfin.HTTP {
-					if config.HTTPStrm.CacheEnable {
+					if config.Cache.Enable && config.Cache.HTTPStrmTTL > 0 {
 						if cachedURL, ok := httpStrmRedirectCache.Get(mediaSourceID); ok {
 							logging.Info("HTTPStrm 重定向至：", cachedURL)
 							ctx.Redirect(http.StatusFound, cachedURL)
@@ -228,8 +228,8 @@ func (jellyfinHandler *JellyfinHandler) VideosHandler(ctx *gin.Context) {
 					} else {
 						logging.Debug("HTTPStrm 未启用获取最终 URL，直接使用原始 URL")
 					}
-					if config.HTTPStrm.CacheEnable && config.HTTPStrm.CacheTTL > 0 {
-						httpStrmRedirectCache.Set(mediaSourceID, redirectURL, config.HTTPStrm.CacheTTL)
+					if config.Cache.Enable && config.Cache.HTTPStrmTTL > 0 {
+						httpStrmRedirectCache.Set(mediaSourceID, redirectURL, config.Cache.HTTPStrmTTL)
 					}
 					logging.Info("HTTPStrm 重定向至：", redirectURL)
 					ctx.Redirect(http.StatusFound, redirectURL)

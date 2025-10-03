@@ -34,6 +34,12 @@ type BaseLoggerSetting struct {
 	File    bool // 是否将日志输出到文件中
 }
 
+// 缓存设置
+type CacheSetting struct {
+	Enable      bool
+	HTTPStrmTTL time.Duration
+}
+
 // Web前端自定义设置
 type WebSetting struct {
 	Enable            bool   // 启用自定义前端设置
@@ -58,12 +64,10 @@ type ClientFilterSetting struct {
 
 // HTTPStrm播放设置
 type HTTPStrmSetting struct {
-	Enable      bool
-	TransCode   bool // false->强制关闭转码 true->保持原有转码设置
-	FinalURL    bool // 对 URL 进行重定向判断，找到非重定向地址再重定向给客户端，减少客户端重定向次数
-	CacheEnable bool
-	CacheTTL    time.Duration
-	PrefixList  []string
+	Enable     bool
+	TransCode  bool // false->强制关闭转码 true->保持原有转码设置
+	FinalURL   bool // 对 URL 进行重定向判断，找到非重定向地址再重定向给客户端，减少客户端重定向次数
+	PrefixList []string
 }
 
 // AlistStrm具体设置
