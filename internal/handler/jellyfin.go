@@ -222,7 +222,7 @@ func (jellyfinHandler *JellyfinHandler) VideosHandler(ctx *gin.Context) {
 
 			case constants.AlistStrm: // 无需判断 *mediasource.Container 是否以Strm结尾，当 AlistStrm 存储的位置有对应的文件时，*mediasource.Container 会被设置为文件后缀
 				redirectURL := alistStrmHandler(*mediasource.Path, opt.(string))
-				if redirectURL == "" {
+				if redirectURL != "" {
 					ctx.Redirect(http.StatusFound, redirectURL)
 				}
 				return
