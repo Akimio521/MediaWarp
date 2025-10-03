@@ -3,6 +3,7 @@ module MediaWarp
 go 1.24.1
 
 require (
+	github.com/allegro/bigcache v1.2.1
 	github.com/andybalholm/brotli v1.1.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/sirupsen/logrus v1.9.3

@@ -22,9 +22,10 @@ import (
 
 // Jellyfin 服务器处理器
 type JellyfinHandler struct {
-	server      *jellyfin.Jellyfin     // Jellyfin 服务器
-	routerRules []RegexpRouteRule      // 正则路由规则
-	proxy       *httputil.ReverseProxy // 反向代理
+	server          *jellyfin.Jellyfin     // Jellyfin 服务器
+	routerRules     []RegexpRouteRule      // 正则路由规则
+	proxy           *httputil.ReverseProxy // 反向代理
+	httpStrmHandler StrmHandlerFunc
 }
 
 func NewJellyfinHander(addr string, apiKey string) (*JellyfinHandler, error) {
@@ -64,6 +65,11 @@ func NewJellyfinHander(addr string, apiKey string) (*JellyfinHandler, error) {
 				)
 			}
 		}
+	}
+
+	jellyfinHandler.httpStrmHandler, err = getHTTPStrmHandler()
+	if err != nil {
+		return nil, fmt.Errorf("创建 HTTPStrm 处理器失败: %w", err)
 	}
 	return &jellyfinHandler, nil
 }
@@ -210,31 +216,9 @@ func (jellyfinHandler *JellyfinHandler) VideosHandler(ctx *gin.Context) {
 			switch strmFileType {
 			case constants.HTTPStrm:
 				if *mediasource.Protocol == jellyfin.HTTP {
-					if config.Cache.Enable && config.Cache.HTTPStrmTTL > 0 {
-						if cachedURL, ok := httpStrmRedirectCache.Get(mediaSourceID); ok {
-							logging.Info("HTTPStrm 重定向至：", cachedURL)
-							ctx.Redirect(http.StatusFound, cachedURL)
-							return
-						}
-					}
-					redirectURL := *mediasource.Path
-					if config.HTTPStrm.FinalURL {
-						logging.Debug("HTTPStrm 启用获取最终 URL，开始尝试获取最终 URL")
-						if finalURL, err := getFinalURL(redirectURL, ctx.Request.UserAgent()); err != nil {
-							logging.Warning("获取最终 URL 失败，使用原始 URL：", err)
-						} else {
-							redirectURL = finalURL
-						}
-					} else {
-						logging.Debug("HTTPStrm 未启用获取最终 URL，直接使用原始 URL")
-					}
-					if config.Cache.Enable && config.Cache.HTTPStrmTTL > 0 {
-						httpStrmRedirectCache.Set(mediaSourceID, redirectURL, config.Cache.HTTPStrmTTL)
-					}
-					logging.Info("HTTPStrm 重定向至：", redirectURL)
-					ctx.Redirect(http.StatusFound, redirectURL)
+					ctx.Redirect(http.StatusFound, jellyfinHandler.httpStrmHandler(*mediasource.Path, ctx.Request.UserAgent()))
+					return
 				}
-				return
 			case constants.AlistStrm: // 无需判断 *mediasource.Container 是否以Strm结尾，当 AlistStrm 存储的位置有对应的文件时，*mediasource.Container 会被设置为文件后缀
 				alistServerAddr := opt.(string)
 				alistServer, err := service.GetAlistServer(alistServerAddr)
