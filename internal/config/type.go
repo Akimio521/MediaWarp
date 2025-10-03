@@ -97,7 +97,7 @@ type SubtitleSetting struct {
 }
 
 type Setting struct {
-	Port         int
+	Port         uint16
 	MediaServer  MediaServerSetting
 	Logger       LoggerSetting
 	Cache        CacheSetting

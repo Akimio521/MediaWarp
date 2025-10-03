@@ -20,7 +20,7 @@ var (
 		Arch:       runtime.GOARCH,
 	}
 
-	Port         int                 // MediaWarp开放端口
+	Port         uint16              // MediaWarp开放端口
 	MediaServer  MediaServerSetting  // 上游媒体服务器设置
 	Logger       LoggerSetting       // 日志设置
 	Cache        CacheSetting        // 缓存设置
