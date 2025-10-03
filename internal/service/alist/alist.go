@@ -44,8 +44,8 @@ func New(addr string, username string, password string, token *string) *AlistSer
 			expireAt: time.Time{},
 		}
 	}
-	if config.Cache.Enable && config.Cache.AlistTTL > 0 {
-		cache, err := bigcache.NewBigCache(bigcache.DefaultConfig(config.Cache.AlistTTL))
+	if config.Cache.Enable && config.Cache.AlistAPITTL > 0 {
+		cache, err := bigcache.NewBigCache(bigcache.DefaultConfig(config.Cache.AlistAPITTL))
 		if err == nil {
 			s.cache = cache
 		} else {

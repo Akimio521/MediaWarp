@@ -37,7 +37,6 @@ func ClientFilter() gin.HandlerFunc {
 				}
 			}
 		}
-
 		if !allowed {
 			ctx.AbortWithStatus(http.StatusForbidden) // 禁止访问
 			logging.Info("客户端过滤器拦截了请求，User-Agent: ", userAgent)

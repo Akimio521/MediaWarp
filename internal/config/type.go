@@ -38,7 +38,7 @@ type BaseLoggerSetting struct {
 type CacheSetting struct {
 	Enable      bool          `yaml:"enable"`
 	HTTPStrmTTL time.Duration `yaml:"http_strm_ttl"`
-	AlistTTL    time.Duration `yaml:"alist_ttl"`
+	AlistAPITTL time.Duration `yaml:"alist_api_ttl"`
 }
 
 // Web前端自定义设置
