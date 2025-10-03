@@ -91,8 +91,11 @@ var embyAPIKeys = []string{"api_key", "X-Emby-Token"}
 // 从 URL 中查询参数中解析 Emby 的 API 键值对
 //
 // 以 xxx=xxx 的字符串形式返回
-func ResolveEmbyAPIKVPairs(urlString string) (string, error) {
-	url, err := url.Parse(urlString)
+func ResolveEmbyAPIKVPairs(urlString *string) (string, error) {
+	if urlString == nil {
+		return "", fmt.Errorf("urlString is nil")
+	}
+	url, err := url.Parse(*urlString)
 	if err != nil {
 		return "", err
 	}

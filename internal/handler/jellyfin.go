@@ -120,7 +120,7 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 				playbackInfoResponse.MediaSources[index].TranscodingSubProtocol = nil
 				playbackInfoResponse.MediaSources[index].TranscodingContainer = nil
 				if mediasource.DirectStreamURL != nil {
-					apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
+					apikeypair, err := utils.ResolveEmbyAPIKVPairs(mediasource.DirectStreamURL)
 					if err != nil {
 						logging.Warning("解析API键值对失败：", err)
 						continue
@@ -142,7 +142,7 @@ func (jellyfinHandler *JellyfinHandler) ModifyPlaybackInfo(rw *http.Response) er
 				directStreamURL := fmt.Sprintf("/Videos/%s/stream?MediaSourceId=%s&Static=true", *mediasource.ID, *mediasource.ID)
 				if mediasource.DirectStreamURL != nil {
 					logging.Debugf("%s 原直链播放链接： %s", *mediasource.Name, *mediasource.DirectStreamURL)
-					apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
+					apikeypair, err := utils.ResolveEmbyAPIKVPairs(mediasource.DirectStreamURL)
 					if err != nil {
 						logging.Warning("解析API键值对失败：", err)
 						continue

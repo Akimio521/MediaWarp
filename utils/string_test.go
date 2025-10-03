@@ -37,7 +37,7 @@ func TestResolveEmbyAPIKVPairs(t *testing.T) {
 
 	for caseName, testCase := range testCases {
 		t.Run(caseName, func(t *testing.T) {
-			result, err := utils.ResolveEmbyAPIKVPairs(testCase.URI)
+			result, err := utils.ResolveEmbyAPIKVPairs(&testCase.URI)
 			if err != nil {
 				t.Errorf("%s 解析发生错误。错误: ", err)
 			}

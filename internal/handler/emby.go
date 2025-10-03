@@ -138,7 +138,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 				playbackInfoResponse.MediaSources[index].TranscodingSubProtocol = nil
 				playbackInfoResponse.MediaSources[index].TranscodingContainer = nil
 				if mediasource.DirectStreamURL != nil {
-					apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
+					apikeypair, err := utils.ResolveEmbyAPIKVPairs(mediasource.DirectStreamURL)
 					if err != nil {
 						logging.Warning("解析API键值对失败：", err)
 						continue
@@ -157,7 +157,7 @@ func (embyServerHandler *EmbyServerHandler) ModifyPlaybackInfo(rw *http.Response
 				playbackInfoResponse.MediaSources[index].TranscodingURL = nil
 				playbackInfoResponse.MediaSources[index].TranscodingSubProtocol = nil
 				playbackInfoResponse.MediaSources[index].TranscodingContainer = nil
-				apikeypair, err := utils.ResolveEmbyAPIKVPairs(*mediasource.DirectStreamURL)
+				apikeypair, err := utils.ResolveEmbyAPIKVPairs(mediasource.DirectStreamURL)
 				if err != nil {
 					logging.Warning("解析API键值对失败：", err)
 					continue
