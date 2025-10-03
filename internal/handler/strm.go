@@ -58,20 +58,11 @@ func alistStrmHandler(content string, alistAddr string) string {
 		logging.Warning("获取 AlistServer 失败：", err)
 		return ""
 	}
-	data, err := alistServer.FsGet(content)
+	url, err := alistServer.GetFileURL(content, config.AlistStrm.RawURL)
 	if err != nil {
-		logging.Warning("请求 FsGet 失败：", err)
+		logging.Warning("获取文件 URL 失败：", err)
 		return ""
 	}
-	var redirectURL string
-	if config.AlistStrm.RawURL {
-		redirectURL = data.RawURL
-	} else {
-		redirectURL = fmt.Sprintf("%s/d%s", alistAddr, content)
-		if data.Sign != "" {
-			redirectURL += "?sign=" + data.Sign
-		}
-	}
-	logging.Infof("AlistStrm 重定向至：%s", redirectURL)
-	return redirectURL
+	logging.Infof("AlistStrm 重定向至：%s", url)
+	return url
 }
