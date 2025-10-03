@@ -246,30 +246,14 @@ func (embyServerHandler *EmbyServerHandler) VideosHandler(ctx *gin.Context) {
 					ctx.Redirect(http.StatusFound, embyServerHandler.httpStrmHandler(*mediasource.Path, ctx.Request.UserAgent()))
 					return
 				}
+
 			case constants.AlistStrm: // 无需判断 *mediasource.Container 是否以Strm结尾，当 AlistStrm 存储的位置有对应的文件时，*mediasource.Container 会被设置为文件后缀
-				alistServerAddr := opt.(string)
-				alistServer, err := service.GetAlistServer(alistServerAddr)
-				if err != nil {
-					logging.Warning("获取 AlistServer 失败：", err)
-					return
+				redirectURL := alistStrmHandler(*mediasource.Path, opt.(string))
+				if redirectURL == "" {
+					ctx.Redirect(http.StatusFound, redirectURL)
 				}
-				fsGetData, err := alistServer.FsGet(*mediasource.Path)
-				if err != nil {
-					logging.Warning("请求 FsGet 失败：", err)
-					return
-				}
-				var redirectURL string
-				if config.AlistStrm.RawURL {
-					redirectURL = fsGetData.RawURL
-				} else {
-					redirectURL = fmt.Sprintf("%s/d%s", alistServerAddr, *mediasource.Path)
-					if fsGetData.Sign != "" {
-						redirectURL += "?sign=" + fsGetData.Sign
-					}
-				}
-				logging.Info("AlistStrm 重定向至：", redirectURL)
-				ctx.Redirect(http.StatusFound, redirectURL)
 				return
+
 			case constants.UnknownStrm:
 				embyServerHandler.ReverseProxy(ctx.Writer, ctx.Request)
 				return
