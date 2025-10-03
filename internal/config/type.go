@@ -38,6 +38,7 @@ type BaseLoggerSetting struct {
 type CacheSetting struct {
 	Enable      bool
 	HTTPStrmTTL time.Duration
+	AlistTTL    time.Duration
 }
 
 // Web前端自定义设置

@@ -1,15 +1,18 @@
 package alist
 
 import (
+	"MediaWarp/internal/config"
+	"MediaWarp/internal/logging"
 	"MediaWarp/utils"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/allegro/bigcache"
 )
 
 type alistToken struct {
@@ -22,6 +25,8 @@ type AlistServer struct {
 	username string // 用户名
 	password string // 密码
 	token    alistToken
+	client   *http.Client
+	cache    *bigcache.BigCache
 }
 
 // 得到服务器入口
@@ -51,7 +56,7 @@ func (alistServer *AlistServer) getToken() (string, error) {
 		return alistServer.token.value, nil
 	}
 
-	token, err := alistServer.authLogin() // 重新生成一个token
+	loginData, err := alistServer.authLogin() // 重新生成一个token
 	alistServer.token.mutex.RUnlock()
 	if err != nil {
 		return "", err
@@ -59,109 +64,111 @@ func (alistServer *AlistServer) getToken() (string, error) {
 
 	alistServer.token.mutex.Lock()
 	defer alistServer.token.mutex.Unlock()
-	alistServer.token.value = token
+	alistServer.token.value = loginData.Token
 	alistServer.token.expireAt = time.Now().Add(tokenDuration) // Token 有效期为30分钟
 
-	return token, nil
+	return loginData.Token, nil
+}
+
+func (alistServer *AlistServer) doRequest(method string, path string, reqBody io.Reader, result any, needToken bool, needCache bool) error {
+	var resp AlistResponse[any]
+
+	cacheKey := method + "|" + path
+	if needCache && alistServer.cache != nil {
+		if data, err := alistServer.cache.Get(cacheKey); err == nil {
+			return json.Unmarshal(data, result)
+		}
+	}
+	var url = alistServer.GetEndpoint() + path
+	req, err := http.NewRequest(method, url, reqBody)
+	if err != nil {
+		return fmt.Errorf("创建请求失败: %w", err)
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	if needToken {
+		token, err := alistServer.getToken()
+		if err != nil {
+			return err
+		}
+		req.Header.Add("Authorization", token)
+	}
+
+	res, err := alistServer.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("请求失败: %w", err)
+	}
+	defer res.Body.Close()
+	err = json.NewDecoder(res.Body).Decode(&resp)
+	if err != nil {
+		return fmt.Errorf("解析响应体失败: %w", err)
+	}
+
+	if resp.Code != http.StatusOK {
+		return fmt.Errorf("请求失败，HTTP 状态码: %d, 相应状态码: %d, 相应信息: %s", res.StatusCode, resp.Code, resp.Message)
+	}
+
+	data, err := json.Marshal(resp.Data)
+	if err != nil {
+		return fmt.Errorf("序列化响应数据失败: %w", err)
+	}
+	err = json.Unmarshal(data, result)
+	if err != nil {
+		return fmt.Errorf("反序列化到结果类型失败: %w", err)
+	}
+
+	if needCache && alistServer.cache != nil {
+		err = alistServer.cache.Set(cacheKey, data)
+		if err != nil {
+			return fmt.Errorf("缓存响应体失败: %w", err)
+		}
+	}
+
+	return nil
 }
 
 // ==========Alist API(v3) 相关操作==========
 
 // 登录Alist（获取一个新的Token）
-func (alistServer *AlistServer) authLogin() (string, error) {
+func (alistServer *AlistServer) authLogin() (*AuthLoginData, error) {
 	var (
-		funcInfo          = "Alist登录"
-		url               = alistServer.GetEndpoint() + "/api/auth/login"
-		method            = http.MethodPost
-		payload           = strings.NewReader(fmt.Sprintf(`{"username": "%s","password": "%s"}`, alistServer.GetUsername(), alistServer.password))
-		authLoginResponse AlistResponse[AuthLoginData]
+		payload = strings.NewReader(fmt.Sprintf(`{"username": "%s","password": "%s"}`, alistServer.GetUsername(), alistServer.password))
+		data    AuthLoginData
 	)
 
-	client := utils.GetHTTPClient()
-	req, err := http.NewRequest(method, url, payload)
+	err := alistServer.doRequest(
+		http.MethodPost,
+		"/api/auth/login",
+		payload,
+		&data,
+		false,
+		false,
+	)
 	if err != nil {
-		err = fmt.Errorf("创建 %s 请求失败: %w", funcInfo, err)
-		return "", err
-	}
-	req.Header.Add("Content-Type", "application/json")
-
-	res, err := client.Do(req)
-	if err != nil {
-		err = fmt.Errorf("请求 %s 失败: %w", funcInfo, err)
-		return "", err
+		return nil, fmt.Errorf("登录失败: %w", err)
 	}
 
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		err = fmt.Errorf("读取 %s 响应体失败: %w", funcInfo, err)
-		return "", err
-	}
-
-	err = json.Unmarshal(body, &authLoginResponse)
-	if err != nil {
-		err = fmt.Errorf("解析 %s 响应体失败: %w", funcInfo, err)
-		return "", err
-	}
-	if authLoginResponse.Code != 200 {
-		err = errors.New(authLoginResponse.Message)
-		return "", err
-	}
-
-	return authLoginResponse.Data.Token, nil
+	return &data, nil
 }
 
 // 获取某个文件/目录信息
-func (alistServer *AlistServer) FsGet(path string) (FsGetData, error) {
+func (alistServer *AlistServer) FsGet(path string) (*FsGetData, error) {
 	var (
-		fsGetDataResponse AlistResponse[FsGetData]
-		token             string
-		funcInfo          = "Alist获取某个文件/目录信息"
-		url               = alistServer.GetEndpoint() + "/api/fs/get"
-		method            = "POST"
-		payload           = strings.NewReader(fmt.Sprintf(`{"path": "%s","password": "","page": 1,"per_page": 0,"refresh": false}`, path))
+		data    FsGetData
+		payload = strings.NewReader(fmt.Sprintf(`{"path": "%s","password": "","page": 1,"per_page": 0,"refresh": false}`, path))
 	)
-
-	// 未从缓存池中读取到数据
-	token, err := alistServer.getToken()
+	err := alistServer.doRequest(
+		http.MethodPost,
+		"/api/fs/get",
+		payload,
+		&data,
+		true,
+		true,
+	)
 	if err != nil {
-		return fsGetDataResponse.Data, nil
+		return nil, fmt.Errorf("获取文件/目录信息失败: %w", err)
 	}
-
-	client := utils.GetHTTPClient()
-	req, err := http.NewRequest(method, url, payload)
-
-	if err != nil {
-		err = fmt.Errorf("创建 %s 请求失败: %w", funcInfo, err)
-		return fsGetDataResponse.Data, err
-	}
-	req.Header.Add("Authorization", token)
-	req.Header.Add("Content-Type", "application/json")
-
-	res, err := client.Do(req)
-	if err != nil {
-		err = fmt.Errorf("请求 %s 信息失败: %w", funcInfo, err)
-		return fsGetDataResponse.Data, err
-	}
-
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		err = fmt.Errorf("读取 %s 响应体失败: %w", funcInfo, err)
-		return fsGetDataResponse.Data, err
-	}
-
-	err = json.Unmarshal(body, &fsGetDataResponse)
-	if err != nil {
-		err = fmt.Errorf("解析 %s 响应体失败: %w", funcInfo, err)
-		return fsGetDataResponse.Data, err
-	}
-	if fsGetDataResponse.Code != 200 {
-		err = errors.New(fsGetDataResponse.Message)
-		return fsGetDataResponse.Data, err
-	}
-
-	return fsGetDataResponse.Data, nil
+	return &data, nil
 }
 
 // 获得AlistServer实例
@@ -170,11 +177,20 @@ func New(addr string, username string, password string, token *string) *AlistSer
 		endpoint: utils.GetEndpoint(addr),
 		username: username,
 		password: password,
+		client:   utils.GetHTTPClient(),
 	}
 	if token != nil {
 		s.token = alistToken{
 			value:    *token,
 			expireAt: time.Time{},
+		}
+	}
+	if config.Cache.Enable && config.Cache.AlistTTL > 0 {
+		cache, err := bigcache.NewBigCache(bigcache.DefaultConfig(config.Cache.AlistTTL))
+		if err == nil {
+			s.cache = cache
+		} else {
+			logging.Warning("创建 Alist API 缓存失败: ", err)
 		}
 	}
 	return &s

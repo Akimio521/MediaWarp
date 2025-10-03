@@ -13,9 +13,10 @@ Logger:                                     # 日志设定
     Console: True                           # 是否将服务日志文件输出到终端中
     File: True                              # 是否将服务日志文件记录到文件中
 
-Cache:
-  Enable: False                             # 是否启用 HTTPStrm 重定向内存缓存
-  HTTPStrmTTL: 1m                           # 重定向缓存有效期（time.ParseDuration 格式）
+Cache:                                      # 缓存相关设置
+  Enable: True                              # 是否启用 HTTPStrm 重定向内存缓存
+  HTTPStrmTTL: 1m                           # 重定向缓存有效期（time.ParseDuration 格式，仅大于等于 0 时生效）
+  AlistTTL: 10m                             # Alist API 缓存有效期（time.ParseDuration 格式，仅大于等于 0 时生效）
 
 Web:                                        # Web 页面修改相关设置
   Enable: False                             # 总开关
