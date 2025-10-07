@@ -66,8 +66,8 @@ type ClientFilterSetting struct {
 // HTTPStrm播放设置
 type HTTPStrmSetting struct {
 	Enable     bool     `yaml:"enable"`
-	TransCode  bool     `yaml:"trans_code"` // false->强制关闭转码 true->保持原有转码设置
-	FinalURL   bool     `yaml:"final_url"`  // 对 URL 进行重定向判断，找到非重定向地址再重定向给客户端，减少客户端重定向次数
+	TransCode  bool     `yaml:"transcode"` // false->强制关闭转码 true->保持原有转码设置
+	FinalURL   bool     `yaml:"final_url"` // 对 URL 进行重定向判断，找到非重定向地址再重定向给客户端，减少客户端重定向次数
 	PrefixList []string `yaml:"prefix_list"`
 }
 
@@ -83,8 +83,8 @@ type AlistSetting struct {
 // AlistStrm播放设置
 type AlistStrmSetting struct {
 	Enable    bool           `yaml:"enable"`
-	TransCode bool           `yaml:"trans_code"` // false->强制关闭转码 true->保持原有转码设置
-	RawURL    bool           `yaml:"raw_url"`    // 是否使用原始 URL
+	TransCode bool           `yaml:"transcode"` // false->强制关闭转码 true->保持原有转码设置
+	RawURL    bool           `yaml:"raw_url"`   // 是否使用原始 URL
 	List      []AlistSetting `yaml:"list"`
 }
 
