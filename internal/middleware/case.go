@@ -15,5 +15,6 @@ func QueryCaseInsensitive() gin.HandlerFunc {
 			queryParams.Add(strings.ToLower(key), strings.Join(values, ","))
 		}
 		ctx.Request.URL.RawQuery = queryParams.Encode()
+		ctx.Next()
 	}
 }
