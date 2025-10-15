@@ -87,3 +87,13 @@
   - 修复 robots.txt 路由错误问题
   - 优化初始化过程，统一日志输出，移除冗余代码
   - 使用当前目录作为项目根目录
+- 2025.10.15: v0.1.4
+  - 添加 HTTPStrm 最终重定向缓存
+  - 添加 Alist API 缓存
+  - AlistStrm 支持基础目录未非根目录用户
+  - 移除 viper，仅支持识别 yaml 配置文件
+  - 添加结构体标签（**可能导致部分配置不通用**）
+  - 修复 AlistStrm 重定向逻辑，确保仅在有效的重定向 URL 时进行重定向
+  - 优化 QueryCaseInsensitive 中间件，简化查询参数处理逻辑
+  - 优化 LoggerFileHook 的文件处理逻辑，提高性能
+  - 修复 GZIP 压缩时响应体为空的问题 ([#64](https://github.com/AkimioJR/MediaWarp/issues/64))
